@@ -414,3 +414,88 @@ def get_memory_stats(learner_id: str) -> dict:
 
     finally:
         db.close()
+
+def get_progress_data(learner_id: str, section: str = "Writing") -> dict:
+    """
+    Pulls together all progress data for a learner in one place.
+    Used by the Progress Dashboard.
+
+    Returns:
+    - List of attempts with scores over time
+    - Best and worst scoring skills
+    - Score trend per skill across attempts
+    - Total attempts count
+    """
+    db = SessionLocal()
+
+    try:
+        attempts = db.query(PracticeAttempt).filter(
+            PracticeAttempt.learner_id == learner_id,
+            PracticeAttempt.section == section
+        ).order_by(PracticeAttempt.created_at.asc()).all()
+
+        if not attempts:
+            return {
+                "total_attempts": 0,
+                "attempts": [],
+                "skill_trends": {},
+                "best_skill": None,
+                "worst_skill": None,
+                "latest_scores": {}
+            }
+
+        # Parse scores from each attempt
+        attempt_data = []
+        for i, a in enumerate(attempts):
+            scores = json.loads(a.score_json) if a.score_json else {}
+            actual_scores = scores.get("scores", {})
+            attempt_data.append({
+                "attempt_number": i + 1,
+                "attempt_id": a.attempt_id,
+                "scores": actual_scores,
+                "feedback": a.feedback,
+                "created_at": str(a.created_at)
+            })
+
+        # Build skill trends — one list of scores per skill across all attempts
+        skill_keys = [
+            "thesis_clarity", "organization",
+            "grammar", "vocabulary", "idea_development"
+        ]
+
+        skill_trends = {}
+        for skill in skill_keys:
+            skill_trends[skill] = [
+                a["scores"].get(skill, 0) for a in attempt_data
+            ]
+
+        # Calculate average score per skill across all attempts
+        skill_averages = {}
+        for skill in skill_keys:
+            values = [v for v in skill_trends[skill] if v > 0]
+            skill_averages[skill] = round(sum(values) / len(values), 2) if values else 0
+
+        # Find best and worst skills
+        if skill_averages:
+            best_skill = max(skill_averages, key=skill_averages.get)
+            worst_skill = min(skill_averages, key=skill_averages.get)
+        else:
+            best_skill = None
+            worst_skill = None
+
+        # Get latest scores for the summary metrics
+        latest_scores = attempt_data[-1]["scores"] if attempt_data else {}
+
+        return {
+            "total_attempts": len(attempt_data),
+            "attempts": attempt_data,
+            "skill_trends": skill_trends,
+            "skill_averages": skill_averages,
+            "best_skill": best_skill,
+            "worst_skill": worst_skill,
+            "latest_scores": latest_scores
+        }
+
+    finally:
+        db.close()
+    
