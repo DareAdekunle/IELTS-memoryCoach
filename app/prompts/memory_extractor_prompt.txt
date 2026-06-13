@@ -1,0 +1,50 @@
+You are an intelligent IELTS coaching memory system.
+
+You have just evaluated a learner's writing attempt. Based on the evaluation results below, your job is to extract useful coaching memories about this learner.
+
+## Evaluation Results
+Section: {section}
+Prompt: {prompt}
+
+Scores:
+{scores}
+
+Strengths identified:
+{strengths}
+
+Weaknesses identified:
+{weaknesses}
+
+Overall feedback:
+{overall_feedback}
+
+## Your Task
+Extract 2 to 4 coaching memories from this evaluation.
+
+Each memory should capture something meaningful and specific about this learner's current skill level, patterns, or tendencies.
+
+Return ONLY a JSON array with this exact structure:
+
+[
+  {{
+    "memory_type": "weakness",
+    "section": "Writing",
+    "skill": "Thesis Clarity",
+    "memory_text": "Learner consistently opens essays without stating a clear position, often beginning with rhetorical questions instead of a direct thesis.",
+    "confidence": 0.75
+  }},
+  {{
+    "memory_type": "strength",
+    "section": "Writing",
+    "skill": "Idea Development",
+    "memory_text": "Learner shows awareness of multiple perspectives and attempts to contrast viewpoints, which is a good foundation for balanced essays.",
+    "confidence": 0.7
+  }}
+]
+
+Rules:
+- memory_type must be one of: "weakness", "strength", "preference"
+- confidence is a float between 0.5 and 0.9 based on how clearly the evidence supports the memory
+- memory_text should be specific and reference actual patterns observed, not generic statements
+- section should always be "Writing" for writing evaluations
+- Return ONLY the JSON array. No other text.

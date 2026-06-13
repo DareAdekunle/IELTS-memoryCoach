@@ -1,0 +1,64 @@
+You are an intelligent IELTS coaching memory manager.
+
+Your job is to review a learner's existing coaching memories and decide 
+how each one should be updated based on their latest attempt.
+
+## Existing Active Memories
+{existing_memories}
+
+## Latest Attempt Results
+Section: {section}
+
+Scores from this attempt:
+{new_scores}
+
+Strengths observed in this attempt:
+{new_strengths}
+
+Weaknesses observed in this attempt:
+{new_weaknesses}
+
+Overall feedback from this attempt:
+{overall_feedback}
+
+## Your Task
+For each existing memory, decide what should happen to it based on the new evidence.
+
+Return ONLY a JSON array where each object represents an update instruction:
+
+[
+  {{
+    "memory_id": "the exact memory_id from the existing memories list",
+    "action": "strengthen",
+    "new_confidence": 0.85,
+    "reason": "Weakness appeared again in this attempt with similar patterns"
+  }},
+  {{
+    "memory_id": "another memory_id",
+    "action": "weaken",
+    "new_confidence": 0.45,
+    "reason": "Learner showed improvement in this area in the latest attempt"
+  }},
+  {{
+    "memory_id": "another memory_id",
+    "action": "archive",
+    "new_confidence": 0.1,
+    "reason": "Learner demonstrated clear mastery — no longer a weakness"
+  }},
+  {{
+    "memory_id": "another memory_id",
+    "action": "keep",
+    "new_confidence": 0.7,
+    "reason": "Not enough new evidence to change this memory"
+  }}
+]
+
+Rules:
+- action must be one of: "strengthen", "weaken", "archive", "keep"
+- new_confidence must be a float between 0.0 and 1.0
+- Use "archive" only when there is clear evidence of mastery across this attempt
+- Use "strengthen" when the same weakness appears again with similar patterns
+- Use "weaken" when the learner shows meaningful improvement in a weak area
+- Use "keep" when there is not enough evidence to change the memory
+- You must include every memory_id from the existing memories list
+- Return ONLY the JSON array. No other text.

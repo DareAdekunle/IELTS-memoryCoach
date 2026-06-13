@@ -1,0 +1,58 @@
+[
+  {
+    "prompt_id": "writing_001",
+    "section": "Writing",
+    "task_type": "Academic Discussion",
+    "prompt": "Some people believe that universities should focus only on academic studies, while others think universities should also prepare students for employment. Discuss both views and give your own opinion.",
+    "target_skills": ["thesis_clarity", "organization", "idea_development"],
+    "difficulty": "intermediate"
+  },
+  {
+    "prompt_id": "writing_002",
+    "section": "Writing",
+    "task_type": "Agree or Disagree",
+    "prompt": "Technology has made it easier for people to work from home. Do you think this is a positive or negative development? Give reasons for your answer and include relevant examples.",
+    "target_skills": ["thesis_clarity", "vocabulary", "idea_development"],
+    "difficulty": "beginner"
+  },
+  {
+    "prompt_id": "writing_003",
+    "section": "Writing",
+    "task_type": "Problem and Solution",
+    "prompt": "In many cities around the world, traffic congestion is a serious problem. What are the main causes of this problem and what measures could be taken to reduce it?",
+    "target_skills": ["organization", "idea_development", "grammar"],
+    "difficulty": "intermediate"
+  },
+  {
+    "prompt_id": "writing_004",
+    "section": "Writing",
+    "task_type": "Agree or Disagree",
+    "prompt": "Some people think that children should begin formal education at a very early age. Others think they should not start school until they are older. Discuss both views and give your opinion.",
+    "target_skills": ["thesis_clarity", "organization", "vocabulary"],
+    "difficulty": "beginner"
+  },
+  {
+    "prompt_id": "writing_005",
+    "section": "Writing",
+    "task_type": "Academic Discussion",
+    "prompt": "In some countries, the average weight of people is increasing and their levels of health and fitness are decreasing. What do you think are the causes of these problems and what measures could be taken to solve them?",
+    "target_skills": ["idea_development", "grammar", "vocabulary"],
+    "difficulty": "advanced"
+  },
+  {
+    "prompt_id": "writing_006",
+    "section": "Writing",
+    "task_type": "Agree or Disagree",
+    "prompt": "Many people believe that social media has had a negative impact on both individuals and society. To what extent do you agree or disagree with this statement?",
+    "target_skills": ["thesis_clarity", "idea_development", "organization"],
+    "difficulty": "intermediate"
+  },
+  {
+    "prompt_id": "writing_007",
+    "section": "Writing",
+    "task_type": "Problem and Solution",
+    "prompt": "The number of people who are overqualified for their jobs is increasing. What problems does this cause? What solutions can you suggest?",
+    "target_skills": ["organization", "vocabulary", "idea_development"],
+    "difficulty": "advanced"
+  }
+]

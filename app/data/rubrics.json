@@ -1,0 +1,62 @@
+{
+  "Writing": {
+    "max_score_per_skill": 5,
+    "skills": {
+      "thesis_clarity": {
+        "name": "Thesis Clarity",
+        "description": "How clearly the main argument or position is stated",
+        "scoring_guide": {
+          "5": "Thesis is exceptionally clear, specific and directly addresses the prompt",
+          "4": "Thesis is clear and relevant but could be more precise",
+          "3": "Thesis is present but somewhat vague or indirect",
+          "2": "Thesis is unclear or difficult to identify",
+          "1": "No clear thesis present"
+        }
+      },
+      "organization": {
+        "name": "Organization",
+        "description": "How well the essay is structured with clear introduction, body and conclusion",
+        "scoring_guide": {
+          "5": "Excellent structure with smooth transitions and logical flow throughout",
+          "4": "Good structure with mostly clear transitions",
+          "3": "Basic structure present but transitions are weak or inconsistent",
+          "2": "Structure is difficult to follow in places",
+          "1": "No clear organizational structure"
+        }
+      },
+      "grammar": {
+        "name": "Grammar",
+        "description": "Accuracy and range of grammatical structures used",
+        "scoring_guide": {
+          "5": "Wide range of structures used accurately with only minor errors",
+          "4": "Good range of structures with occasional errors that do not impede understanding",
+          "3": "Some errors present but meaning is generally clear",
+          "2": "Frequent errors that sometimes impede understanding",
+          "1": "Serious grammatical errors throughout"
+        }
+      },
+      "vocabulary": {
+        "name": "Vocabulary Range",
+        "description": "Range and accuracy of vocabulary used",
+        "scoring_guide": {
+          "5": "Wide range of vocabulary used naturally and accurately",
+          "4": "Good range of vocabulary with minor inaccuracies",
+          "3": "Adequate vocabulary but limited range or some inaccurate usage",
+          "2": "Limited vocabulary that restricts the message",
+          "1": "Very limited vocabulary throughout"
+        }
+      },
+      "idea_development": {
+        "name": "Idea Development",
+        "description": "How well ideas are explained, supported and developed with examples",
+        "scoring_guide": {
+          "5": "Ideas are thoroughly developed with relevant specific examples",
+          "4": "Ideas are well developed with mostly relevant support",
+          "3": "Ideas are present but underdeveloped or examples are vague",
+          "2": "Ideas are listed but not developed",
+          "1": "Little to no idea development present"
+        }
+      }
+    }
+  }
+}
