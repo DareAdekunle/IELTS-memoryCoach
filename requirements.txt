@@ -2,3 +2,4 @@ streamlit
 openai
 python-dotenv
 sqlalchemy
+dashscope==1.25.21

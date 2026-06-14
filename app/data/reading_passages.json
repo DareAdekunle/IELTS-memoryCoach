@@ -1,0 +1,323 @@
+[
+  {
+    "passage_id": "reading_001",
+    "title": "The History of Public Libraries",
+    "difficulty": "beginner",
+    "topic": "Society and Culture",
+    "passage": "Public libraries have played an important role in communities for hundreds of years. The first public libraries appeared in ancient civilisations, where collections of clay tablets and papyrus scrolls were stored for scholars and government officials. However, these early libraries were not open to the general public.\n\nThe modern concept of a free public library — one that any member of the public could use without charge — developed in the nineteenth century. In 1850, the British Parliament passed the Public Libraries Act, which allowed local councils to establish free libraries funded by local taxes. This was a significant development because it meant that ordinary working-class people, not just the wealthy, could access books and educational materials.\n\nIn the United States, the growth of public libraries was greatly accelerated by the philanthropist Andrew Carnegie. Between 1883 and 1929, Carnegie donated more than 56 million dollars to build 2,509 libraries across the English-speaking world. Carnegie believed strongly that libraries gave poor people the opportunity to educate themselves and improve their lives.\n\nToday, public libraries offer far more than books. Many libraries provide access to computers and the internet, host community events, offer language classes, and provide support services for job seekers. Despite the rise of digital technology and concerns about declining visitor numbers, public libraries remain an important community resource in many countries around the world.",
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "What is the main purpose of this passage?",
+        "options": {
+          "A": "To argue that public libraries are no longer necessary",
+          "B": "To trace the development of public libraries over time",
+          "C": "To compare libraries in different countries",
+          "D": "To explain how Andrew Carnegie became wealthy"
+        },
+        "answer": "B",
+        "explanation": "The passage traces libraries from ancient civilisations through the nineteenth century to the present day, making B the correct answer. The passage does not argue against libraries, compare countries in detail, or focus on Carnegie's wealth.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "According to the passage, what made the 1850 Public Libraries Act significant?",
+        "options": {
+          "A": "It was the first law ever passed about libraries",
+          "B": "It allowed libraries to charge lower fees",
+          "C": "It enabled working-class people to access books for free",
+          "D": "It encouraged Andrew Carnegie to donate money"
+        },
+        "answer": "C",
+        "explanation": "The passage states the Act was significant because ordinary working-class people, not just the wealthy, could access books and educational materials. This matches option C directly.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "How many libraries did Andrew Carnegie help build?",
+        "options": {
+          "A": "More than 56",
+          "B": "Exactly 1,883",
+          "C": "2,509",
+          "D": "56 million"
+        },
+        "answer": "C",
+        "explanation": "The passage clearly states Carnegie funded the building of 2,509 libraries. 56 million was the amount of money donated, not the number of libraries.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "true_false_ng",
+        "question": "Early libraries in ancient civilisations were available to everyone in the community.",
+        "answer": "False",
+        "explanation": "The passage states that early libraries were not open to the general public — they were for scholars and government officials only.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "true_false_ng",
+        "question": "The British Public Libraries Act of 1850 was funded by local taxes.",
+        "answer": "True",
+        "explanation": "The passage directly states the Act allowed local councils to establish free libraries funded by local taxes.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "true_false_ng",
+        "question": "Andrew Carnegie built libraries only in the United States.",
+        "answer": "False",
+        "explanation": "The passage states Carnegie built libraries across the English-speaking world, not just in the United States.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "true_false_ng",
+        "question": "The passage suggests that public libraries may face challenges in the modern world.",
+        "answer": "True",
+        "explanation": "The final paragraph mentions concerns about declining visitor numbers, which implies libraries face modern challenges even though they remain important.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "According to the passage, what did Andrew Carnegie believe libraries could do for poor people?",
+        "answer": "Carnegie believed libraries gave poor people the opportunity to educate themselves and improve their lives.",
+        "explanation": "This is stated directly in the third paragraph. A good answer should mention self-education and life improvement.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q9",
+        "question_type": "short_answer",
+        "question": "Name TWO services that modern public libraries offer besides lending books.",
+        "answer": "Any two of: access to computers and the internet, community events, language classes, support services for job seekers.",
+        "explanation": "The final paragraph lists four additional services. The learner needs to correctly identify any two of them.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q10",
+        "question_type": "short_answer",
+        "question": "In your own words, explain why the development of free public libraries in the nineteenth century was important for society.",
+        "answer": "Free public libraries gave ordinary and working-class people access to books and education for the first time, reducing the gap between the wealthy and the poor in terms of access to knowledge.",
+        "explanation": "A strong answer should explain that access to knowledge and education was previously limited to wealthy people, and free libraries changed this by making information available to everyone.",
+        "skill": "inference"
+      }
+    ]
+  },
+  {
+    "passage_id": "reading_002",
+    "title": "The Science of Sleep",
+    "difficulty": "intermediate",
+    "topic": "Health and Science",
+    "passage": "Sleep is one of the most fundamental biological needs of the human body, yet it remains one of the least understood. Scientists have known for decades that sleep deprivation has serious consequences for physical and mental health, but the precise mechanisms by which sleep restores and repairs the body are still being investigated.\n\nDuring sleep, the body goes through several distinct stages. The first stage is light sleep, during which the body begins to relax and brain activity slows. This is followed by deeper stages of non-REM sleep, where the body carries out most of its physical repair work — releasing growth hormones, repairing muscle tissue and consolidating memories. The final stage, REM sleep (Rapid Eye Movement), is associated with vivid dreaming and is believed to play a crucial role in emotional processing and creative thinking.\n\nResearch has consistently shown that adults need between seven and nine hours of sleep per night for optimal functioning. However, surveys suggest that a significant proportion of people in industrialised countries regularly sleep for fewer than six hours. This widespread sleep deprivation has been linked to increased risks of obesity, diabetes, cardiovascular disease and weakened immune function.\n\nOne factor that has significantly disrupted natural sleep patterns is the widespread use of electronic devices before bed. The blue light emitted by smartphones and computer screens suppresses the production of melatonin, the hormone responsible for signalling to the body that it is time to sleep. Sleep researchers strongly recommend avoiding screens for at least one hour before bedtime to allow melatonin levels to rise naturally.\n\nDespite growing awareness of the importance of sleep, many societies continue to treat sleep deprivation as a badge of honour — a sign of hard work and productivity. This cultural attitude, researchers argue, is one of the most significant barriers to addressing what some have described as a global sleep deprivation epidemic.",
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "What is the main idea of this passage?",
+        "options": {
+          "A": "To explain why people dream during REM sleep",
+          "B": "To argue that electronic devices are harmful to health",
+          "C": "To discuss the importance of sleep and the problems caused by not getting enough",
+          "D": "To compare sleep habits in different countries"
+        },
+        "answer": "C",
+        "explanation": "The passage covers the importance of sleep, sleep stages, the health consequences of sleep deprivation and cultural attitudes toward sleep. Option C best captures this broad scope.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "According to the passage, which stage of sleep is associated with emotional processing?",
+        "options": {
+          "A": "Light sleep",
+          "B": "Non-REM deep sleep",
+          "C": "REM sleep",
+          "D": "The first stage of sleep"
+        },
+        "answer": "C",
+        "explanation": "The passage explicitly states that REM sleep is believed to play a crucial role in emotional processing and creative thinking.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "Why does blue light from screens disrupt sleep?",
+        "options": {
+          "A": "It makes the brain too active to fall asleep",
+          "B": "It suppresses the production of melatonin",
+          "C": "It causes the body to release growth hormones",
+          "D": "It prevents the body from entering REM sleep"
+        },
+        "answer": "B",
+        "explanation": "The passage states that blue light suppresses melatonin production. Melatonin is the hormone that signals to the body that it is time to sleep.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "true_false_ng",
+        "question": "Scientists fully understand the mechanisms by which sleep restores the body.",
+        "answer": "False",
+        "explanation": "The passage states the precise mechanisms by which sleep restores and repairs the body are still being investigated, meaning they are not yet fully understood.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "true_false_ng",
+        "question": "Most physical repair work happens during REM sleep.",
+        "answer": "False",
+        "explanation": "The passage states physical repair work happens during non-REM deep sleep, not REM sleep. REM sleep is associated with dreaming and emotional processing.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "true_false_ng",
+        "question": "Sleep researchers recommend stopping screen use at least one hour before bed.",
+        "answer": "True",
+        "explanation": "The passage directly states that sleep researchers strongly recommend avoiding screens for at least one hour before bedtime.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "true_false_ng",
+        "question": "The passage implies that cultural attitudes make it harder to solve the sleep deprivation problem.",
+        "answer": "True",
+        "explanation": "The final paragraph states that treating sleep deprivation as a badge of honour is one of the most significant barriers to addressing the problem, implying cultural attitudes make it harder to solve.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "What does the passage say happens to the body during non-REM deep sleep?",
+        "answer": "During non-REM deep sleep the body releases growth hormones, repairs muscle tissue and consolidates memories.",
+        "explanation": "This information is clearly stated in the second paragraph. A complete answer should mention at least two of the three processes.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q9",
+        "question_type": "short_answer",
+        "question": "According to the passage, name THREE health problems linked to regularly sleeping fewer than six hours.",
+        "answer": "Any three of: obesity, diabetes, cardiovascular disease, weakened immune function.",
+        "explanation": "The third paragraph lists four health risks associated with sleep deprivation. The learner should correctly identify three of them.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q10",
+        "question_type": "short_answer",
+        "question": "What does the writer mean by describing sleep deprivation as a badge of honour? Use evidence from the passage to support your answer.",
+        "answer": "The writer means that in many societies people are proud of sleeping very little because it is seen as a sign of hard work and productivity. This is supported by the passage stating that societies treat sleep deprivation as a sign of hard work.",
+        "explanation": "A strong answer should explain the phrase in the context of cultural attitudes and reference the passage's mention of hard work and productivity as the reason people treat sleep deprivation positively.",
+        "skill": "vocabulary_in_context"
+      }
+    ]
+  },
+  {
+    "passage_id": "reading_003",
+    "title": "The Economics of Artificial Intelligence",
+    "difficulty": "advanced",
+    "topic": "Technology and Economy",
+    "passage": "The rapid advancement of artificial intelligence technologies is reshaping global labour markets in ways that economists are only beginning to understand. While technological disruption is not a new phenomenon — the Industrial Revolution displaced millions of agricultural and craft workers — the speed and breadth of AI-driven change presents challenges that may require fundamentally new economic and social policy responses.\n\nProponents of AI adoption argue that, as with previous technological revolutions, the displacement of workers in some sectors will be offset by the creation of new industries and job categories that do not yet exist. Historical precedent appears to support this view: the mechanisation of agriculture in the twentieth century, for example, did not result in mass permanent unemployment but rather a shift of labour into manufacturing and service industries.\n\nHowever, critics contend that AI represents a qualitatively different kind of technological disruption. Unlike previous technologies that primarily replaced physical labour, AI systems are increasingly capable of performing complex cognitive tasks — legal research, medical diagnosis, financial analysis and creative work — that were previously considered the exclusive domain of highly educated professionals. This, critics argue, means that the displacement effects of AI may be both broader and deeper than those of previous technological transitions.\n\nA further complication is the pace of change. Historical labour market transitions, while disruptive, typically unfolded over generations, giving workers, educational institutions and policy makers time to adapt. The current rate of AI development, by contrast, may compress these transitions into years rather than decades, potentially leaving both individuals and institutions unable to adapt quickly enough.\n\nEconomists remain divided on the long-term employment effects of AI. Some foresee a future of radical abundance in which AI-generated productivity gains are widely shared, reducing the need for human labour while raising living standards. Others warn of increasing inequality, in which the economic gains from AI accrue primarily to those who own the technology rather than those whose labour it displaces. The resolution of this debate will depend not only on the trajectory of AI development itself but on the policy choices that governments make in the coming decades.",
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "What is the central concern of this passage?",
+        "options": {
+          "A": "Whether artificial intelligence is more advanced than previous technologies",
+          "B": "How AI is affecting global labour markets and what this means for the future",
+          "C": "Why economists cannot agree on any aspect of AI development",
+          "D": "How governments should respond to artificial intelligence"
+        },
+        "answer": "B",
+        "explanation": "The passage examines AI's impact on labour markets, compares it to previous technological disruptions and considers future economic consequences. Option B captures this central focus most accurately.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "According to the passage, how did the mechanisation of agriculture affect workers?",
+        "options": {
+          "A": "It caused permanent mass unemployment",
+          "B": "It led workers to move into manufacturing and service industries",
+          "C": "It created entirely new types of agricultural jobs",
+          "D": "It reduced the overall size of the workforce permanently"
+        },
+        "answer": "B",
+        "explanation": "The passage states that mechanisation of agriculture did not result in mass permanent unemployment but rather a shift of labour into manufacturing and service industries.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "What do critics argue makes AI different from previous technological disruptions?",
+        "options": {
+          "A": "AI is developing much more slowly than previous technologies",
+          "B": "AI primarily affects agricultural workers rather than professionals",
+          "C": "AI can perform complex cognitive tasks previously done by educated professionals",
+          "D": "AI is only used in a small number of industries"
+        },
+        "answer": "C",
+        "explanation": "The passage states critics argue that unlike technologies that replaced physical labour, AI can perform complex cognitive tasks previously considered the exclusive domain of highly educated professionals.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "true_false_ng",
+        "question": "All economists agree that AI will ultimately create more jobs than it destroys.",
+        "answer": "False",
+        "explanation": "The passage states economists remain divided on the long-term employment effects of AI. Some are optimistic, others warn of inequality — there is no consensus.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "true_false_ng",
+        "question": "The passage suggests that previous technological disruptions gave society more time to adapt than AI may allow.",
+        "answer": "True",
+        "explanation": "The fourth paragraph explicitly states that historical transitions unfolded over generations while AI may compress these transitions into years rather than decades.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "true_false_ng",
+        "question": "The writer personally believes that AI will lead to greater economic inequality.",
+        "answer": "Not Given",
+        "explanation": "The passage presents both optimistic and pessimistic views on AI and inequality but the writer does not express a personal opinion on which view is correct.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "true_false_ng",
+        "question": "The passage implies that government policy will play a role in determining the economic outcomes of AI.",
+        "answer": "True",
+        "explanation": "The final sentence states the resolution of the debate will depend on the policy choices that governments make in the coming decades, implying government policy is important.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "According to supporters of AI adoption, why should we not be too worried about job displacement caused by AI?",
+        "answer": "Supporters argue that as with previous technological revolutions, new industries and job categories will be created to replace those that are displaced, as happened with the mechanisation of agriculture.",
+        "explanation": "A strong answer should reference the historical precedent argument made by proponents in the second paragraph.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q9",
+        "question_type": "short_answer",
+        "question": "Explain in your own words what the writer means by AI compressing labour market transitions into years rather than decades.",
+        "answer": "The writer means that while past technological changes happened slowly enough for workers and institutions to adapt over many years or generations, AI is changing so quickly that people and organisations may not have enough time to adjust.",
+        "explanation": "A strong answer should capture both elements: the historical slowness of past transitions and the potentially dangerous speed of AI-driven change.",
+        "skill": "vocabulary_in_context"
+      },
+      {
+        "question_id": "q10",
+        "question_type": "short_answer",
+        "question": "The passage presents two contrasting views of AI's economic future. Summarise both views in your own words.",
+        "answer": "One view is optimistic: AI will generate so much productivity that living standards will rise and the benefits will be widely shared. The other view is pessimistic: the economic gains from AI will mostly go to the owners of the technology rather than ordinary workers, leading to greater inequality.",
+        "explanation": "A complete answer must accurately summarise both the optimistic view of radical abundance and shared gains, and the pessimistic view of inequality and concentrated ownership of AI benefits.",
+        "skill": "inference"
+      }
+    ]
+  }
+]

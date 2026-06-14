@@ -418,13 +418,11 @@ def get_memory_stats(learner_id: str) -> dict:
 def get_progress_data(learner_id: str, section: str = "Writing") -> dict:
     """
     Pulls together all progress data for a learner in one place.
-    Used by the Progress Dashboard.
+    Handles both Writing and Reading sections correctly since
+    they store scores in different formats.
 
-    Returns:
-    - List of attempts with scores over time
-    - Best and worst scoring skills
-    - Score trend per skill across attempts
-    - Total attempts count
+    Writing scores: individual skill scores out of 5
+    Reading scores: skill accuracy percentages stored in score_json
     """
     db = SessionLocal()
 
@@ -439,41 +437,66 @@ def get_progress_data(learner_id: str, section: str = "Writing") -> dict:
                 "total_attempts": 0,
                 "attempts": [],
                 "skill_trends": {},
+                "skill_averages": {},
                 "best_skill": None,
                 "worst_skill": None,
                 "latest_scores": {}
             }
 
-        # Parse scores from each attempt
         attempt_data = []
+
         for i, a in enumerate(attempts):
-            scores = json.loads(a.score_json) if a.score_json else {}
-            actual_scores = scores.get("scores", {})
+            raw = json.loads(a.score_json) if a.score_json else {}
+
+            if section == "Writing":
+                # Writing stores scores directly in score_json
+                actual_scores = raw.get("scores", {})
+
+            elif section == "Reading":
+                # Reading stores full attempt result in score_json
+                # skill_accuracy contains percentage scores per skill
+                skill_accuracy = raw.get("skill_accuracy", {})
+
+                # Convert percentage accuracy to a score out of 5
+                # so both sections use the same scale on the dashboard
+                actual_scores = {
+                    skill: round((acc / 100) * 5, 1)
+                    for skill, acc in skill_accuracy.items()
+                }
+
             attempt_data.append({
                 "attempt_number": i + 1,
                 "attempt_id": a.attempt_id,
                 "scores": actual_scores,
                 "feedback": a.feedback,
-                "created_at": str(a.created_at)
+                "created_at": str(a.created_at),
+                # Reading-specific extras
+                "total_score": raw.get("total_score"),
+                "max_score": raw.get("max_score"),
+                "percentage": raw.get("percentage"),
+                "passage_title": raw.get("passage_title", "")
             })
 
-        # Build skill trends — one list of scores per skill across all attempts
-        skill_keys = [
-            "thesis_clarity", "organization",
-            "grammar", "vocabulary", "idea_development"
-        ]
+        # Build skill keys from all attempts combined
+        # (different attempts may test different skills)
+        all_skill_keys = set()
+        for a in attempt_data:
+            all_skill_keys.update(a["scores"].keys())
 
+        # Build skill trends
         skill_trends = {}
-        for skill in skill_keys:
+        for skill in all_skill_keys:
             skill_trends[skill] = [
                 a["scores"].get(skill, 0) for a in attempt_data
             ]
 
-        # Calculate average score per skill across all attempts
+        # Calculate average score per skill
         skill_averages = {}
-        for skill in skill_keys:
+        for skill in all_skill_keys:
             values = [v for v in skill_trends[skill] if v > 0]
-            skill_averages[skill] = round(sum(values) / len(values), 2) if values else 0
+            skill_averages[skill] = round(
+                sum(values) / len(values), 2
+            ) if values else 0
 
         # Find best and worst skills
         if skill_averages:
@@ -483,7 +506,6 @@ def get_progress_data(learner_id: str, section: str = "Writing") -> dict:
             best_skill = None
             worst_skill = None
 
-        # Get latest scores for the summary metrics
         latest_scores = attempt_data[-1]["scores"] if attempt_data else {}
 
         return {
@@ -498,4 +520,138 @@ def get_progress_data(learner_id: str, section: str = "Writing") -> dict:
 
     finally:
         db.close()
-    
+
+def extract_reading_memories(learner_id: str, attempt_result: dict) -> list:
+    """
+    Extracts coaching memories from a completed reading attempt.
+
+    Works the same as extract_and_save_memories but uses the
+    reading-specific prompt and formats reading results correctly.
+    """
+    # Load the reading memory extractor prompt
+    path = os.path.join(PROMPTS_DIR, "reading_memory_extractor.txt")
+    with open(path, "r") as f:
+        template = f.read()
+
+    # Format skill accuracy for the prompt
+    skill_accuracy_lines = []
+    for skill, accuracy in attempt_result.get("skill_accuracy", {}).items():
+        label = skill.replace("_", " ").title()
+        skill_accuracy_lines.append(f"  {label}: {accuracy}%")
+    skill_accuracy_text = "\n".join(skill_accuracy_lines)
+
+    # Format question summary for the prompt
+    question_lines = []
+    for q in attempt_result.get("question_results", []):
+        status = "✓ Correct" if q["is_correct"] else "✗ Incorrect"
+        if q.get("partial_credit"):
+            status = "~ Partial"
+        question_lines.append(
+            f"  {q['question_id'].upper()} [{q['question_type']}] "
+            f"[{q['skill']}] — {status} "
+            f"({q['score']}/{q['max_score']})"
+        )
+    question_summary_text = "\n".join(question_lines)
+
+    # Fill the prompt template
+    full_prompt = template.format(
+        passage_title=attempt_result.get("passage_title", "Unknown"),
+        difficulty=attempt_result.get("difficulty", "Unknown"),
+        total_score=attempt_result.get("total_score", 0),
+        max_score=attempt_result.get("max_score", 0),
+        percentage=attempt_result.get("percentage", 0),
+        skill_accuracy=skill_accuracy_text,
+        question_summary=question_summary_text
+    )
+
+    # Call Qwen to extract memories
+    raw_response = call_qwen_for_json(full_prompt)
+
+    try:
+        memories = safe_parse_json(raw_response)
+    except ValueError:
+        try:
+            memories = extract_json_from_text(raw_response)
+        except ValueError as e:
+            print(f"Could not extract reading memories: {e}")
+            return []
+
+    if not isinstance(memories, list):
+        print("Reading memory extraction did not return a list")
+        return []
+
+    # Save each memory to the database
+    saved_memories = []
+    db = SessionLocal()
+
+    try:
+        for mem in memories:
+            if not all(k in mem for k in ["memory_type", "section", "skill", "memory_text"]):
+                continue
+
+            memory_id = str(uuid.uuid4())[:12]
+
+            memory = LearnerMemory(
+                memory_id=memory_id,
+                learner_id=learner_id,
+                section=mem["section"],
+                skill=mem["skill"],
+                memory_type=mem["memory_type"],
+                memory_text=mem["memory_text"],
+                confidence=float(mem.get("confidence", 0.6)),
+                evidence_count=1,
+                status="active"
+            )
+
+            db.add(memory)
+            saved_memories.append(mem)
+
+        db.commit()
+        print(f"Saved {len(saved_memories)} reading memories for {learner_id}")
+
+    except Exception as e:
+        db.rollback()
+        print(f"Error saving reading memories: {e}")
+
+    finally:
+        db.close()
+
+    return saved_memories
+
+def save_reading_attempt(learner_id: str, attempt_result: dict) -> str:
+    """
+    Saves a completed reading attempt to the practice_attempts table.
+    Returns the attempt_id.
+    """
+    db = SessionLocal()
+
+    try:
+        attempt_id = str(uuid.uuid4())[:12]
+
+        attempt = PracticeAttempt(
+            attempt_id=attempt_id,
+            learner_id=learner_id,
+            section="Reading",
+            task_type=attempt_result.get("difficulty", "").title(),
+            prompt=attempt_result.get("passage_title", ""),
+            learner_response=f"Completed {attempt_result.get('max_score', 0)} question reading attempt",
+            score_json=json.dumps(attempt_result),
+            feedback=(
+                f"Score: {attempt_result.get('total_score', 0)} / "
+                f"{attempt_result.get('max_score', 0)} "
+                f"({attempt_result.get('percentage', 0)}%)"
+            )
+        )
+
+        db.add(attempt)
+        db.commit()
+
+        print(f"Reading attempt saved: {attempt_id}")
+        return attempt_id
+
+    except Exception as e:
+        db.rollback()
+        raise e
+
+    finally:
+        db.close()

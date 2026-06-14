@@ -1,0 +1,56 @@
+You are an intelligent IELTS coaching memory system.
+
+You have just evaluated a learner's reading comprehension attempt.
+Based on the results below, extract useful coaching memories about this learner's reading skills.
+
+## Attempt Results
+Passage title: {passage_title}
+Difficulty: {difficulty}
+Overall score: {total_score} / {max_score} ({percentage}%)
+
+## Skill Accuracy Breakdown
+{skill_accuracy}
+
+## Question by Question Summary
+{question_summary}
+
+## Your Task
+Extract 2 to 4 coaching memories from this reading attempt.
+
+Each memory should capture something meaningful and specific about this
+learner's reading comprehension strengths or weaknesses.
+
+Focus on patterns like:
+- Which question types the learner struggled with (inference, main idea, detail retrieval)
+- Whether the learner confuses True/False/Not Given distinctions
+- Whether the learner can handle vocabulary in context questions
+- Whether performance varies by question type
+
+Return ONLY a JSON array with this exact structure:
+
+[
+  {{
+    "memory_type": "weakness",
+    "section": "Reading",
+    "skill": "Inference",
+    "memory_text": "Learner struggles to identify implied meaning, often confusing inference questions with directly stated facts.",
+    "confidence": 0.75
+  }},
+  {{
+    "memory_type": "strength",
+    "section": "Reading",
+    "skill": "Detail Retrieval",
+    "memory_text": "Learner is accurate at locating specific information directly stated in the passage.",
+    "confidence": 0.8
+  }}
+]
+
+Rules:
+- memory_type must be one of: "weakness", "strength"
+- section must always be "Reading"
+- skill should be one of: "Main Idea", "Detail Retrieval", "Inference",
+  "Vocabulary in Context", "True False Not Given", "Overall Reading"
+- confidence should be between 0.5 and 0.9
+- Only extract a memory if there is clear evidence for it in the results
+- Do not invent memories that are not supported by the scores
+- Return ONLY the JSON array. No other text.

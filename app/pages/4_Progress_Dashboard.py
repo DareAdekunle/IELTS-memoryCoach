@@ -24,171 +24,333 @@ if "learner_id" not in st.session_state or st.session_state["learner_id"] is Non
 learner_id = st.session_state["learner_id"]
 learner_name = st.session_state.get("learner_name", "Learner")
 
-# Load progress data
-data = get_progress_data(learner_id, section="Writing")
+# Load data for both sections
+writing_data = get_progress_data(learner_id, section="Writing")
+reading_data = get_progress_data(learner_id, section="Reading")
 memory_stats = get_memory_stats(learner_id)
 
-# ─── No attempts yet ──────────────────────────────────────────────────────────
-if data["total_attempts"] == 0:
-    st.info(
-        "📝 No attempts yet. Go to the **Writing Coach** page to submit "
-        "your first essay and your progress will appear here."
-    )
-    st.stop()
-
-# ─── Summary metrics ──────────────────────────────────────────────────────────
-st.subheader(f"📊 {learner_name}'s Writing Progress")
+# ─── Top level summary ────────────────────────────────────────────────────────
+st.subheader(f"📊 {learner_name}'s IELTS Overview")
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     st.metric(
-        label="Total Attempts",
-        value=data["total_attempts"]
+        "Writing Attempts",
+        writing_data["total_attempts"]
     )
-
 with col2:
     st.metric(
-        label="Active Memories",
-        value=memory_stats["active_count"]
+        "Reading Attempts",
+        reading_data["total_attempts"]
     )
-
 with col3:
     st.metric(
-        label="Skills Mastered",
-        value=memory_stats["archived_count"]
+        "Active Memories",
+        memory_stats["active_count"]
     )
-
 with col4:
-    avg_confidence = memory_stats.get("avg_confidence", 0)
     st.metric(
-        label="Avg Memory Confidence",
-        value=f"{int(avg_confidence * 100)}%"
+        "Skills Mastered",
+        memory_stats["archived_count"]
     )
 
 st.markdown("---")
 
-# ─── Latest skill scores ──────────────────────────────────────────────────────
-st.subheader("🎯 Latest Skill Scores")
+# ─── Section tabs ─────────────────────────────────────────────────────────────
+writing_tab, reading_tab = st.tabs(["✍️ Writing Progress", "📖 Reading Progress"])
 
-skill_labels = {
-    "thesis_clarity": "Thesis Clarity",
-    "organization": "Organization",
-    "grammar": "Grammar",
-    "vocabulary": "Vocabulary",
-    "idea_development": "Idea Development"
-}
 
-latest = data["latest_scores"]
-averages = data.get("skill_averages", {})
+# ══════════════════════════════════════════════════════════════════════════════
+# WRITING TAB
+# ══════════════════════════════════════════════════════════════════════════════
+with writing_tab:
 
-cols = st.columns(5)
-for i, (skill_key, label) in enumerate(skill_labels.items()):
-    with cols[i]:
-        latest_score = latest.get(skill_key, 0)
-        avg_score = averages.get(skill_key, 0)
-
-        # Calculate delta from average to show trend
-        delta = round(latest_score - avg_score, 1)
-        delta_str = f"{delta:+.1f} vs avg" if data["total_attempts"] > 1 else None
-
-        st.metric(
-            label=label,
-            value=f"{latest_score} / 5",
-            delta=delta_str
+    if writing_data["total_attempts"] == 0:
+        st.info(
+            "📝 No writing attempts yet. Go to the **Writing Coach** page "
+            "to submit your first essay."
         )
-
-st.markdown("---")
-
-# ─── Score trend chart ────────────────────────────────────────────────────────
-if data["total_attempts"] > 1:
-    st.subheader("📉 Score Trends Over Time")
-    st.caption("How each skill has changed across your attempts")
-
-    # Build chart data
-    # Streamlit's line_chart needs a dict of lists
-    chart_data = {}
-    for skill_key, label in skill_labels.items():
-        trend = data["skill_trends"].get(skill_key, [])
-        if trend:
-            chart_data[label] = trend
-
-    if chart_data:
-        st.line_chart(chart_data)
-
-    st.markdown("---")
-
-# ─── Skill breakdown table ────────────────────────────────────────────────────
-st.subheader("📋 Skill Breakdown")
-
-best_skill = data.get("best_skill")
-worst_skill = data.get("worst_skill")
-
-rows = []
-for skill_key, label in skill_labels.items():
-    avg = averages.get(skill_key, 0)
-    trend = data["skill_trends"].get(skill_key, [])
-    latest_val = trend[-1] if trend else 0
-    first_val = trend[0] if trend else 0
-
-    if len(trend) > 1:
-        change = latest_val - first_val
-        if change > 0:
-            trend_icon = "📈 Improving"
-        elif change < 0:
-            trend_icon = "📉 Declining"
-        else:
-            trend_icon = "➡️ Stable"
     else:
-        trend_icon = "⬜ First attempt"
+        data = writing_data
 
-    tag = ""
-    if skill_key == best_skill:
-        tag = " 🏆"
-    elif skill_key == worst_skill:
-        tag = " ⚠️"
+        skill_labels = {
+            "thesis_clarity": "Thesis Clarity",
+            "organization": "Organization",
+            "grammar": "Grammar",
+            "vocabulary": "Vocabulary",
+            "idea_development": "Idea Development"
+        }
 
-    rows.append({
-        "Skill": label + tag,
-        "Average Score": f"{avg} / 5",
-        "Latest Score": f"{latest_val} / 5",
-        "Trend": trend_icon
-    })
+        # Latest skill scores
+        st.subheader("🎯 Latest Writing Scores")
+        latest = data["latest_scores"]
+        averages = data.get("skill_averages", {})
 
-st.table(rows)
-
-st.markdown("---")
-
-# ─── Recommended next focus ───────────────────────────────────────────────────
-st.subheader("🎯 Recommended Next Focus")
-
-if worst_skill:
-    worst_label = skill_labels.get(worst_skill, worst_skill)
-    worst_avg = averages.get(worst_skill, 0)
-
-    st.warning(
-        f"Based on your attempts so far, your coach recommends focusing on "
-        f"**{worst_label}** next. Your average score in this area is "
-        f"**{worst_avg} / 5** — the lowest across all your skills."
-    )
-else:
-    st.info("Complete more attempts to get a personalised recommendation.")
-
-# ─── Attempt history ──────────────────────────────────────────────────────────
-st.markdown("---")
-st.subheader("📜 Attempt History")
-
-attempts = data["attempts"]
-for attempt in reversed(attempts):
-    with st.expander(
-        f"Attempt {attempt['attempt_number']} — "
-        f"{attempt['created_at'][:16].replace('T', ' at ')}"
-    ):
-        scores = attempt["scores"]
         cols = st.columns(5)
         for i, (skill_key, label) in enumerate(skill_labels.items()):
             with cols[i]:
-                st.metric(label, f"{scores.get(skill_key, 0)} / 5")
+                latest_score = latest.get(skill_key, 0)
+                avg_score = averages.get(skill_key, 0)
+                delta = round(latest_score - avg_score, 1)
+                delta_str = (
+                    f"{delta:+.1f} vs avg"
+                    if data["total_attempts"] > 1 else None
+                )
+                st.metric(
+                    label=label,
+                    value=f"{latest_score} / 5",
+                    delta=delta_str
+                )
 
-        if attempt["feedback"]:
-            st.markdown(f"**Coach feedback:** {attempt['feedback']}")
+        # Score trend chart
+        if data["total_attempts"] > 1:
+            st.markdown("---")
+            st.subheader("📉 Writing Score Trends")
+            st.caption("How each skill has changed across your attempts")
+
+            chart_data = {}
+            for skill_key, label in skill_labels.items():
+                trend = data["skill_trends"].get(skill_key, [])
+                if trend:
+                    chart_data[label] = trend
+
+            if chart_data:
+                st.line_chart(chart_data)
+
+        # Skill breakdown table
+        st.markdown("---")
+        st.subheader("📋 Writing Skill Breakdown")
+
+        best_skill = data.get("best_skill")
+        worst_skill = data.get("worst_skill")
+
+        rows = []
+        for skill_key, label in skill_labels.items():
+            avg = averages.get(skill_key, 0)
+            trend = data["skill_trends"].get(skill_key, [])
+            latest_val = trend[-1] if trend else 0
+            first_val = trend[0] if trend else 0
+
+            if len(trend) > 1:
+                change = latest_val - first_val
+                if change > 0:
+                    trend_icon = "📈 Improving"
+                elif change < 0:
+                    trend_icon = "📉 Declining"
+                else:
+                    trend_icon = "➡️ Stable"
+            else:
+                trend_icon = "⬜ First attempt"
+
+            tag = ""
+            if skill_key == best_skill:
+                tag = " 🏆"
+            elif skill_key == worst_skill:
+                tag = " ⚠️"
+
+            rows.append({
+                "Skill": label + tag,
+                "Average Score": f"{avg} / 5",
+                "Latest Score": f"{latest_val} / 5",
+                "Trend": trend_icon
+            })
+
+        st.table(rows)
+
+        # Recommended focus
+        st.markdown("---")
+        st.subheader("🎯 Recommended Writing Focus")
+
+        if worst_skill:
+            worst_label = skill_labels.get(worst_skill, worst_skill)
+            worst_avg = averages.get(worst_skill, 0)
+            st.warning(
+                f"Your coach recommends focusing on **{worst_label}**. "
+                f"Your average score is **{worst_avg} / 5** — "
+                f"the lowest across all writing skills."
+            )
+
+        # Attempt history
+        st.markdown("---")
+        st.subheader("📜 Writing Attempt History")
+
+        for attempt in reversed(data["attempts"]):
+            with st.expander(
+                f"Attempt {attempt['attempt_number']} — "
+                f"{attempt['created_at'][:16].replace('T', ' at ')}"
+            ):
+                scores = attempt["scores"]
+                cols = st.columns(5)
+                for i, (skill_key, label) in enumerate(skill_labels.items()):
+                    with cols[i]:
+                        st.metric(label, f"{scores.get(skill_key, 0)} / 5")
+
+                if attempt["feedback"]:
+                    st.markdown(f"**Coach feedback:** {attempt['feedback']}")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# READING TAB
+# ══════════════════════════════════════════════════════════════════════════════
+with reading_tab:
+
+    if reading_data["total_attempts"] == 0:
+        st.info(
+            "📖 No reading attempts yet. Go to the **Reading Coach** page "
+            "to complete your first passage."
+        )
+    else:
+        data = reading_data
+
+        # Reading skill labels
+        reading_skill_labels = {
+            "main_idea": "Main Idea",
+            "detail_retrieval": "Detail Retrieval",
+            "inference": "Inference",
+            "vocabulary_in_context": "Vocabulary in Context",
+            "true_false_ng": "True / False / NG"
+        }
+
+        # Latest scores
+        st.subheader("🎯 Latest Reading Scores")
+        latest = data["latest_scores"]
+        averages = data.get("skill_averages", {})
+
+        # Show latest attempt percentage score prominently
+        latest_attempt = data["attempts"][-1]
+        if latest_attempt.get("percentage") is not None:
+            pct = latest_attempt["percentage"]
+            total = latest_attempt.get("total_score", "?")
+            maximum = latest_attempt.get("max_score", "?")
+
+            if pct >= 80:
+                st.success(
+                    f"Latest attempt: **{total} / {maximum}** ({pct}%) 🎉"
+                )
+            elif pct >= 60:
+                st.warning(
+                    f"Latest attempt: **{total} / {maximum}** ({pct}%) 👍"
+                )
+            else:
+                st.error(
+                    f"Latest attempt: **{total} / {maximum}** ({pct}%) 📚"
+                )
+
+        # Skill scores converted to /5 scale
+        if latest:
+            skill_cols = st.columns(len(latest))
+            for i, (skill_key, score) in enumerate(latest.items()):
+                with skill_cols[i]:
+                    label = reading_skill_labels.get(
+                        skill_key,
+                        skill_key.replace("_", " ").title()
+                    )
+                    st.metric(label=label, value=f"{score} / 5")
+
+        # Score trend chart
+        if data["total_attempts"] > 1:
+            st.markdown("---")
+            st.subheader("📉 Reading Score Trends")
+            st.caption("Skill scores converted to /5 scale across attempts")
+
+            chart_data = {}
+            for skill_key, trend in data["skill_trends"].items():
+                label = reading_skill_labels.get(
+                    skill_key,
+                    skill_key.replace("_", " ").title()
+                )
+                if trend:
+                    chart_data[label] = trend
+
+            if chart_data:
+                st.line_chart(chart_data)
+
+        # Skill breakdown table
+        st.markdown("---")
+        st.subheader("📋 Reading Skill Breakdown")
+
+        best_skill = data.get("best_skill")
+        worst_skill = data.get("worst_skill")
+
+        rows = []
+        for skill_key, avg in averages.items():
+            label = reading_skill_labels.get(
+                skill_key,
+                skill_key.replace("_", " ").title()
+            )
+            trend = data["skill_trends"].get(skill_key, [])
+            latest_val = trend[-1] if trend else 0
+            first_val = trend[0] if trend else 0
+
+            if len(trend) > 1:
+                change = latest_val - first_val
+                if change > 0:
+                    trend_icon = "📈 Improving"
+                elif change < 0:
+                    trend_icon = "📉 Declining"
+                else:
+                    trend_icon = "➡️ Stable"
+            else:
+                trend_icon = "⬜ First attempt"
+
+            tag = ""
+            if skill_key == best_skill:
+                tag = " 🏆"
+            elif skill_key == worst_skill:
+                tag = " ⚠️"
+
+            rows.append({
+                "Skill": label + tag,
+                "Average Score": f"{avg} / 5",
+                "Latest Score": f"{latest_val} / 5",
+                "Trend": trend_icon
+            })
+
+        if rows:
+            st.table(rows)
+
+        # Recommended reading focus
+        st.markdown("---")
+        st.subheader("🎯 Recommended Reading Focus")
+
+        if worst_skill:
+            worst_label = reading_skill_labels.get(
+                worst_skill,
+                worst_skill.replace("_", " ").title()
+            )
+            worst_avg = averages.get(worst_skill, 0)
+            st.warning(
+                f"Your coach recommends focusing on **{worst_label}** "
+                f"in your reading practice. "
+                f"Your average score is **{worst_avg} / 5**."
+            )
+
+        # Reading attempt history
+        st.markdown("---")
+        st.subheader("📜 Reading Attempt History")
+
+        for attempt in reversed(data["attempts"]):
+            title = attempt.get("passage_title") or "Reading Attempt"
+            pct = attempt.get("percentage", "?")
+            total = attempt.get("total_score", "?")
+            maximum = attempt.get("max_score", "?")
+
+            with st.expander(
+                f"Attempt {attempt['attempt_number']} — {title} — "
+                f"{total}/{maximum} ({pct}%) — "
+                f"{attempt['created_at'][:16].replace('T', ' at ')}"
+            ):
+                scores = attempt["scores"]
+                if scores:
+                    cols = st.columns(len(scores))
+                    for i, (skill_key, score) in enumerate(scores.items()):
+                        label = reading_skill_labels.get(
+                            skill_key,
+                            skill_key.replace("_", " ").title()
+                        )
+                        with cols[i]:
+                            st.metric(label, f"{score} / 5")
+
+                if attempt["feedback"]:
+                    st.markdown(f"**Result:** {attempt['feedback']}")
