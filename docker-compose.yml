@@ -1,11 +1,20 @@
-version: "3.8"
-
 services:
   app:
     build: .
     ports:
       - "8501:8501"
     volumes:
+      # Mount the entire project into the container
+      # This means code changes reflect without rebuilding
       - .:/app
+      # Mount the data volume separately so the database
+      # persists between container rebuilds
+      - ielts_data:/app/data/db
     env_file:
       - .env
+    restart: unless-stopped
+
+# Define the named volume
+# Docker manages this separately from the container
+volumes:
+  ielts_data:

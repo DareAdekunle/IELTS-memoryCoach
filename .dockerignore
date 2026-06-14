@@ -1,0 +1,27 @@
+# Python
+venv/
+agent_env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Database — we mount this as a volume instead
+*.db
+
+# Environment files
+.env
+
+# VS Code
+.vscode/
+
+# Git
+.git/
+.gitignore
+
+# Mac system files
+.DS_Store
+
+# Streamlit cache
+.streamlit/
