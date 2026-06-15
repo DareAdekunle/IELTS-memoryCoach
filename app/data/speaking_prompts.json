@@ -1,0 +1,422 @@
+[
+  {
+    "prompt_set_id": "speaking_001",
+    "topic": "People and Relationships",
+    "difficulty": "beginner",
+    "part1": {
+      "title": "Friends and Family",
+      "questions": [
+        "Do you prefer spending time with friends or family? Why?",
+        "How often do you keep in touch with your friends?",
+        "Have your friendships changed as you have grown older?",
+        "What qualities do you think are most important in a good friend?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a person who has had a positive influence on your life",
+      "cue_card": "Describe a person who has had a positive influence on your life.\n\nYou should say:\n- Who this person is\n- How you know them\n- What they did that influenced you\n- And explain why their influence has been important to you",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Influence and Role Models",
+      "questions": [
+        "Why do you think some people have more influence over others than other people do?",
+        "Do you think celebrities make good role models for young people? Why or why not?",
+        "How has the internet changed the way people are influenced by others?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_002",
+    "topic": "Education and Learning",
+    "difficulty": "beginner",
+    "part1": {
+      "title": "Studying and School",
+      "questions": [
+        "What subject did you enjoy most at school and why?",
+        "Do you prefer studying alone or with others?",
+        "How do you usually prepare for an important exam?",
+        "Do you think the education system in your country is good?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a teacher who made a strong impression on you",
+      "cue_card": "Describe a teacher who made a strong impression on you.\n\nYou should say:\n- Who this teacher was\n- What subject they taught\n- What made them different from other teachers\n- And explain why they made such a strong impression on you",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Teaching and Education",
+      "questions": [
+        "What qualities do you think make an effective teacher?",
+        "Do you think technology will eventually replace teachers in the classroom?",
+        "How important is it for children to learn subjects like art and music alongside academic subjects?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_003",
+    "topic": "Technology and Modern Life",
+    "difficulty": "intermediate",
+    "part1": {
+      "title": "Technology in Daily Life",
+      "questions": [
+        "How much time do you spend on your phone each day?",
+        "What kind of apps do you use most frequently?",
+        "Do you think people rely too much on technology these days?",
+        "Has technology made your daily life easier or more complicated?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a piece of technology that you find particularly useful",
+      "cue_card": "Describe a piece of technology that you find particularly useful.\n\nYou should say:\n- What it is\n- How long you have been using it\n- How you use it in your daily life\n- And explain why you find it so useful",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Technology and Society",
+      "questions": [
+        "How do you think artificial intelligence will change the way people work in the future?",
+        "Do you think social media has had a mostly positive or mostly negative effect on society?",
+        "Should governments regulate how technology companies collect and use personal data?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_004",
+    "topic": "Environment and Nature",
+    "difficulty": "intermediate",
+    "part1": {
+      "title": "The Environment",
+      "questions": [
+        "How concerned are you personally about climate change?",
+        "Do you do anything in your daily life to help the environment?",
+        "Are there any natural places near where you live that you enjoy visiting?",
+        "Do you think people in your country care enough about environmental issues?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a time when you spent time in nature",
+      "cue_card": "Describe a time when you spent time in nature.\n\nYou should say:\n- Where you went\n- Who you were with\n- What you did there\n- And explain how spending time in that natural environment made you feel",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Environment and Responsibility",
+      "questions": [
+        "Who do you think bears the greatest responsibility for protecting the environment — individuals, businesses or governments?",
+        "Do you think economic development and environmental protection can coexist?",
+        "How effective do you think international agreements on climate change have been?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_005",
+    "topic": "Work and Career",
+    "difficulty": "intermediate",
+    "part1": {
+      "title": "Work and Jobs",
+      "questions": [
+        "What do you do for work or what are you studying?",
+        "What aspects of your work or studies do you enjoy most?",
+        "What kind of job would you most like to have in the future?",
+        "Do you think it is better to work for yourself or for a company?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a job you would like to try in the future",
+      "cue_card": "Describe a job you would like to try in the future.\n\nYou should say:\n- What the job is\n- What skills or qualifications it requires\n- What you would do in this job on a typical day\n- And explain why you would like to try this job",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Work and Society",
+      "questions": [
+        "Do you think job satisfaction is more important than salary when choosing a career?",
+        "How has the concept of work changed over the past few decades?",
+        "Do you think the traditional nine to five working day will still exist in twenty years time?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_006",
+    "topic": "Health and Lifestyle",
+    "difficulty": "beginner",
+    "part1": {
+      "title": "Health and Wellbeing",
+      "questions": [
+        "Do you think you have a healthy lifestyle?",
+        "How do you usually relax after a stressful day?",
+        "Do you do any regular exercise? What kind?",
+        "How important is sleep to you and do you get enough of it?"
+      ]
+    },
+    "part2": {
+      "title": "Describe something you do to stay healthy",
+      "cue_card": "Describe something you do to stay healthy.\n\nYou should say:\n- What it is\n- How long you have been doing it\n- How often you do it\n- And explain why you think it is important for your health",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Health and Society",
+      "questions": [
+        "Do you think governments should do more to encourage citizens to live healthier lives?",
+        "Why do you think rates of obesity and lifestyle-related diseases are increasing in many countries?",
+        "How has our understanding of what constitutes a healthy diet changed in recent years?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_007",
+    "topic": "Travel and Culture",
+    "difficulty": "beginner",
+    "part1": {
+      "title": "Travel",
+      "questions": [
+        "Do you enjoy travelling? Where have you been recently?",
+        "Do you prefer travelling alone or with other people?",
+        "What do you think is the best way to experience a new culture?",
+        "Is there a country you would really like to visit? Why?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a memorable journey or trip you have taken",
+      "cue_card": "Describe a memorable journey or trip you have taken.\n\nYou should say:\n- Where you went\n- Who you travelled with\n- What you did or saw there\n- And explain why this trip was particularly memorable for you",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Travel and Globalisation",
+      "questions": [
+        "Do you think international tourism has more positive or negative effects on local communities?",
+        "How has cheap air travel changed the way people think about visiting other countries?",
+        "Do you think cultural differences between countries are becoming smaller because of globalisation?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_008",
+    "topic": "Cities and Urban Life",
+    "difficulty": "intermediate",
+    "part1": {
+      "title": "Where You Live",
+      "questions": [
+        "Do you live in a city or a smaller town or village?",
+        "What do you like most about where you currently live?",
+        "Has the area where you live changed much in recent years?",
+        "Would you prefer to live in the city centre or in the suburbs? Why?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a city you have visited that you particularly enjoyed",
+      "cue_card": "Describe a city you have visited that you particularly enjoyed.\n\nYou should say:\n- Which city it was\n- When you went there\n- What you did and saw there\n- And explain what it was about this city that you particularly enjoyed",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Urban Development and Planning",
+      "questions": [
+        "What do you think are the biggest challenges facing cities today?",
+        "How can city planners make urban areas more liveable for their residents?",
+        "Do you think the trend of people moving from rural areas to cities will continue in the future?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_009",
+    "topic": "Arts and Creativity",
+    "difficulty": "intermediate",
+    "part1": {
+      "title": "Art and Culture",
+      "questions": [
+        "Are you interested in any form of art such as painting, music or literature?",
+        "Did you do anything creative when you were a child?",
+        "Do you ever visit museums, galleries or cultural events?",
+        "Do you think it is important for people to have creative hobbies?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a work of art, music or literature that has had an impact on you",
+      "cue_card": "Describe a work of art, music or literature that has had an impact on you.\n\nYou should say:\n- What it is and who created it\n- When you first encountered it\n- What it is about or what it depicts\n- And explain why it has had an impact on you",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Art and Society",
+      "questions": [
+        "Do you think governments have a responsibility to fund the arts?",
+        "How has digital technology changed the way people create and consume art?",
+        "Do you think traditional art forms like classical music and painting are becoming less relevant in modern society?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_010",
+    "topic": "Media and Communication",
+    "difficulty": "advanced",
+    "part1": {
+      "title": "News and Media",
+      "questions": [
+        "How do you usually get your news — through television, newspapers or online?",
+        "Do you think the news media generally reports things accurately?",
+        "How much time do you spend reading or watching the news each day?",
+        "Do you follow any particular journalists or news sources that you trust?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a news story that had a strong effect on you",
+      "cue_card": "Describe a news story that had a strong effect on you.\n\nYou should say:\n- What the story was about\n- When and where you heard or read about it\n- What happened as a result of this story\n- And explain why this story had such a strong effect on you",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Media and Society",
+      "questions": [
+        "Do you think social media has made it harder for people to distinguish between reliable and unreliable news?",
+        "Should governments have the power to regulate what is published on social media platforms?",
+        "How do you think the rise of artificial intelligence will affect journalism and the media industry?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_011",
+    "topic": "Economy and Money",
+    "difficulty": "advanced",
+    "part1": {
+      "title": "Money and Spending",
+      "questions": [
+        "Are you good at managing your money?",
+        "Do you prefer to save money or spend it on experiences and things you enjoy?",
+        "Do you think young people today are taught enough about managing finances?",
+        "Has your attitude towards money changed as you have got older?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a time when you made a significant financial decision",
+      "cue_card": "Describe a time when you made a significant financial decision.\n\nYou should say:\n- What the decision was\n- When you had to make it\n- How you went about making the decision\n- And explain whether you think it was the right decision in hindsight",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Economics and Inequality",
+      "questions": [
+        "Do you think the gap between rich and poor is growing in most countries? What are the consequences of this?",
+        "Should wealthy individuals and corporations pay higher rates of tax to fund public services?",
+        "How do you think automation and artificial intelligence will affect economic inequality in the future?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_012",
+    "topic": "Food and Culture",
+    "difficulty": "beginner",
+    "part1": {
+      "title": "Food and Eating",
+      "questions": [
+        "Do you enjoy cooking? What kinds of things do you like to cook?",
+        "How important is food to you in terms of your cultural identity?",
+        "Have your eating habits changed much over the years?",
+        "Do you prefer eating at home or going out to restaurants?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a meal that you particularly enjoyed",
+      "cue_card": "Describe a meal that you particularly enjoyed.\n\nYou should say:\n- What the meal was\n- Where you had it and who you were with\n- What was special about the food or the occasion\n- And explain why this meal was particularly enjoyable for you",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Food, Culture and Globalisation",
+      "questions": [
+        "How has globalisation affected the food people eat in your country?",
+        "Do you think the growing popularity of fast food is a problem for public health?",
+        "How important do you think it is to preserve traditional food cultures?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_013",
+    "topic": "Sport and Competition",
+    "difficulty": "intermediate",
+    "part1": {
+      "title": "Sport and Physical Activity",
+      "questions": [
+        "Do you play any sports or do any physical activities regularly?",
+        "Did you play a lot of sport when you were at school?",
+        "Do you prefer watching sport or playing it yourself?",
+        "Is there a sport you have always wanted to try but never have?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a sporting event you have watched or attended",
+      "cue_card": "Describe a sporting event you have watched or attended.\n\nYou should say:\n- What the event was\n- When and where it took place\n- What happened during the event\n- And explain why this sporting event was memorable for you",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Sport, Competition and Society",
+      "questions": [
+        "Do you think competitive sport teaches children valuable life skills or puts too much pressure on them?",
+        "Why do you think some countries invest so heavily in elite sport and Olympic performance?",
+        "Do you think professional athletes are paid too much compared to other professions in society?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_014",
+    "topic": "Science and Innovation",
+    "difficulty": "advanced",
+    "part1": {
+      "title": "Science and Discovery",
+      "questions": [
+        "Are you interested in science? Which areas of science interest you most?",
+        "Do you follow news about scientific discoveries and breakthroughs?",
+        "Did you enjoy science subjects at school?",
+        "Do you think scientific thinking is important in everyday life?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a scientific discovery or invention that you find fascinating",
+      "cue_card": "Describe a scientific discovery or invention that you find fascinating.\n\nYou should say:\n- What it is\n- When it was discovered or invented\n- How it works or what it does\n- And explain why you find it so fascinating",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Science, Ethics and Progress",
+      "questions": [
+        "Do you think there are areas of scientific research that should be limited or banned for ethical reasons?",
+        "How should governments decide which areas of scientific research to prioritise and fund?",
+        "Do you think the benefits of scientific progress always outweigh the risks?"
+      ]
+    }
+  },
+  {
+    "prompt_set_id": "speaking_015",
+    "topic": "Identity and Society",
+    "difficulty": "advanced",
+    "part1": {
+      "title": "Identity and Belonging",
+      "questions": [
+        "Do you feel a strong connection to your national identity or cultural background?",
+        "Has living in your country shaped your values and outlook on life?",
+        "Do you think younger generations have a different sense of identity from older generations?",
+        "Do you feel more comfortable in large groups of people or in smaller more intimate settings?"
+      ]
+    },
+    "part2": {
+      "title": "Describe a tradition or custom from your culture that is important to you",
+      "cue_card": "Describe a tradition or custom from your culture that is important to you.\n\nYou should say:\n- What the tradition or custom is\n- When and how it is observed\n- Who participates in it\n- And explain why this tradition or custom is important to you personally",
+      "preparation_time": 60,
+      "speaking_time": 120
+    },
+    "part3": {
+      "title": "Identity, Culture and Change",
+      "questions": [
+        "Do you think globalisation is causing cultures around the world to become more similar?",
+        "How important is it for immigrant communities to maintain their cultural identity in a new country?",
+        "Do you think national identity will become more or less important in the future as globalisation continues?"
+      ]
+    }
+  }
+]

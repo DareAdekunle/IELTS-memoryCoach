@@ -655,3 +655,252 @@ def save_reading_attempt(learner_id: str, attempt_result: dict) -> str:
 
     finally:
         db.close()
+
+
+def extract_speaking_memories(learner_id: str, attempt_result: dict) -> list:
+    """
+    Extracts coaching memories from a completed speaking attempt.
+
+    Uses the speaking-specific memory extractor prompt and formats
+    speaking evaluation results correctly for memory extraction.
+    """
+    # Load the speaking memory extractor prompt
+    path = os.path.join(PROMPTS_DIR, "speaking_memory_extractor.txt")
+    with open(path, "r") as f:
+        template = f.read()
+
+    scores = attempt_result.get("scores", {})
+
+    # Format strengths and weaknesses for the prompt
+    strengths_text = "\n".join([
+        f"  - {s}" for s in scores.get("strengths", [])
+    ])
+    weaknesses_text = "\n".join([
+        f"  - {w}" for w in scores.get("weaknesses", [])
+    ])
+
+    full_prompt = template.format(
+        topic=attempt_result.get("topic", "Unknown"),
+        overall_band=scores.get("overall_band", "?"),
+        fluency_coherence=scores.get("fluency_coherence", "?"),
+        lexical_resource=scores.get("lexical_resource", "?"),
+        grammatical_range=scores.get("grammatical_range", "?"),
+        pronunciation_clarity=scores.get("pronunciation_clarity", "?"),
+        strengths=strengths_text if strengths_text else "  None noted",
+        weaknesses=weaknesses_text if weaknesses_text else "  None noted",
+        part1_comment=scores.get("part1_comment", "No comment"),
+        part2_comment=scores.get("part2_comment", "No comment"),
+        part3_comment=scores.get("part3_comment", "No comment")
+    )
+
+    # Call Qwen to extract memories
+    raw_response = call_qwen_for_json(full_prompt)
+
+    try:
+        memories = safe_parse_json(raw_response)
+    except ValueError:
+        try:
+            memories = extract_json_from_text(raw_response)
+        except ValueError as e:
+            print(f"Could not extract speaking memories: {e}")
+            return []
+
+    if not isinstance(memories, list):
+        print("Speaking memory extraction did not return a list")
+        return []
+
+    # Save each memory to the database
+    saved_memories = []
+    db = SessionLocal()
+
+    try:
+        for mem in memories:
+            if not all(k in mem for k in [
+                "memory_type", "section", "skill", "memory_text"
+            ]):
+                continue
+
+            memory_id = str(uuid.uuid4())[:12]
+
+            memory = LearnerMemory(
+                memory_id=memory_id,
+                learner_id=learner_id,
+                section=mem["section"],
+                skill=mem["skill"],
+                memory_type=mem["memory_type"],
+                memory_text=mem["memory_text"],
+                confidence=float(mem.get("confidence", 0.6)),
+                evidence_count=1,
+                status="active"
+            )
+
+            db.add(memory)
+            saved_memories.append(mem)
+
+        db.commit()
+        print(
+            f"Saved {len(saved_memories)} speaking memories "
+            f"for learner {learner_id}"
+        )
+
+    except Exception as e:
+        db.rollback()
+        print(f"Error saving speaking memories: {e}")
+
+    finally:
+        db.close()
+
+    return saved_memories
+
+
+def save_speaking_attempt(learner_id: str, attempt_result: dict) -> str:
+    """
+    Saves a completed speaking attempt to the practice_attempts table.
+    Returns the attempt_id.
+
+    Speaking attempts store the full evaluation result in score_json
+    including band scores, feedback text and part comments.
+    """
+    db = SessionLocal()
+
+    try:
+        attempt_id = str(uuid.uuid4())[:12]
+
+        scores = attempt_result.get("scores", {})
+        overall_band = scores.get("overall_band", "?")
+
+        attempt = PracticeAttempt(
+            attempt_id=attempt_id,
+            learner_id=learner_id,
+            section="Speaking",
+            task_type=attempt_result.get("difficulty", "").title(),
+            prompt=attempt_result.get("topic", "Speaking Practice"),
+            learner_response=(
+                f"Completed 3-part speaking session on: "
+                f"{attempt_result.get('topic', 'Unknown topic')}"
+            ),
+            score_json=json.dumps({
+                "scores": scores,
+                "feedback_text": attempt_result.get("feedback_text", ""),
+                "topic": attempt_result.get("topic", ""),
+                "difficulty": attempt_result.get("difficulty", ""),
+                "overall_band": overall_band
+            }),
+            feedback=(
+                f"Overall Band: {overall_band} | "
+                f"Fluency: {scores.get('fluency_coherence', '?')}/9 | "
+                f"Lexical: {scores.get('lexical_resource', '?')}/9 | "
+                f"Grammar: {scores.get('grammatical_range', '?')}/9 | "
+                f"Pronunciation: {scores.get('pronunciation_clarity', '?')}/9"
+            )
+        )
+
+        db.add(attempt)
+        db.commit()
+
+        print(f"Speaking attempt saved: {attempt_id}")
+        return attempt_id
+
+    except Exception as e:
+        db.rollback()
+        raise e
+
+    finally:
+        db.close()
+
+
+def get_speaking_progress_data(learner_id: str) -> dict:
+    """
+    Pulls together speaking progress data for the dashboard.
+
+    Speaking uses band scores out of 9 rather than skill scores
+    out of 5 like Writing and Reading.
+    """
+    db = SessionLocal()
+
+    try:
+        attempts = db.query(PracticeAttempt).filter(
+            PracticeAttempt.learner_id == learner_id,
+            PracticeAttempt.section == "Speaking"
+        ).order_by(PracticeAttempt.created_at.asc()).all()
+
+        if not attempts:
+            return {
+                "total_attempts": 0,
+                "attempts": [],
+                "band_trends": {},
+                "latest_scores": {},
+                "best_criterion": None,
+                "worst_criterion": None
+            }
+
+        attempt_data = []
+        for i, a in enumerate(attempts):
+            raw = json.loads(a.score_json) if a.score_json else {}
+            scores = raw.get("scores", {})
+
+            attempt_data.append({
+                "attempt_number": i + 1,
+                "attempt_id": a.attempt_id,
+                "topic": raw.get("topic", "Unknown"),
+                "difficulty": raw.get("difficulty", ""),
+                "overall_band": scores.get("overall_band", 0),
+                "fluency_coherence": scores.get("fluency_coherence", 0),
+                "lexical_resource": scores.get("lexical_resource", 0),
+                "grammatical_range": scores.get("grammatical_range", 0),
+                "pronunciation_clarity": scores.get("pronunciation_clarity", 0),
+                "feedback": a.feedback,
+                "created_at": str(a.created_at)
+            })
+
+        # Build band score trends
+        criteria = [
+            "fluency_coherence",
+            "lexical_resource",
+            "grammatical_range",
+            "pronunciation_clarity"
+        ]
+
+        band_trends = {}
+        for criterion in criteria:
+            band_trends[criterion] = [
+                a[criterion] for a in attempt_data
+            ]
+
+        # Overall band trend
+        band_trends["overall_band"] = [
+            a["overall_band"] for a in attempt_data
+        ]
+
+        # Calculate averages
+        criterion_averages = {}
+        for criterion in criteria:
+            values = [
+                v for v in band_trends[criterion] if v and v > 0
+            ]
+            criterion_averages[criterion] = round(
+                sum(values) / len(values), 1
+            ) if values else 0
+
+        # Best and worst criteria
+        if criterion_averages:
+            best = max(criterion_averages, key=criterion_averages.get)
+            worst = min(criterion_averages, key=criterion_averages.get)
+        else:
+            best = None
+            worst = None
+
+        latest = attempt_data[-1] if attempt_data else {}
+
+        return {
+            "total_attempts": len(attempt_data),
+            "attempts": attempt_data,
+            "band_trends": band_trends,
+            "criterion_averages": criterion_averages,
+            "latest_scores": latest,
+            "best_criterion": best,
+            "worst_criterion": worst
+        }
+
+    finally:
+        db.close()

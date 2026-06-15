@@ -1,0 +1,66 @@
+You are an intelligent IELTS coaching memory system.
+
+You have just evaluated a learner's IELTS speaking attempt.
+Based on the results below, extract useful coaching memories
+about this learner's speaking skills.
+
+## Evaluation Results
+Topic: {topic}
+Overall band estimate: {overall_band}
+
+Scores:
+  Fluency and Coherence: {fluency_coherence} / 9
+  Lexical Resource: {lexical_resource} / 9
+  Grammatical Range: {grammatical_range} / 9
+  Pronunciation Clarity: {pronunciation_clarity} / 9
+
+Strengths observed:
+{strengths}
+
+Weaknesses observed:
+{weaknesses}
+
+Part comments:
+  Part 1: {part1_comment}
+  Part 2: {part2_comment}
+  Part 3: {part3_comment}
+
+## Your Task
+Extract 2 to 4 coaching memories from this speaking evaluation.
+
+Focus on patterns like:
+- Vocabulary range and repetition habits
+- Grammar accuracy and range of structures
+- Fluency patterns — hesitation, filler words, natural flow
+- Part 2 monologue structure and development
+- Part 3 analytical language and depth of reasoning
+- Coherence and how ideas are connected
+
+Return ONLY a JSON array with this exact structure:
+
+[
+  {{
+    "memory_type": "weakness",
+    "section": "Speaking",
+    "skill": "Lexical Resource",
+    "memory_text": "Learner relies heavily on basic vocabulary and repeats the same words across responses. Needs to develop a wider range of synonyms and topic-specific language.",
+    "confidence": 0.75
+  }},
+  {{
+    "memory_type": "strength",
+    "section": "Speaking",
+    "skill": "Fluency and Coherence",
+    "memory_text": "Learner speaks fluently with natural pacing and good use of cohesive devices to connect ideas.",
+    "confidence": 0.8
+  }}
+]
+
+Rules:
+- memory_type must be one of: "weakness", "strength"
+- section must always be "Speaking"
+- skill should be one of: "Fluency and Coherence", "Lexical Resource",
+  "Grammatical Range and Accuracy", "Pronunciation and Clarity",
+  "Part 2 Structure", "Part 3 Analytical Depth"
+- confidence should be between 0.5 and 0.9
+- Only extract memories clearly supported by the evaluation
+- Return ONLY the JSON array. No other text.

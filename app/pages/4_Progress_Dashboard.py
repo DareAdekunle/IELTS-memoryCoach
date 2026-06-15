@@ -4,7 +4,11 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from app.services.memory_service import get_progress_data, get_memory_stats
+from app.services.memory_service import (
+    get_progress_data,
+    get_memory_stats,
+    get_speaking_progress_data
+)
 
 st.set_page_config(
     page_title="Progress Dashboard",
@@ -32,33 +36,32 @@ memory_stats = get_memory_stats(learner_id)
 # ─── Top level summary ────────────────────────────────────────────────────────
 st.subheader(f"📊 {learner_name}'s IELTS Overview")
 
-col1, col2, col3, col4 = st.columns(4)
+speaking_data_summary = get_speaking_progress_data(learner_id)
+
+col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
-    st.metric(
-        "Writing Attempts",
-        writing_data["total_attempts"]
-    )
+    st.metric("Writing Attempts", writing_data["total_attempts"])
 with col2:
-    st.metric(
-        "Reading Attempts",
-        reading_data["total_attempts"]
-    )
+    st.metric("Reading Attempts", reading_data["total_attempts"])
 with col3:
     st.metric(
-        "Active Memories",
-        memory_stats["active_count"]
+        "Speaking Attempts",
+        speaking_data_summary["total_attempts"]
     )
 with col4:
-    st.metric(
-        "Skills Mastered",
-        memory_stats["archived_count"]
-    )
+    st.metric("Active Memories", memory_stats["active_count"])
+with col5:
+    st.metric("Skills Mastered", memory_stats["archived_count"])
 
 st.markdown("---")
 
 # ─── Section tabs ─────────────────────────────────────────────────────────────
-writing_tab, reading_tab = st.tabs(["✍️ Writing Progress", "📖 Reading Progress"])
+writing_tab, reading_tab, speaking_tab = st.tabs([
+    "✍️ Writing Progress",
+    "📖 Reading Progress",
+    "🎤 Speaking Progress"
+])
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -351,6 +354,186 @@ with reading_tab:
                         )
                         with cols[i]:
                             st.metric(label, f"{score} / 5")
+
+                if attempt["feedback"]:
+                    st.markdown(f"**Result:** {attempt['feedback']}")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPEAKING TAB
+# ══════════════════════════════════════════════════════════════════════════════
+with speaking_tab:
+
+    speaking_data = get_speaking_progress_data(learner_id)
+
+    if speaking_data["total_attempts"] == 0:
+        st.info(
+            "🎤 No speaking attempts yet. Go to the **Speaking Coach** "
+            "page to complete your first speaking session."
+        )
+    else:
+        criterion_labels = {
+            "fluency_coherence": "Fluency & Coherence",
+            "lexical_resource": "Lexical Resource",
+            "grammatical_range": "Grammatical Range",
+            "pronunciation_clarity": "Pronunciation"
+        }
+
+        # Latest attempt summary
+        latest = speaking_data["latest_scores"]
+        overall_band = latest.get("overall_band", 0)
+
+        st.subheader("🎯 Latest Speaking Scores")
+
+        if overall_band >= 7.0:
+            st.success(
+                f"Latest Overall Band: **{overall_band}** 🎉"
+            )
+        elif overall_band >= 5.5:
+            st.warning(
+                f"Latest Overall Band: **{overall_band}** 👍"
+            )
+        else:
+            st.error(
+                f"Latest Overall Band: **{overall_band}** 📚"
+            )
+
+        # Four criterion scores
+        averages = speaking_data.get("criterion_averages", {})
+        col1, col2, col3, col4 = st.columns(4)
+        cols = [col1, col2, col3, col4]
+        criteria = list(criterion_labels.keys())
+
+        for i, criterion in enumerate(criteria):
+            with cols[i]:
+                score = latest.get(criterion, 0)
+                avg = averages.get(criterion, 0)
+                delta = round(score - avg, 1)
+                delta_str = (
+                    f"{delta:+.1f} vs avg"
+                    if speaking_data["total_attempts"] > 1
+                    else None
+                )
+                st.metric(
+                    label=criterion_labels[criterion],
+                    value=f"{score} / 9",
+                    delta=delta_str
+                )
+
+        # Band score trend chart
+        if speaking_data["total_attempts"] > 1:
+            st.markdown("---")
+            st.subheader("📉 Band Score Trends")
+            st.caption(
+                "How your band scores have changed across attempts"
+            )
+
+            chart_data = {}
+            for criterion, label in criterion_labels.items():
+                trend = speaking_data["band_trends"].get(criterion, [])
+                if trend:
+                    chart_data[label] = trend
+
+            overall_trend = speaking_data["band_trends"].get(
+                "overall_band", []
+            )
+            if overall_trend:
+                chart_data["Overall Band"] = overall_trend
+
+            if chart_data:
+                st.line_chart(chart_data)
+
+        # Criterion breakdown table
+        st.markdown("---")
+        st.subheader("📋 Criterion Breakdown")
+
+        best = speaking_data.get("best_criterion")
+        worst = speaking_data.get("worst_criterion")
+
+        rows = []
+        for criterion, label in criterion_labels.items():
+            avg = averages.get(criterion, 0)
+            trend = speaking_data["band_trends"].get(criterion, [])
+            latest_val = trend[-1] if trend else 0
+            first_val = trend[0] if trend else 0
+
+            if len(trend) > 1:
+                change = latest_val - first_val
+                if change > 0:
+                    trend_icon = "📈 Improving"
+                elif change < 0:
+                    trend_icon = "📉 Declining"
+                else:
+                    trend_icon = "➡️ Stable"
+            else:
+                trend_icon = "⬜ First attempt"
+
+            tag = ""
+            if criterion == best:
+                tag = " 🏆"
+            elif criterion == worst:
+                tag = " ⚠️"
+
+            rows.append({
+                "Criterion": label + tag,
+                "Average Score": f"{avg} / 9",
+                "Latest Score": f"{latest_val} / 9",
+                "Trend": trend_icon
+            })
+
+        st.table(rows)
+
+        # Recommended focus
+        st.markdown("---")
+        st.subheader("🎯 Recommended Speaking Focus")
+
+        if worst:
+            worst_label = criterion_labels.get(worst, worst)
+            worst_avg = averages.get(worst, 0)
+            st.warning(
+                f"Your coach recommends focusing on "
+                f"**{worst_label}**. "
+                f"Your average score is **{worst_avg} / 9** — "
+                f"the lowest across all speaking criteria."
+            )
+
+        # Attempt history
+        st.markdown("---")
+        st.subheader("📜 Speaking Attempt History")
+
+        for attempt in reversed(speaking_data["attempts"]):
+            with st.expander(
+                f"Attempt {attempt['attempt_number']} — "
+                f"{attempt['topic']} — "
+                f"Band {attempt['overall_band']} — "
+                f"{attempt['created_at'][:16].replace('T', ' at ')}"
+            ):
+                col1, col2, col3, col4, col5 = st.columns(5)
+                with col1:
+                    st.metric(
+                        "Overall Band",
+                        attempt["overall_band"]
+                    )
+                with col2:
+                    st.metric(
+                        "Fluency",
+                        f"{attempt['fluency_coherence']}/9"
+                    )
+                with col3:
+                    st.metric(
+                        "Lexical",
+                        f"{attempt['lexical_resource']}/9"
+                    )
+                with col4:
+                    st.metric(
+                        "Grammar",
+                        f"{attempt['grammatical_range']}/9"
+                    )
+                with col5:
+                    st.metric(
+                        "Pronunciation",
+                        f"{attempt['pronunciation_clarity']}/9"
+                    )
 
                 if attempt["feedback"]:
                     st.markdown(f"**Result:** {attempt['feedback']}")

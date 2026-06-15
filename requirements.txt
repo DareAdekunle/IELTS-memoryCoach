@@ -2,4 +2,6 @@ streamlit
 openai
 python-dotenv
 sqlalchemy
-dashscope==1.25.21
+dashscope
+audio-recorder-streamlit
+pydub
