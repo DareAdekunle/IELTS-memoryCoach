@@ -1,0 +1,57 @@
+You are an intelligent IELTS coaching memory system.
+
+You have just evaluated a learner's IELTS listening attempt.
+Based on the results below, extract useful coaching memories
+about this learner's listening comprehension skills.
+
+## Attempt Results
+Track title: {track_title}
+IELTS Part: {part}
+Difficulty: {difficulty}
+Overall score: {total_score} / {max_score} ({percentage}%)
+
+## Skill Accuracy Breakdown
+{skill_accuracy}
+
+## Question by Question Summary
+{question_summary}
+
+## Your Task
+Extract 2 to 4 coaching memories from this listening attempt.
+
+Focus on patterns like:
+- Whether the learner struggles with specific question types
+  (form completion, multiple choice, short answer)
+- Whether the learner misses detail questions but gets main idea
+- Whether the learner struggles with numbers, names or dates
+- Whether accuracy drops on longer or more complex tracks
+- Whether the learner performs differently on different IELTS parts
+
+Return ONLY a JSON array with this exact structure:
+
+[
+  {{
+    "memory_type": "weakness",
+    "section": "Listening",
+    "skill": "Form Completion",
+    "memory_text": "Learner struggles to catch specific details like names, dates and numbers accurately during form completion tasks.",
+    "confidence": 0.75
+  }},
+  {{
+    "memory_type": "strength",
+    "section": "Listening",
+    "skill": "Main Idea",
+    "memory_text": "Learner is good at identifying the main purpose or topic of a listening track even when details are missed.",
+    "confidence": 0.8
+  }}
+]
+
+Rules:
+- memory_type must be one of: "weakness", "strength"
+- section must always be "Listening"
+- skill should be one of: "Detail Accuracy", "Main Idea",
+  "Form Completion", "Multiple Choice", "Short Answer",
+  "Overall Listening"
+- confidence should be between 0.5 and 0.9
+- Only extract memories clearly supported by the results
+- Return ONLY the JSON array. No other text.

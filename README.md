@@ -1,8 +1,7 @@
-Open README.md and replace everything with this:
-markdown# 🎯 IELTS MemoryCoach
+# 🎯 IELTS MemoryCoach
 
 An AI-powered IELTS coaching app with persistent memory.
-Built with Streamlit, Qwen AI, SQLite and Docker.
+Built with Streamlit, Qwen AI (text, ASR and TTS), SQLite and Docker.
 
 ---
 
@@ -11,15 +10,15 @@ Built with Streamlit, Qwen AI, SQLite and Docker.
 IELTS MemoryCoach is a local coaching app that remembers learners
 across sessions. Unlike a simple essay grader or quiz tool, it tracks
 weaknesses, monitors improvement and personalises feedback over time
-using a MemoryAgent system.
+using a MemoryAgent system — across **all four IELTS skills**.
 
 **Core features:**
-- Real IELTS writing prompts with difficulty levels
-- Real IELTS reading passages with 10 questions per passage
-- AI-powered scoring using official IELTS rubrics
-- Persistent memory that extracts coaching insights after each attempt
+- Real IELTS practice content for Writing, Reading, Speaking and Listening
+- AI-powered scoring using official IELTS rubrics and band descriptors
+- Live speech-to-text and text-to-speech for the Speaking and Listening modules
+- Persistent memory that extracts coaching insights after every attempt
 - Memory that strengthens, weakens and archives based on new evidence
-- Progress dashboard showing score trends across both Writing and Reading
+- Progress dashboard showing trends across all four skills
 - Memory dashboard showing everything the coach knows about the learner
 
 ---
@@ -29,8 +28,12 @@ using a MemoryAgent system.
 | Layer | Technology |
 |---|---|
 | Frontend | Streamlit |
-| AI / LLM | Qwen API (via OpenAI-compatible SDK + DashScope SDK) |
+| AI / LLM | Qwen API (OpenAI-compatible SDK for text, DashScope SDK for ASR/TTS) |
+| Speech-to-Text | qwen3-asr-flash |
+| Text-to-Speech | qwen3-tts-flash (Cherry voice) |
 | Database | SQLite via SQLAlchemy |
+| Audio recording | audio-recorder-streamlit |
+| Audio processing | pydub + ffmpeg |
 | Containerisation | Docker + Docker Compose |
 
 ---
@@ -47,9 +50,10 @@ cd IELTS-memorycoach
 ### 2. Add your API key
 
 Create a `.env` file in the root folder:
-DASHSCOPE_API_KEY=your_key_here
 
-Get your free API key from: https://dashscope-intl.aliyuncs.com
+> DASHSCOPE_API_KEY=your_key_here
+
+Get your API key from: https://dashscope-intl.aliyuncs.com
 
 ### 3. Run with Docker
 
@@ -61,11 +65,13 @@ Open your browser at: **http://localhost:8501**
 
 ### 4. First time setup
 
-1. Click **Profile** in the sidebar
-2. Create your learner profile
-3. Go to **Writing Coach** and submit your first essay
-4. Go to **Reading Coach** and complete your first passage
-5. Check **Progress** and **Memory** dashboards after each attempt
+1. Click **Profile** in the sidebar and create your learner profile
+2. Try each coaching module:
+   - **Writing Coach** — submit an essay
+   - **Reading Coach** — complete a passage
+   - **Speaking Coach** — record or upload spoken responses
+   - **Listening Coach** — listen to a generated track and answer
+3. Check **Progress** and **Memory** dashboards after each attempt
 
 ---
 
@@ -75,59 +81,93 @@ Open your browser at: **http://localhost:8501**
 - 7 academic writing prompts across beginner, intermediate and advanced levels
 - Task types: Academic Discussion, Agree or Disagree, Problem and Solution
 - AI evaluation against 5 official IELTS writing criteria:
-  - Thesis Clarity, Organization, Grammar, Vocabulary, Idea Development
-- Scores out of 5 per skill with strengths and weaknesses breakdown
-- Recommended next step after every attempt
+  Thesis Clarity, Organization, Grammar, Vocabulary, Idea Development
+- Scores out of 5 per skill with strengths, weaknesses and next steps
 - Full memory lifecycle: extract → retrieve → update → archive
 
 ### 📖 Reading Coach
 - 3 full reading passages across beginner, intermediate and advanced levels
-- Topics: Society and Culture, Health and Science, Technology and Economy
-- 10 questions per passage in three formats:
-  - Multiple Choice (3 questions) — checked instantly against answer key
-  - True / False / Not Given (4 questions) — checked instantly against answer key
-  - Short Answer (3 questions) — evaluated by Qwen AI for partial credit
-- Skill tracking across: Main Idea, Detail Retrieval, Inference,
-  Vocabulary in Context, True/False/NG accuracy
-- Detailed question review with explanations for every wrong answer
+- 10 questions per passage: Multiple Choice, True/False/Not Given, Short Answer
+- Objective questions checked instantly; short answers evaluated by Qwen
+- Skill tracking: Main Idea, Detail Retrieval, Inference, Vocabulary in Context
+- Full memory lifecycle: extract → retrieve → update → archive
+
+### 🎤 Speaking Coach
+- 15 prompt sets across beginner, intermediate and advanced levels
+- Covers all 3 IELTS Speaking parts in one structured session:
+  Part 1 (personal questions), Part 2 (long turn with cue card),
+  Part 3 (abstract discussion)
+- Learner responds by microphone recording or audio file upload
+- **qwen3-asr-flash** transcribes every spoken response in real time
+- Qwen evaluates all three parts together as a real examiner would,
+  giving conversational feedback referencing actual things the learner said
+- **qwen3-tts-flash** (Cherry voice) reads the examiner feedback aloud
+- Band scores (1-9) across Fluency, Lexical Resource, Grammar, Pronunciation
+- Full memory lifecycle: extract → retrieve → update → archive
+
+### 🎧 Listening Coach
+- 4 listening tracks covering all 4 IELTS Listening parts:
+  Part 1 (social conversation), Part 2 (monologue), Part 3 (academic
+  discussion), Part 4 (lecture)
+- Audio is **generated on demand** — Cherry reads natural scripts aloud
+  via TTS, no pre-recorded audio files needed
+- Mirrors real exam conditions: questions previewed first, audio plays
+  once, learner answers while listening
+- Audio generates in the background while the learner reads questions
+  so no time is wasted
+- Question types: Multiple Choice, Form Completion, Short Answer
+- Fuzzy answer matching handles spelling, number words and phrasing variations
 - Full memory lifecycle: extract → retrieve → update → archive
 
 ---
 
 ## Project structure
+
 IELTS-memorycoach/
 
 ├── app/
 
-│   ├── main.py                        # Home page
+│   ├── main.py                          # Home page
 
 │   ├── pages/
 
-│   │   ├── 1_Profile.py               # Learner profile
+│   │   ├── 1_Profile.py                 # Learner profile
 
-│   │   ├── 2_Writing_Coach.py         # Writing practice
+│   │   ├── 2_Writing_Coach.py           # Writing practice
 
-│   │   ├── 3_Reading_Coach.py         # Reading practice
+│   │   ├── 3_Reading_Coach.py           # Reading practice
 
-│   │   ├── 4_Progress_Dashboard.py    # Score trends
+│   │   ├── 4_Progress_Dashboard.py      # Score trends, all 4 skills
 
-│   │   └── 5_Memory_Dashboard.py      # Memory viewer
+│   │   ├── 5_Memory_Dashboard.py        # Memory viewer
+
+│   │   ├── 6_Speaking_Coach.py          # Speaking practice (ASR + TTS)
+
+│   │   └── 7_Listening_Coach.py         # Listening practice (TTS)
 
 │   ├── services/
 
-│   │   ├── agent_controller.py        # App coordinator
+│   │   ├── qwen_service.py              # Qwen text API wrapper
 
-│   │   ├── qwen_service.py            # Qwen text API wrapper
+│   │   ├── asr_service.py                # Speech-to-text wrapper
 
-│   │   ├── memory_service.py          # Memory lifecycle
+│   │   ├── tts_service.py                # Text-to-speech wrapper
 
-│   │   ├── scoring_service.py         # Writing evaluator
+│   │   ├── memory_service.py             # Memory lifecycle (all sections)
 
-│   │   ├── reading_service.py         # Reading evaluator
+│   │   ├── scoring_service.py            # Writing evaluator
 
-│   │   ├── practice_service.py        # Content loader
+│   │   ├── reading_service.py            # Reading evaluator
 
-│   │   └── profile_service.py         # Learner profiles
+│   │   ├── speaking_service.py           # Speaking prompt loader
+
+│   │   ├── speaking_evaluator_service.py # Speaking examiner logic
+
+│   │   ├── listening_service.py          # Listening audio + answer checking
+
+│   │   ├── practice_service.py           # Writing content loader
+
+│   │   └── profile_service.py            # Learner profiles
 
 │   ├── prompts/
 
@@ -135,35 +175,43 @@ IELTS-memorycoach/
 
 │   │   ├── reading_evaluator_prompt.txt
 
+│   │   ├── speaking_evaluator_prompt.txt
+
 │   │   ├── memory_extractor_prompt.txt
 
 │   │   ├── reading_memory_extractor.txt
 
-│   │   ├── memory_update_prompt.txt
+│   │   ├── speaking_memory_extractor.txt
 
-│   │   └── coach_prompt.txt
+│   │   ├── listening_memory_extractor.txt
+
+│   │   └── memory_update_prompt.txt
 
 │   ├── data/
 
-│   │   ├── writing_prompts.json       # 7 writing prompts
+│   │   ├── writing_prompts.json          # 7 writing prompts
 
-│   │   ├── reading_passages.json      # 3 reading passages
+│   │   ├── reading_passages.json         # 3 reading passages
 
-│   │   └── rubrics.json               # Scoring rubrics
+│   │   ├── speaking_prompts.json         # 15 speaking prompt sets
+
+│   │   ├── listening_tracks.json         # 4 listening tracks
+
+│   │   └── rubrics.json                  # Scoring rubrics
 
 │   ├── db/
 
-│   │   ├── database.py                # SQLite connection
+│   │   ├── database.py                   # SQLite connection
 
-│   │   ├── models.py                  # Table definitions
+│   │   ├── models.py                     # Table definitions
 
-│   │   └── init_db.py                 # Database initialiser
+│   │   └── init_db.py                    # Database initialiser
 
 │   └── utils/
 
-│       ├── json_utils.py              # Safe JSON parser
+│       ├── json_utils.py                 # Safe JSON parser
 
-│       └── scoring_utils.py           # Score helpers
+│       └── scoring_utils.py               # Score helpers
 
 ├── Dockerfile
 
@@ -171,16 +219,17 @@ IELTS-memorycoach/
 
 ├── requirements.txt
 
-└── .env                               # Not committed to Git
+└── .env                                   # Not committed to Git
 
 ---
 
 ## How the memory system works
-Learner completes a Writing or Reading attempt
+
+Learner completes a Writing, Reading, Speaking or Listening attempt
 
 ↓
 
-Qwen evaluates the attempt against rubric criteria
+Qwen evaluates the attempt against rubric/examiner criteria
 
 ↓
 
@@ -210,6 +259,8 @@ Feedback directly references the learner's history
 
 Over time: feedback becomes fully personalised
 
+across all four skills
+
 ### Memory lifecycle example
 Attempt 1: "Learner writes essays without a clear thesis"
 
@@ -224,6 +275,34 @@ Attempt 4: Consistent improvement confirmed
 
 status: archived — skill considered mastered
 
+This exact lifecycle runs independently for Writing, Reading, Speaking
+and Listening — each skill builds its own evolving memory profile.
+
+---
+
+## How Speaking and Listening use voice AI
+SPEAKING                              LISTENING
+
+─────────────────────                 ─────────────────────
+
+Learner records/uploads audio         Learner reads questions
+
+↓                                     ↓
+
+qwen3-asr-flash transcribes           qwen3-tts-flash generates
+
+↓                             audio from a written script
+
+Qwen evaluates transcription                  ↓
+
+as an IELTS examiner                  Cherry reads it aloud
+
+↓                                     ↓
+
+qwen3-tts-flash (Cherry)              Learner listens once and
+
+speaks the feedback aloud             answers while listening
+
 ---
 
 ## Database schema
@@ -231,8 +310,8 @@ status: archived — skill considered mastered
 | Table | Purpose |
 |---|---|
 | learners | Learner profiles and goals |
-| practice_attempts | Every Writing and Reading attempt |
-| learner_memories | Coaching memories per skill |
+| practice_attempts | Every attempt across all 4 sections |
+| learner_memories | Coaching memories per skill per section |
 | mastery_scores | Current skill level per section |
 | session_summaries | Session level summaries |
 
@@ -242,10 +321,11 @@ status: archived — skill considered mastered
 
 - [x] Writing Coach with full memory cycle
 - [x] Reading Coach with full memory cycle
-- [ ] Speaking Coach with ASR and TTS
-- [ ] Listening Coach
+- [x] Speaking Coach with ASR, TTS and full memory cycle
+- [x] Listening Coach with TTS-generated audio and full memory cycle
 - [ ] Chat Coach (free conversation with AI tutor)
 - [ ] Teacher / admin dashboard
+- [ ] More content — additional prompts, passages and tracks
 - [ ] FastAPI backend upgrade
 - [ ] PostgreSQL upgrade
 - [ ] Cloud deployment

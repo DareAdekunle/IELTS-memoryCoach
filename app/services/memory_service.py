@@ -904,3 +904,233 @@ def get_speaking_progress_data(learner_id: str) -> dict:
 
     finally:
         db.close()
+
+def extract_listening_memories(learner_id: str, attempt_result: dict) -> list:
+    """
+    Extracts coaching memories from a completed listening attempt.
+
+    Uses the listening-specific memory extractor prompt and formats
+    listening results correctly for memory extraction.
+    """
+    path = os.path.join(PROMPTS_DIR, "listening_memory_extractor.txt")
+    with open(path, "r") as f:
+        template = f.read()
+
+    # Format skill accuracy for the prompt
+    skill_accuracy_lines = []
+    for skill, accuracy in attempt_result.get("skill_accuracy", {}).items():
+        label = skill.replace("_", " ").title()
+        skill_accuracy_lines.append(f"  {label}: {accuracy}%")
+    skill_accuracy_text = "\n".join(skill_accuracy_lines)
+
+    # Format question summary for the prompt
+    question_lines = []
+    for q in attempt_result.get("question_results", []):
+        status = "Correct" if q["is_correct"] else "Incorrect"
+        question_lines.append(
+            f"  {q['question_id'].upper()} "
+            f"[{q['question_type']}] "
+            f"[{q['skill']}] — {status} "
+            f"({q['score']}/{q['max_score']})"
+        )
+    question_summary_text = "\n".join(question_lines)
+
+    full_prompt = template.format(
+        track_title=attempt_result.get("track_title", "Unknown"),
+        part=attempt_result.get("part", "Unknown"),
+        difficulty=attempt_result.get("difficulty", "Unknown"),
+        total_score=attempt_result.get("total_score", 0),
+        max_score=attempt_result.get("max_score", 0),
+        percentage=attempt_result.get("percentage", 0),
+        skill_accuracy=skill_accuracy_text,
+        question_summary=question_summary_text
+    )
+
+    raw_response = call_qwen_for_json(full_prompt)
+
+    try:
+        memories = safe_parse_json(raw_response)
+    except ValueError:
+        try:
+            memories = extract_json_from_text(raw_response)
+        except ValueError as e:
+            print(f"Could not extract listening memories: {e}")
+            return []
+
+    if not isinstance(memories, list):
+        print("Listening memory extraction did not return a list")
+        return []
+
+    saved_memories = []
+    db = SessionLocal()
+
+    try:
+        for mem in memories:
+            if not all(k in mem for k in [
+                "memory_type", "section", "skill", "memory_text"
+            ]):
+                continue
+
+            memory_id = str(uuid.uuid4())[:12]
+
+            memory = LearnerMemory(
+                memory_id=memory_id,
+                learner_id=learner_id,
+                section=mem["section"],
+                skill=mem["skill"],
+                memory_type=mem["memory_type"],
+                memory_text=mem["memory_text"],
+                confidence=float(mem.get("confidence", 0.6)),
+                evidence_count=1,
+                status="active"
+            )
+
+            db.add(memory)
+            saved_memories.append(mem)
+
+        db.commit()
+        print(
+            f"Saved {len(saved_memories)} listening memories "
+            f"for learner {learner_id}"
+        )
+
+    except Exception as e:
+        db.rollback()
+        print(f"Error saving listening memories: {e}")
+
+    finally:
+        db.close()
+
+    return saved_memories
+
+
+def save_listening_attempt(learner_id: str, attempt_result: dict) -> str:
+    """
+    Saves a completed listening attempt to the practice_attempts table.
+    Returns the attempt_id.
+    """
+    db = SessionLocal()
+
+    try:
+        attempt_id = str(uuid.uuid4())[:12]
+
+        attempt = PracticeAttempt(
+            attempt_id=attempt_id,
+            learner_id=learner_id,
+            section="Listening",
+            task_type=f"Part {attempt_result.get('part', '?')}",
+            prompt=attempt_result.get("track_title", "Listening Practice"),
+            learner_response=(
+                f"Completed Part {attempt_result.get('part', '?')} "
+                f"listening attempt: "
+                f"{attempt_result.get('track_title', 'Unknown')}"
+            ),
+            score_json=json.dumps(attempt_result),
+            feedback=(
+                f"Score: {attempt_result.get('total_score', 0)} / "
+                f"{attempt_result.get('max_score', 0)} "
+                f"({attempt_result.get('percentage', 0)}%)"
+            )
+        )
+
+        db.add(attempt)
+        db.commit()
+
+        print(f"Listening attempt saved: {attempt_id}")
+        return attempt_id
+
+    except Exception as e:
+        db.rollback()
+        raise e
+
+    finally:
+        db.close()
+
+
+def get_listening_progress_data(learner_id: str) -> dict:
+    """
+    Pulls together listening progress data for the dashboard.
+    Returns attempt history and skill accuracy trends over time.
+    """
+    db = SessionLocal()
+
+    try:
+        attempts = db.query(PracticeAttempt).filter(
+            PracticeAttempt.learner_id == learner_id,
+            PracticeAttempt.section == "Listening"
+        ).order_by(PracticeAttempt.created_at.asc()).all()
+
+        if not attempts:
+            return {
+                "total_attempts": 0,
+                "attempts": [],
+                "skill_trends": {},
+                "skill_averages": {},
+                "best_skill": None,
+                "worst_skill": None
+            }
+
+        attempt_data = []
+        for i, a in enumerate(attempts):
+            raw = json.loads(a.score_json) if a.score_json else {}
+            skill_accuracy = raw.get("skill_accuracy", {})
+
+            attempt_data.append({
+                "attempt_number": i + 1,
+                "attempt_id": a.attempt_id,
+                "track_title": raw.get("track_title", "Unknown"),
+                "part": raw.get("part", "?"),
+                "difficulty": raw.get("difficulty", ""),
+                "total_score": raw.get("total_score", 0),
+                "max_score": raw.get("max_score", 0),
+                "percentage": raw.get("percentage", 0),
+                "skill_accuracy": skill_accuracy,
+                "feedback": a.feedback,
+                "created_at": str(a.created_at)
+            })
+
+        # Build skill trends across attempts
+        all_skills = set()
+        for a in attempt_data:
+            all_skills.update(a["skill_accuracy"].keys())
+
+        skill_trends = {}
+        for skill in all_skills:
+            skill_trends[skill] = [
+                a["skill_accuracy"].get(skill, 0)
+                for a in attempt_data
+            ]
+
+        # Calculate averages
+        skill_averages = {}
+        for skill in all_skills:
+            values = [
+                v for v in skill_trends[skill] if v > 0
+            ]
+            skill_averages[skill] = round(
+                sum(values) / len(values), 1
+            ) if values else 0
+
+        # Overall percentage trend
+        skill_trends["overall"] = [
+            a["percentage"] for a in attempt_data
+        ]
+
+        best_skill = max(
+            skill_averages, key=skill_averages.get
+        ) if skill_averages else None
+        worst_skill = min(
+            skill_averages, key=skill_averages.get
+        ) if skill_averages else None
+
+        return {
+            "total_attempts": len(attempt_data),
+            "attempts": attempt_data,
+            "skill_trends": skill_trends,
+            "skill_averages": skill_averages,
+            "best_skill": best_skill,
+            "worst_skill": worst_skill
+        }
+
+    finally:
+        db.close()

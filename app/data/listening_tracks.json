@@ -1,0 +1,347 @@
+[
+  {
+    "track_id": "listening_001",
+    "part": 1,
+    "title": "Registering at a Health Centre",
+    "context": "A new patient is registering at a local health centre. Listen to the conversation between the receptionist and the patient.",
+    "difficulty": "beginner",
+    "speakers": ["Receptionist", "Patient"],
+    "script": "Receptionist: Good morning. Welcome to Greenfield Health Centre. How can I help you today?\nPatient: Hi. I would like to register as a new patient please.\nReceptionist: Of course. I just need to take a few details from you. Could I start with your full name?\nPatient: Yes, it is Michael Thomas Carter.\nReceptionist: Thank you Mr Carter. And could I have your date of birth?\nPatient: It is the fourteenth of March, nineteen eighty-eight.\nReceptionist: Perfect. And what is your current address?\nPatient: I am at forty-two Birchwood Avenue. That is B-I-R-C-H-W-O-O-D Avenue. The postcode is SW6 4PN.\nReceptionist: Thank you. And a contact phone number?\nPatient: My mobile is zero seven seven zero nine eight eight three four five.\nReceptionist: Great. Do you have a preferred doctor? We have Doctor Singh and Doctor Patel currently accepting new patients.\nPatient: I would prefer Doctor Patel if possible.\nReceptionist: No problem at all. And finally, do you have any known allergies we should record?\nPatient: Yes, I am allergic to penicillin.\nReceptionist: I have noted that. Your first appointment with Doctor Patel will be on Wednesday the twenty-second at ten thirty in the morning. Does that work for you?\nPatient: Yes that is perfect. Thank you very much.\nReceptionist: You are welcome Mr Carter. See you on Wednesday.",
+    "question_type_mix": ["form_completion"],
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "form_completion",
+        "question": "Patient's full name:",
+        "answer": "Michael Thomas Carter",
+        "acceptable_answers": ["Michael Thomas Carter", "Michael Carter", "M T Carter"],
+        "explanation": "The patient clearly states his full name as Michael Thomas Carter when asked by the receptionist.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "form_completion",
+        "question": "Date of birth:",
+        "answer": "14th March 1988",
+        "acceptable_answers": ["14th March 1988", "14 March 1988", "14/03/1988", "March 14 1988", "fourteenth of march nineteen eighty eight"],
+        "explanation": "The patient gives his date of birth as the fourteenth of March, nineteen eighty-eight.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "form_completion",
+        "question": "Street address:",
+        "answer": "42 Birchwood Avenue",
+        "acceptable_answers": ["42 Birchwood Avenue", "forty-two Birchwood Avenue", "42 birchwood ave"],
+        "explanation": "The patient gives his address as forty-two Birchwood Avenue and even spells out Birchwood.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "form_completion",
+        "question": "Postcode:",
+        "answer": "SW6 4PN",
+        "acceptable_answers": ["SW6 4PN", "sw6 4pn", "SW64PN"],
+        "explanation": "The patient states the postcode is SW6 4PN immediately after giving his street address.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "form_completion",
+        "question": "Preferred doctor:",
+        "answer": "Doctor Patel",
+        "acceptable_answers": ["Doctor Patel", "Dr Patel", "Patel"],
+        "explanation": "When offered a choice between Doctor Singh and Doctor Patel, the patient chooses Doctor Patel.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "form_completion",
+        "question": "Known allergy:",
+        "answer": "Penicillin",
+        "acceptable_answers": ["penicillin", "Penicillin"],
+        "explanation": "The patient states he is allergic to penicillin when asked about known allergies.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "form_completion",
+        "question": "Appointment date:",
+        "answer": "Wednesday 22nd",
+        "acceptable_answers": ["Wednesday the 22nd", "Wednesday 22nd", "22nd Wednesday", "wednesday twenty-second"],
+        "explanation": "The receptionist confirms the first appointment is on Wednesday the twenty-second.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "form_completion",
+        "question": "Appointment time:",
+        "answer": "10:30",
+        "acceptable_answers": ["10:30", "10.30", "ten thirty", "10:30am", "half past ten"],
+        "explanation": "The receptionist states the appointment is at ten thirty in the morning.",
+        "skill": "detail_accuracy"
+      }
+    ]
+  },
+  {
+    "track_id": "listening_002",
+    "part": 2,
+    "title": "City Walking Tour Introduction",
+    "context": "You will hear a tour guide giving an introduction to a city walking tour. Listen carefully and answer the questions.",
+    "difficulty": "beginner",
+    "speakers": ["Tour Guide"],
+    "script": "Tour Guide: Good morning everyone and welcome to the Old Quarter Walking Tour. My name is Sarah and I will be your guide today. Before we set off I would like to go over a few important details.\n\nToday's tour will last approximately two and a half hours. We will be covering around four kilometres on foot so I recommend comfortable shoes. If at any point you need to stop please just raise your hand and let me know.\n\nWe will be visiting six main sites today. We will start here at the Central Market, then move on to the old Cathedral, followed by the historic Merchant Quarter. After a short break at the riverside gardens we will visit the Maritime Museum and finish at the famous Clock Tower where you will have a wonderful view of the whole city.\n\nA few important things to note. The Maritime Museum has a small entrance fee of four pounds fifty. All other sites are free of charge. Photography is welcome everywhere except inside the Cathedral where it is strictly prohibited.\n\nIf you have any questions during the tour please do not hesitate to ask. There will also be time for shopping and refreshments near the Clock Tower at the end. Our meeting point if anyone gets separated is the fountain in front of the Central Market.\n\nRight, I think we are all set. Let us begin our journey through this wonderful city.",
+    "question_type_mix": ["multiple_choice"],
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "How long will the walking tour last?",
+        "options": {
+          "A": "Two hours",
+          "B": "Two and a half hours",
+          "C": "Three hours",
+          "D": "Four hours"
+        },
+        "answer": "B",
+        "explanation": "The guide states the tour will last approximately two and a half hours.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "How far will the group walk in total?",
+        "options": {
+          "A": "Two kilometres",
+          "B": "Three kilometres",
+          "C": "Four kilometres",
+          "D": "Six kilometres"
+        },
+        "answer": "C",
+        "explanation": "The guide says the tour covers around four kilometres on foot.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "Which site has an entrance fee?",
+        "options": {
+          "A": "The Cathedral",
+          "B": "The Merchant Quarter",
+          "C": "The Maritime Museum",
+          "D": "The Clock Tower"
+        },
+        "answer": "C",
+        "explanation": "The guide states the Maritime Museum has a small entrance fee of four pounds fifty. All other sites are free.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "multiple_choice",
+        "question": "Where is photography NOT allowed?",
+        "options": {
+          "A": "The Clock Tower",
+          "B": "The Maritime Museum",
+          "C": "The riverside gardens",
+          "D": "Inside the Cathedral"
+        },
+        "answer": "D",
+        "explanation": "The guide states photography is welcome everywhere except inside the Cathedral where it is strictly prohibited.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "multiple_choice",
+        "question": "Where should group members go if they get separated?",
+        "options": {
+          "A": "The Clock Tower",
+          "B": "The Maritime Museum entrance",
+          "C": "The fountain in front of the Central Market",
+          "D": "The riverside gardens"
+        },
+        "answer": "C",
+        "explanation": "The guide says the meeting point if anyone gets separated is the fountain in front of the Central Market.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "multiple_choice",
+        "question": "What will be available near the Clock Tower at the end of the tour?",
+        "options": {
+          "A": "A museum visit",
+          "B": "Shopping and refreshments",
+          "C": "A photography session",
+          "D": "A bus back to the hotel"
+        },
+        "answer": "B",
+        "explanation": "The guide mentions there will be time for shopping and refreshments near the Clock Tower at the end.",
+        "skill": "main_idea"
+      }
+    ]
+  },
+  {
+    "track_id": "listening_003",
+    "part": 3,
+    "title": "Two Students Discussing a Research Project",
+    "context": "You will hear two university students, James and Priya, discussing their group research project. Listen and answer the questions.",
+    "difficulty": "intermediate",
+    "speakers": ["James", "Priya"],
+    "script": "James: Hi Priya. Have you had a chance to look at the project brief yet?\nPriya: Yes I read through it last night. I think the topic is really interesting but I am a bit worried about the timeline. We only have three weeks.\nJames: I know. I was thinking we should divide the work up straight away so we are not wasting time. There are four main sections — the literature review, the methodology, the data collection, and the analysis.\nPriya: That makes sense. I am quite comfortable with the literature review since I did something similar last semester. I could take that on.\nJames: Perfect. I was actually hoping you would say that because I am more comfortable with the data side. I could handle the methodology and data collection.\nPriya: Great. That leaves the analysis. Should we do that together?\nJames: I think that would be best actually. The analysis is the part that really needs two people looking at it to make sure we are interpreting things correctly.\nPriya: Agreed. Now the other thing I wanted to discuss is our sources. The brief says we need at least fifteen academic sources.\nJames: Fifteen? I thought it was ten.\nPriya: No, I checked twice. It definitely says fifteen. And they need to be from peer-reviewed journals published in the last ten years.\nJames: Right, okay. That is going to take some time. Do you have access to the university library database?\nPriya: Yes I renewed my access last week. I can share my login details with you if you need them.\nJames: That would be really helpful actually. Oh and one more thing — when is the presentation?\nPriya: The presentation is on the seventeenth. But the written report is due three days before that, so on the fourteenth.\nJames: Right. So we really need to have the analysis done by the twelfth at the latest to give ourselves time to write up.\nPriya: Exactly. Shall we meet again on Friday to check on progress?\nJames: Friday works for me. Let us say two o'clock in the library study room.",
+    "question_type_mix": ["multiple_choice", "short_answer"],
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "Why is Priya worried about the project?",
+        "options": {
+          "A": "She does not understand the topic",
+          "B": "The timeline is very short",
+          "C": "There are too many group members",
+          "D": "She has not read the brief"
+        },
+        "answer": "B",
+        "explanation": "Priya says she is a bit worried about the timeline because they only have three weeks.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "Which section will Priya be responsible for?",
+        "options": {
+          "A": "The methodology",
+          "B": "The data collection",
+          "C": "The analysis",
+          "D": "The literature review"
+        },
+        "answer": "D",
+        "explanation": "Priya says she is comfortable with the literature review since she did something similar last semester and offers to take it on.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "How many academic sources are required for the project?",
+        "options": {
+          "A": "Ten",
+          "B": "Twelve",
+          "C": "Fifteen",
+          "D": "Twenty"
+        },
+        "answer": "C",
+        "explanation": "Priya confirms the brief requires fifteen academic sources. James initially thought it was ten but Priya says she checked twice and it is definitely fifteen.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "short_answer",
+        "question": "When is the written report due?",
+        "answer": "The fourteenth",
+        "acceptable_answers": ["the fourteenth", "14th", "on the 14th", "three days before the presentation"],
+        "explanation": "Priya states the written report is due on the fourteenth, which is three days before the presentation on the seventeenth.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "short_answer",
+        "question": "Where will James and Priya meet on Friday?",
+        "answer": "The library study room",
+        "acceptable_answers": ["the library study room", "library study room", "study room in the library", "library"],
+        "explanation": "James and Priya agree to meet at two o'clock in the library study room on Friday.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "short_answer",
+        "question": "What requirement must all academic sources meet?",
+        "answer": "They must be from peer-reviewed journals published in the last ten years.",
+        "acceptable_answers": ["peer reviewed journals in the last ten years", "peer-reviewed and published in last 10 years", "from peer reviewed journals last ten years"],
+        "explanation": "Priya specifies that sources need to be from peer-reviewed journals published in the last ten years.",
+        "skill": "detail_accuracy"
+      }
+    ]
+  },
+  {
+    "track_id": "listening_004",
+    "part": 4,
+    "title": "Lecture on Urban Green Spaces",
+    "context": "You will hear part of a university lecture on the importance of urban green spaces. Listen carefully and answer the questions.",
+    "difficulty": "advanced",
+    "speakers": ["Lecturer"],
+    "script": "Lecturer: Good afternoon everyone. Today I want to talk about something that is becoming increasingly important in urban planning — the role of green spaces in modern cities.\n\nNow when we talk about urban green spaces we are referring to parks, gardens, tree-lined streets, community allotments and even green rooftops. Research consistently shows that access to these spaces has profound effects on both physical and mental wellbeing.\n\nA landmark study conducted in Copenhagen in two thousand and fifteen tracked over three thousand residents for a period of five years. The study found that people who lived within three hundred metres of a green space had a twenty-three percent lower risk of developing stress-related conditions. That is a remarkable finding.\n\nBut the benefits go beyond individual health. Green spaces play a critical role in what urban planners call the urban heat island effect. Cities tend to be significantly warmer than surrounding rural areas due to the concentration of buildings, roads and human activity. Trees and vegetation help counteract this by providing shade and releasing moisture through a process called evapotranspiration. Cities with high levels of green coverage can be up to four degrees cooler on average than those without.\n\nThere are also significant biodiversity benefits. Urban green spaces act as wildlife corridors, allowing species to move between larger natural habitats. A study of London's parks found over two thousand species of plants, insects and birds living within the city boundaries.\n\nHowever, there is a growing concern among researchers about what is called green gentrification. This refers to the phenomenon where improving green spaces in a neighbourhood drives up property values and ultimately pushes out lower income residents who can no longer afford to live there. This has been documented in cities including New York, Barcelona and Seoul.\n\nSo the challenge for urban planners is not simply to create more green spaces but to ensure that the benefits of those spaces are equitably distributed across all communities regardless of income level. This requires careful policy design, community consultation and in some cases rent control measures to prevent displacement.\n\nIn our next session we will look at specific case studies of cities that have managed this balance successfully. For now I would like you to consider the question of who urban planning ultimately serves and whether the current approach in your own city reflects the needs of all its residents.",
+    "question_type_mix": ["short_answer", "form_completion"],
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "short_answer",
+        "question": "Name TWO types of urban green spaces mentioned by the lecturer.",
+        "answer": "Any two of: parks, gardens, tree-lined streets, community allotments, green rooftops.",
+        "acceptable_answers": ["parks and gardens", "parks and tree-lined streets", "parks and allotments", "gardens and rooftops", "allotments and parks"],
+        "explanation": "The lecturer lists parks, gardens, tree-lined streets, community allotments and green rooftops as examples of urban green spaces.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "short_answer",
+        "question": "How long did the Copenhagen study last?",
+        "answer": "Five years",
+        "acceptable_answers": ["five years", "5 years"],
+        "explanation": "The lecturer states the Copenhagen study tracked over three thousand residents for a period of five years.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "short_answer",
+        "question": "What percentage lower risk of stress-related conditions was found in the Copenhagen study?",
+        "answer": "23 percent",
+        "acceptable_answers": ["23 percent", "23%", "twenty-three percent"],
+        "explanation": "The study found people living within three hundred metres of a green space had a twenty-three percent lower risk of stress-related conditions.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "form_completion",
+        "question": "Process by which trees release moisture: ___",
+        "answer": "Evapotranspiration",
+        "acceptable_answers": ["evapotranspiration", "evapotranspiration process"],
+        "explanation": "The lecturer explains that trees release moisture through a process called evapotranspiration.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "form_completion",
+        "question": "Cities with high green coverage can be up to ___ degrees cooler.",
+        "answer": "Four",
+        "acceptable_answers": ["four", "4"],
+        "explanation": "The lecturer states cities with high levels of green coverage can be up to four degrees cooler on average.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "form_completion",
+        "question": "Term for green spaces driving up property values and displacing residents: ___",
+        "answer": "Green gentrification",
+        "acceptable_answers": ["green gentrification", "green gentrification phenomenon"],
+        "explanation": "The lecturer introduces the term green gentrification to describe the phenomenon where improving green spaces drives up property values and pushes out lower income residents.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "short_answer",
+        "question": "Name ONE city where green gentrification has been documented.",
+        "answer": "Any one of: New York, Barcelona, Seoul.",
+        "acceptable_answers": ["new york", "barcelona", "seoul"],
+        "explanation": "The lecturer mentions New York, Barcelona and Seoul as cities where green gentrification has been documented.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "According to the lecturer, what is needed to prevent displacement of residents?",
+        "answer": "Careful policy design, community consultation and rent control measures.",
+        "acceptable_answers": ["policy design and community consultation", "rent control", "careful policy design", "community consultation and rent control"],
+        "explanation": "The lecturer states that preventing displacement requires careful policy design, community consultation and in some cases rent control measures.",
+        "skill": "main_idea"
+      }
+    ]
+  }
+]

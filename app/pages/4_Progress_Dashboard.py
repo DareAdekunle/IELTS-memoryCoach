@@ -7,7 +7,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from app.services.memory_service import (
     get_progress_data,
     get_memory_stats,
-    get_speaking_progress_data
+    get_speaking_progress_data,
+    get_listening_progress_data
 )
 
 st.set_page_config(
@@ -37,8 +38,9 @@ memory_stats = get_memory_stats(learner_id)
 st.subheader(f"📊 {learner_name}'s IELTS Overview")
 
 speaking_data_summary = get_speaking_progress_data(learner_id)
+listening_data_summary = get_listening_progress_data(learner_id)
 
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 with col1:
     st.metric("Writing Attempts", writing_data["total_attempts"])
@@ -50,17 +52,23 @@ with col3:
         speaking_data_summary["total_attempts"]
     )
 with col4:
-    st.metric("Active Memories", memory_stats["active_count"])
+    st.metric(
+        "Listening Attempts",
+        listening_data_summary["total_attempts"]
+    )
 with col5:
+    st.metric("Active Memories", memory_stats["active_count"])
+with col6:
     st.metric("Skills Mastered", memory_stats["archived_count"])
 
 st.markdown("---")
 
 # ─── Section tabs ─────────────────────────────────────────────────────────────
-writing_tab, reading_tab, speaking_tab = st.tabs([
+writing_tab, reading_tab, speaking_tab, listening_tab = st.tabs([
     "✍️ Writing Progress",
     "📖 Reading Progress",
-    "🎤 Speaking Progress"
+    "🎤 Speaking Progress",
+    "🎧 Listening Progress"
 ])
 
 
@@ -537,3 +545,182 @@ with speaking_tab:
 
                 if attempt["feedback"]:
                     st.markdown(f"**Result:** {attempt['feedback']}")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# LISTENING TAB
+# ══════════════════════════════════════════════════════════════════════════════
+with listening_tab:
+
+    listening_data = get_listening_progress_data(learner_id)
+
+    if listening_data["total_attempts"] == 0:
+        st.info(
+            "🎧 No listening attempts yet. Go to the "
+            "**Listening Coach** page to complete your "
+            "first listening track."
+        )
+    else:
+        skill_labels = {
+            "detail_accuracy": "Detail Accuracy",
+            "main_idea": "Main Idea",
+            "form_completion": "Form Completion"
+        }
+
+        # Latest attempt summary
+        latest = listening_data["attempts"][-1]
+        pct = latest.get("percentage", 0)
+        total = latest.get("total_score", 0)
+        maximum = latest.get("max_score", 0)
+
+        st.subheader("🎯 Latest Listening Score")
+
+        if pct >= 80:
+            st.success(
+                f"Latest attempt: **{total} / {maximum}** ({pct}%) 🎉"
+            )
+        elif pct >= 60:
+            st.warning(
+                f"Latest attempt: **{total} / {maximum}** ({pct}%) 👍"
+            )
+        else:
+            st.error(
+                f"Latest attempt: **{total} / {maximum}** ({pct}%) 📚"
+            )
+
+        # Skill accuracy scores
+        averages = listening_data.get("skill_averages", {})
+        if averages:
+            cols = st.columns(len(averages))
+            for i, (skill, avg) in enumerate(averages.items()):
+                with cols[i]:
+                    label = skill_labels.get(
+                        skill,
+                        skill.replace("_", " ").title()
+                    )
+                    latest_acc = latest.get(
+                        "skill_accuracy", {}
+                    ).get(skill, 0)
+                    delta = round(latest_acc - avg, 1)
+                    delta_str = (
+                        f"{delta:+.1f}% vs avg"
+                        if listening_data["total_attempts"] > 1
+                        else None
+                    )
+                    st.metric(
+                        label=label,
+                        value=f"{latest_acc}%",
+                        delta=delta_str
+                    )
+
+        # Score trend chart
+        if listening_data["total_attempts"] > 1:
+            st.markdown("---")
+            st.subheader("📉 Listening Score Trends")
+            st.caption(
+                "Overall percentage score across attempts"
+            )
+
+            chart_data = {}
+            overall_trend = listening_data["skill_trends"].get(
+                "overall", []
+            )
+            if overall_trend:
+                chart_data["Overall %"] = overall_trend
+
+            for skill, label in skill_labels.items():
+                trend = listening_data["skill_trends"].get(skill, [])
+                if trend:
+                    chart_data[label] = trend
+
+            if chart_data:
+                st.line_chart(chart_data)
+
+        # Skill breakdown table
+        st.markdown("---")
+        st.subheader("📋 Skill Breakdown")
+
+        best_skill = listening_data.get("best_skill")
+        worst_skill = listening_data.get("worst_skill")
+
+        rows = []
+        for skill, avg in averages.items():
+            label = skill_labels.get(
+                skill, skill.replace("_", " ").title()
+            )
+            trend = listening_data["skill_trends"].get(skill, [])
+            latest_val = trend[-1] if trend else 0
+            first_val = trend[0] if trend else 0
+
+            if len(trend) > 1:
+                change = latest_val - first_val
+                if change > 0:
+                    trend_icon = "📈 Improving"
+                elif change < 0:
+                    trend_icon = "📉 Declining"
+                else:
+                    trend_icon = "➡️ Stable"
+            else:
+                trend_icon = "⬜ First attempt"
+
+            tag = ""
+            if skill == best_skill:
+                tag = " 🏆"
+            elif skill == worst_skill:
+                tag = " ⚠️"
+
+            rows.append({
+                "Skill": label + tag,
+                "Average Score": f"{avg}%",
+                "Latest Score": f"{latest_val}%",
+                "Trend": trend_icon
+            })
+
+        if rows:
+            st.table(rows)
+
+        # Recommended focus
+        st.markdown("---")
+        st.subheader("🎯 Recommended Listening Focus")
+
+        if worst_skill:
+            worst_label = skill_labels.get(
+                worst_skill,
+                worst_skill.replace("_", " ").title()
+            )
+            worst_avg = averages.get(worst_skill, 0)
+            st.warning(
+                f"Your coach recommends focusing on "
+                f"**{worst_label}** in your listening practice. "
+                f"Your average accuracy is **{worst_avg}%**."
+            )
+
+        # Attempt history
+        st.markdown("---")
+        st.subheader("📜 Listening Attempt History")
+
+        for attempt in reversed(listening_data["attempts"]):
+            with st.expander(
+                f"Attempt {attempt['attempt_number']} — "
+                f"Part {attempt['part']}: {attempt['track_title']} — "
+                f"{attempt['total_score']}/{attempt['max_score']} "
+                f"({attempt['percentage']}%) — "
+                f"{attempt['created_at'][:16].replace('T', ' at ')}"
+            ):
+                skill_acc = attempt.get("skill_accuracy", {})
+                if skill_acc:
+                    cols = st.columns(len(skill_acc))
+                    for i, (skill, acc) in enumerate(
+                        skill_acc.items()
+                    ):
+                        label = skill_labels.get(
+                            skill,
+                            skill.replace("_", " ").title()
+                        )
+                        with cols[i]:
+                            st.metric(label, f"{acc}%")
+
+                if attempt["feedback"]:
+                    st.markdown(
+                        f"**Result:** {attempt['feedback']}"
+                    )

@@ -1,0 +1,191 @@
+{
+  "section": "Writing",
+  "task_type": "Task 2",
+  "source_note": "Rank definitions are paraphrased from the official IELTS Writing Task 2 Band Descriptors (Public Version, updated May 2023, British Council / IDP / Cambridge). Each skill below maps to one of the 4 official criteria: Task Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy. Ranks are independent of IELTS bands 1-9 — they are a 5-step coaching ladder (1=beginner, 5=advanced) used to track this learner's mastery of one specific sub-skill over time, not a test score.",
+  "categories": [
+    {
+      "category_id": "task_response",
+      "category_name": "Task Response",
+      "official_criterion": "Task Response",
+      "skills": [
+        {
+          "skill_id": "tr_full_coverage",
+          "skill_name": "Full Task Coverage",
+          "description": "Addressing every part of the prompt, not just the easiest part to write about.",
+          "ranks": {
+            "1": "Tackles the prompt only minimally or tangentially; large parts of the question are not addressed at all.",
+            "2": "Addresses the main parts of the prompt but treats some parts far more fully than others; at least one part is noticeably underdeveloped.",
+            "3": "Addresses the main parts of the prompt, though coverage is uneven — some required elements are present but thin.",
+            "4": "Addresses all parts of the prompt appropriately and sufficiently, with only occasional omissions or lapses.",
+            "5": "Addresses all parts of the prompt fully and explores them in depth; every element the prompt asks for is clearly and proportionately covered."
+          }
+        },
+        {
+          "skill_id": "tr_position_clarity",
+          "skill_name": "Clarity of Position",
+          "description": "Presenting one clear, identifiable stance and maintaining it throughout the essay.",
+          "ranks": {
+            "1": "No relevant position can be identified, or the reader cannot tell what the writer actually believes.",
+            "2": "A position is discernible but the reader has to search for it; it may be inconsistent or contradicted elsewhere in the essay.",
+            "3": "A position is presented and is directly relevant to the prompt, though it may be unclear, unjustified, or stated only once without reinforcement.",
+            "4": "A clear and well-developed position is presented and maintained, answering the question directly.",
+            "5": "A clear and fully developed position is presented which directly and confidently answers the question throughout the entire response."
+          }
+        },
+        {
+          "skill_id": "tr_idea_development",
+          "skill_name": "Idea Development and Support",
+          "description": "Extending ideas with explanation, reasoning, and support rather than just stating them.",
+          "ranks": {
+            "1": "Ideas, where identifiable, lack any development or support; points are simply listed.",
+            "2": "Main ideas are difficult to identify and what is identifiable may be repetitive or unsupported.",
+            "3": "Main ideas are present but are limited and not sufficiently developed; some supporting detail is missing or only loosely relevant.",
+            "4": "Ideas are relevant, extended and supported, though there may be a tendency to over-generalise or lack precision in places.",
+            "5": "Ideas are relevant, fully extended and well supported throughout; any lapses in development are extremely rare."
+          }
+        },
+        {
+          "skill_id": "tr_conclusion_synthesis",
+          "skill_name": "Conclusion Synthesis",
+          "description": "A conclusion that genuinely ties back to and reflects every dimension raised in the prompt, not just a generic restatement.",
+          "ranks": {
+            "1": "No real conclusion is present, or it is entirely disconnected from the body of the essay.",
+            "2": "A conclusion is present but restates only the easiest or most general part of the argument, ignoring other dimensions of the prompt.",
+            "3": "The conclusion summarises the writer's overall position but omits explicit reference to one or more specific elements the prompt asked about.",
+            "4": "The conclusion effectively synthesises the main ideas and reflects most dimensions of the prompt, with only minor omissions.",
+            "5": "The conclusion fully synthesises the response, explicitly reflecting every dimension of the prompt and reinforcing the position with no gaps in coverage."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "coherence_cohesion",
+      "category_name": "Coherence and Cohesion",
+      "official_criterion": "Coherence & Cohesion",
+      "skills": [
+        {
+          "skill_id": "cc_logical_progression",
+          "skill_name": "Logical Progression",
+          "description": "Ideas building on each other in a clear order so the response can be followed without effort.",
+          "ranks": {
+            "1": "There is no apparent logical organisation; ideas are discernible but difficult to relate to one another.",
+            "2": "Information and ideas are evident but not arranged coherently; there is no clear progression within the response.",
+            "3": "Organisation is evident but is not wholly logical; there is some underlying coherence but progression is inconsistent.",
+            "4": "Information and ideas are logically organised with a clear progression throughout; a few lapses may occur but are minor.",
+            "5": "The message can be followed effortlessly; ideas progress with skilfully managed logical sequencing throughout."
+          }
+        },
+        {
+          "skill_id": "cc_paragraphing",
+          "skill_name": "Paragraphing",
+          "description": "Using paragraphs to organise distinct ideas, with one central topic per paragraph.",
+          "ranks": {
+            "1": "There is no paragraphing, or paragraphing has no clear main topic.",
+            "2": "Paragraphing may be missing or inadequate; where present, the central topic is often unclear.",
+            "3": "Paragraphing is attempted but may not always be logical, or the central topic of a paragraph is not always clear.",
+            "4": "Paragraphing is used sufficiently and appropriately to support overall coherence.",
+            "5": "Paragraphing is skilfully managed, with each paragraph clearly and purposefully organised around one central idea."
+          }
+        },
+        {
+          "skill_id": "cc_cohesive_devices",
+          "skill_name": "Cohesive Devices",
+          "description": "Using linking words, reference, and substitution accurately to connect ideas without overusing mechanical connectors.",
+          "ranks": {
+            "1": "There is minimal or no use of cohesive devices; relationships between ideas are unclear or unmarked.",
+            "2": "Basic cohesive devices are used but may be inaccurate, repetitive, or fail to indicate a logical relationship between ideas.",
+            "3": "Cohesive devices are used to some effect, but cohesion within or between sentences may be faulty or mechanical due to misuse or overuse.",
+            "4": "A range of cohesive devices including reference and substitution is used flexibly, though some inaccuracies or over/under-use may occur.",
+            "5": "Cohesion is managed so well that it rarely attracts attention; reference and substitution are used naturally and precisely throughout."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "lexical_resource",
+      "category_name": "Lexical Resource",
+      "official_criterion": "Lexical Resource",
+      "skills": [
+        {
+          "skill_id": "lr_range",
+          "skill_name": "Vocabulary Range",
+          "description": "Using a sufficiently wide variety of vocabulary appropriate to the topic, rather than relying on the same words repeatedly.",
+          "ranks": {
+            "1": "Vocabulary is extremely limited, essentially relying on memorised phrases or a few recognisable words.",
+            "2": "Vocabulary is basic and used repetitively; the resource is limited and inadequate for the task.",
+            "3": "Vocabulary is minimally adequate for the task but the range does not permit much variation in expression.",
+            "4": "A sufficient range of vocabulary is used to allow some flexibility and precision, with some ability to use less common items.",
+            "5": "A wide range of vocabulary is used accurately and appropriately with natural and sophisticated control."
+          }
+        },
+        {
+          "skill_id": "lr_precision",
+          "skill_name": "Word Choice Precision",
+          "description": "Selecting the most accurate word for the intended meaning rather than an approximate or vague alternative.",
+          "ranks": {
+            "1": "Control of word choice is very limited and errors predominate, severely impeding meaning.",
+            "2": "Inappropriate word choice may impede meaning; lexical chunks may be used inaccurately or inappropriately.",
+            "3": "Meaning is generally clear despite a restricted range or lack of precision in word choice; frequent simplification is apparent.",
+            "4": "Word choice is generally precise with only occasional inaccuracies in collocation or appropriacy.",
+            "5": "Word choice is precise and natural throughout, with skilful use of uncommon or idiomatic items where appropriate."
+          }
+        },
+        {
+          "skill_id": "lr_spelling_word_formation",
+          "skill_name": "Spelling and Word Formation",
+          "description": "Spelling words correctly and forming words (e.g. noun/verb/adjective forms) accurately.",
+          "ranks": {
+            "1": "There is no apparent control of word formation or spelling.",
+            "2": "Errors in spelling and word formation are noticeable and may impede meaning.",
+            "3": "There are some errors in spelling or word formation, but these do not impede communication.",
+            "4": "Occasional errors in spelling or word formation may occur but have minimal impact on communication.",
+            "5": "Minor errors in spelling and word formation are extremely rare and have no real impact on communication."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "grammatical_range_accuracy",
+      "category_name": "Grammatical Range and Accuracy",
+      "official_criterion": "Grammatical Range & Accuracy",
+      "skills": [
+        {
+          "skill_id": "gra_sentence_variety",
+          "skill_name": "Sentence Variety",
+          "description": "Using a mix of simple and complex sentence structures rather than relying on one repeated pattern.",
+          "ranks": {
+            "1": "There is little or no evidence of varied sentence forms; simple sentences predominate almost entirely.",
+            "2": "A very limited range of structures is used; subordinate clauses are rare and simple sentences predominate.",
+            "3": "A mix of simple and complex sentence forms is used but flexibility is limited; complex sentences are attempted but tend to be faulty.",
+            "4": "A variety of complex structures is used with some flexibility and accuracy.",
+            "5": "A wide range of structures is used with full flexibility and control, appropriate to the meaning intended."
+          }
+        },
+        {
+          "skill_id": "gra_accuracy",
+          "skill_name": "Grammatical Accuracy",
+          "description": "Producing grammatically correct sentences consistently, including subject-verb agreement, tense, and articles.",
+          "ranks": {
+            "1": "Errors in grammar predominate and prevent most meaning from coming through.",
+            "2": "Grammatical errors are frequent and may impede meaning.",
+            "3": "Errors in grammar occur and may be frequent, sometimes causing the reader some difficulty.",
+            "4": "Grammar is generally well controlled; error-free sentences are frequent, though a few errors may persist.",
+            "5": "A wide range of structures is used with full accuracy; minor errors occur only as rare slips with no impact on communication."
+          }
+        },
+        {
+          "skill_id": "gra_punctuation",
+          "skill_name": "Punctuation Control",
+          "description": "Using punctuation (commas, full stops, apostrophes) correctly to support clear sentence boundaries and meaning.",
+          "ranks": {
+            "1": "Punctuation is largely absent or used in a way that prevents meaning from being understood.",
+            "2": "Punctuation is often faulty or inadequate.",
+            "3": "Punctuation may be faulty and occasionally affects clarity.",
+            "4": "Punctuation is generally well managed, with only occasional, non-systematic errors.",
+            "5": "Punctuation is used appropriately and accurately throughout, attracting no negative attention."
+          }
+        }
+      ]
+    }
+  ]
+}
