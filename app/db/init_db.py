@@ -10,7 +10,8 @@ from app.db.models import (
     PracticeAttempt,
     LearnerMemory,
     MasteryScore,
-    SessionSummary
+    SessionSummary,
+    LearnerSkillRank
 )
 
 

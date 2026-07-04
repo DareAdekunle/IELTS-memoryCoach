@@ -1134,3 +1134,458 @@ def get_listening_progress_data(learner_id: str) -> dict:
 
     finally:
         db.close()
+
+# ─── SKILL RANKING SYSTEM ─────────────────────────────────────────────────────
+
+from app.db.models import LearnerSkillRank
+from app.services.skill_taxonomy_service import (
+    get_all_skill_ids,
+    get_skill_by_id,
+    get_rank_name,
+    get_skills_flat
+)
+
+RANK_UP_THRESHOLD = 3  # consecutive clean attempts needed to rank up
+MAX_RANK = 5
+MIN_RANK = 1
+
+
+def get_skill_rank(learner_id: str, section: str, skill_id: str) -> dict:
+    """
+    Returns the learner's current rank record for one skill.
+    If no record exists yet, returns a default starting state
+    (rank 1, no evidence) WITHOUT creating a database row —
+    the row is only created on the first actual classification.
+    """
+    db = SessionLocal()
+
+    try:
+        record = db.query(LearnerSkillRank).filter(
+            LearnerSkillRank.learner_id == learner_id,
+            LearnerSkillRank.section == section,
+            LearnerSkillRank.skill_id == skill_id
+        ).first()
+
+        if record is None:
+            return {
+                "skill_id": skill_id,
+                "current_rank": 1,
+                "clean_streak": 0,
+                "total_evidence": 0,
+                "last_classification": None,
+                "exists": False
+            }
+
+        return {
+            "skill_id": record.skill_id,
+            "current_rank": record.current_rank,
+            "clean_streak": record.clean_streak,
+            "total_evidence": record.total_evidence,
+            "last_classification": record.last_classification,
+            "exists": True
+        }
+
+    finally:
+        db.close()
+
+
+def get_all_skill_ranks(learner_id: str, section: str = "Writing") -> list:
+    """
+    Returns the learner's rank record for EVERY skill in the
+    taxonomy, including skills that have never been assessed yet
+    (which default to rank 1 with no evidence).
+
+    This is what powers "find the weakest skill" and the skill
+    dashboard — it always returns the full taxonomy, not just
+    skills with existing database rows.
+    """
+    all_skills = get_skills_flat(section)
+    results = []
+
+    for skill in all_skills:
+        rank_data = get_skill_rank(
+            learner_id, section, skill["skill_id"]
+        )
+        results.append({
+            **rank_data,
+            "skill_name": skill["skill_name"],
+            "category_name": skill["category_name"],
+            "rank_name": get_rank_name(rank_data["current_rank"])
+        })
+
+    return results
+
+
+def apply_skill_classification(
+    learner_id: str,
+    section: str,
+    skill_id: str,
+    classification: str
+) -> dict:
+    """
+    Applies ONE skill classification from a single attempt to the
+    learner's rank record. This is the rule engine — deterministic,
+    no AI judgement happens here, only counting.
+
+    classification must be one of:
+      "demonstrated_strength"  -> clean_streak += 1
+      "demonstrated_weakness"  -> clean_streak = 0
+      "not_applicable"         -> no change at all, not even evidence count
+
+    Rank increases by 1 when clean_streak reaches RANK_UP_THRESHOLD,
+    then clean_streak resets to 0. Rank never decreases automatically.
+    Rank is capped at MAX_RANK.
+
+    Returns a dict describing what happened, including whether a
+    rank-up occurred — used by the page to show a celebration message.
+    """
+    if classification not in (
+        "demonstrated_strength",
+        "demonstrated_weakness",
+        "not_applicable"
+    ):
+        raise ValueError(f"Invalid classification: {classification}")
+
+    # not_applicable means this skill was not relevant to this prompt
+    # We do not touch the record at all -- no evidence, no streak change
+    if classification == "not_applicable":
+        return {
+            "skill_id": skill_id,
+            "changed": False,
+            "ranked_up": False,
+            "current_rank": None,
+            "clean_streak": None
+        }
+
+    db = SessionLocal()
+
+    try:
+        record = db.query(LearnerSkillRank).filter(
+            LearnerSkillRank.learner_id == learner_id,
+            LearnerSkillRank.section == section,
+            LearnerSkillRank.skill_id == skill_id
+        ).first()
+
+        if record is None:
+            # First time this skill has ever been assessed for this learner
+            record = LearnerSkillRank(
+                rank_id=str(uuid.uuid4())[:12],
+                learner_id=learner_id,
+                section=section,
+                skill_id=skill_id,
+                current_rank=1,
+                clean_streak=0,
+                total_evidence=0,
+                last_classification=None
+            )
+            db.add(record)
+
+        ranked_up = False
+
+        record.total_evidence += 1
+        record.last_classification = classification
+
+        if classification == "demonstrated_strength":
+            record.clean_streak += 1
+
+            if (record.clean_streak >= RANK_UP_THRESHOLD
+                    and record.current_rank < MAX_RANK):
+                record.current_rank += 1
+                record.clean_streak = 0
+                ranked_up = True
+
+        elif classification == "demonstrated_weakness":
+            record.clean_streak = 0
+
+        db.commit()
+
+        return {
+            "skill_id": skill_id,
+            "changed": True,
+            "ranked_up": ranked_up,
+            "current_rank": record.current_rank,
+            "clean_streak": record.clean_streak
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise e
+
+    finally:
+        db.close()
+
+
+def apply_skill_classifications_batch(
+    learner_id: str,
+    section: str,
+    classifications: dict
+) -> list:
+    """
+    Applies a full set of skill classifications from one attempt
+    (one Writing essay typically touches multiple skills at once).
+
+    classifications is a dict like:
+      {
+        "tr_full_coverage": "demonstrated_strength",
+        "tr_conclusion_synthesis": "demonstrated_weakness",
+        "gra_punctuation": "not_applicable",
+        ...
+      }
+
+    Returns a list of result dicts, one per skill, in the same
+    shape as apply_skill_classification. Skills with a "changed"
+    result are the ones the page should report on.
+    """
+    results = []
+    for skill_id, classification in classifications.items():
+        result = apply_skill_classification(
+            learner_id=learner_id,
+            section=section,
+            skill_id=skill_id,
+            classification=classification
+        )
+        results.append(result)
+    return results
+
+
+def get_weakest_skill(learner_id: str, section: str = "Writing") -> dict | None:
+    """
+    Finds the single skill most in need of attention.
+
+    Priority order:
+    1. Lowest current_rank first (rank 1 skills beat rank 3 skills)
+    2. Among skills tied on rank, the one with the LOWEST
+       total_evidence is prioritised (we know least about it,
+       or it has never been assessed -- worth surfacing)
+    3. Among skills tied on both, the one with the most recent
+       "demonstrated_weakness" classification is prioritised
+
+    Returns None only if the taxonomy itself is empty (should
+    never happen in practice).
+    """
+    all_ranks = get_all_skill_ranks(learner_id, section)
+
+    if not all_ranks:
+        return None
+
+    def sort_key(skill):
+        # Lower rank = higher priority (sorts first)
+        # Lower evidence = higher priority (sorts first)
+        # weakness more recent = higher priority -> use 0 if weakness, 1 otherwise
+        weakness_priority = (
+            0 if skill["last_classification"] == "demonstrated_weakness"
+            else 1
+        )
+        return (
+            skill["current_rank"],
+            skill["total_evidence"],
+            weakness_priority
+        )
+
+    sorted_skills = sorted(all_ranks, key=sort_key)
+    return sorted_skills[0]
+
+
+def get_skill_progress_summary(learner_id: str, section: str = "Writing") -> dict:
+    """
+    Returns a summary of the learner's overall skill progress —
+    used by both the Progress Dashboard and the future coaching
+    hub to show "how far along is this learner overall".
+    """
+    all_ranks = get_all_skill_ranks(learner_id, section)
+
+    if not all_ranks:
+        return {
+            "total_skills": 0,
+            "average_rank": 0,
+            "skills_at_max": 0,
+            "skills_untouched": 0,
+            "weakest_skill": None
+        }
+
+    total = len(all_ranks)
+    avg_rank = round(
+        sum(s["current_rank"] for s in all_ranks) / total, 2
+    )
+    at_max = len([s for s in all_ranks if s["current_rank"] == MAX_RANK])
+    untouched = len([s for s in all_ranks if s["total_evidence"] == 0])
+
+    weakest = get_weakest_skill(learner_id, section)
+
+    return {
+        "total_skills": total,
+        "average_rank": avg_rank,
+        "skills_at_max": at_max,
+        "skills_untouched": untouched,
+        "weakest_skill": weakest
+    }
+
+# ─── CHAT COACH CONTEXT BUILDER ────────────────────────────────────────────────
+
+def find_evidence_memory_for_skill(learner_id: str, skill_id: str) -> dict | None:
+    """
+    Finds the single most relevant existing memory that gives
+    concrete evidence of a learner's standing on a given skill_id.
+
+    Searches learner_memories using the label bridge in
+    skill_taxonomy_service, prioritising:
+      1. Active weaknesses (most useful for "here's what to fix")
+      2. Most recent if multiple match
+
+    Returns None if no matching memory exists yet -- this is
+    expected for a learner who hasn't been assessed on this skill.
+    """
+    from app.services.skill_taxonomy_service import get_memory_labels_for_skill
+
+    labels = get_memory_labels_for_skill(skill_id)
+    if not labels:
+        return None
+
+    db = SessionLocal()
+
+    try:
+        # Prefer an active weakness first
+        memory = db.query(LearnerMemory).filter(
+            LearnerMemory.learner_id == learner_id,
+            LearnerMemory.section == "Writing",
+            LearnerMemory.skill.in_(labels),
+            LearnerMemory.memory_type == "weakness",
+            LearnerMemory.status == "active"
+        ).order_by(
+            LearnerMemory.updated_at.desc()
+        ).first()
+
+        # Fall back to any memory on this skill, regardless of type/status
+        # -- better to show something true than nothing at all
+        if memory is None:
+            memory = db.query(LearnerMemory).filter(
+                LearnerMemory.learner_id == learner_id,
+                LearnerMemory.section == "Writing",
+                LearnerMemory.skill.in_(labels)
+            ).order_by(
+                LearnerMemory.updated_at.desc()
+            ).first()
+
+        if memory is None:
+            return None
+
+        return {
+            "memory_text": memory.memory_text,
+            "memory_type": memory.memory_type,
+            "skill_label": memory.skill,
+            "status": memory.status
+        }
+
+    finally:
+        db.close()
+
+
+def find_recent_essay_excerpt(learner_id: str, section: str = "Writing") -> dict | None:
+    """
+    Returns the learner's most recent essay attempt -- prompt and
+    full response text -- so the Chat Coach can reference their
+    actual writing directly, not just a memory summary.
+
+    Returns None if the learner has no attempts yet.
+    """
+    db = SessionLocal()
+
+    try:
+        attempt = db.query(PracticeAttempt).filter(
+            PracticeAttempt.learner_id == learner_id,
+            PracticeAttempt.section == section
+        ).order_by(
+            PracticeAttempt.created_at.desc()
+        ).first()
+
+        if attempt is None:
+            return None
+
+        return {
+            "prompt": attempt.prompt,
+            "essay": attempt.learner_response,
+            "created_at": str(attempt.created_at)
+        }
+
+    finally:
+        db.close()
+
+
+def build_chat_coach_context(learner_id: str, section: str = "Writing") -> dict:
+    """
+    Assembles everything the Chat Coach needs to open a session
+    intelligently. This is the single entry point the Chat Coach
+    page/service calls before generating its first message.
+
+    Returns one of two shapes:
+
+    NEW LEARNER (no skill evidence at all):
+      {
+        "has_history": False
+      }
+
+    RETURNING LEARNER:
+      {
+        "has_history": True,
+        "weakest_skill": {... from get_weakest_skill() ...},
+        "skill_definition": {... from get_skill_by_id() ...},
+        "current_rank_text": "the rank 1 definition for this skill",
+        "next_rank_text": "the rank 2 definition for this skill",
+        "evidence_memory": {... from find_evidence_memory_for_skill()
+                             or None ...},
+        "recent_essay": {... from find_recent_essay_excerpt()
+                          or None ...}
+      }
+
+    "has_history" is False specifically when the weakest skill has
+    zero total_evidence AND there is no fallback memory evidence
+    either -- meaning this learner has genuinely never been
+    assessed on anything yet. This matches the locked design
+    decision: brand new learners get a general welcome, not a
+    forced skill focus.
+    """
+    from app.services.skill_taxonomy_service import (
+        get_skill_by_id,
+        get_rank_definition
+    )
+
+    weakest = get_weakest_skill(learner_id, section)
+
+    evidence = None
+    if weakest is not None:
+        evidence = find_evidence_memory_for_skill(
+            learner_id, weakest["skill_id"]
+        )
+
+    # No history at all: the weakest skill has never been assessed
+    # AND there's no memory evidence to fall back on either
+    no_evidence_at_all = (
+        weakest is None
+        or (weakest["total_evidence"] == 0 and evidence is None)
+    )
+
+    if no_evidence_at_all:
+        return {"has_history": False}
+
+    skill_definition = get_skill_by_id(weakest["skill_id"], section)
+    current_rank = weakest["current_rank"]
+    next_rank = min(current_rank + 1, 5)
+
+    current_rank_text = get_rank_definition(
+        weakest["skill_id"], current_rank, section
+    )
+    next_rank_text = get_rank_definition(
+        weakest["skill_id"], next_rank, section
+    )
+
+    recent_essay = find_recent_essay_excerpt(learner_id, section)
+
+    return {
+        "has_history": True,
+        "weakest_skill": weakest,
+        "skill_definition": skill_definition,
+        "current_rank_text": current_rank_text,
+        "next_rank_text": next_rank_text,
+        "evidence_memory": evidence,
+        "recent_essay": recent_essay
+    }

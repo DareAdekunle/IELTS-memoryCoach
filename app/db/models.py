@@ -85,3 +85,29 @@ class SessionSummary(Base):
     section = Column(String, nullable=False)
     summary = Column(Text, nullable=True)
     created_at = Column(DateTime, default=func.now())
+
+
+class LearnerSkillRank(Base):
+    """
+    Tracks a learner's mastery progress on one granular skill
+    within one section (currently Writing only).
+
+    Rank moves up via clean_streak — 3 consecutive attempts where
+    Qwen classifies this skill as "demonstrated_strength" with no
+    weakness in between. Any "demonstrated_weakness" resets the
+    streak to 0. There is no automatic rank-down.
+
+    One row per (learner_id, section, skill_id).
+    """
+    __tablename__ = "learner_skill_ranks"
+
+    rank_id = Column(String, primary_key=True, index=True)
+    learner_id = Column(String, nullable=False)
+    section = Column(String, nullable=False)       # "Writing" for now
+    skill_id = Column(String, nullable=False)       # e.g. "tr_conclusion_synthesis"
+    current_rank = Column(Integer, default=1)       # 1 (beginner) to 5 (advanced)
+    clean_streak = Column(Integer, default=0)        # consecutive clean attempts
+    total_evidence = Column(Integer, default=0)       # total times this skill was assessed
+    last_classification = Column(String, nullable=True)  # last result: weakness/strength/not_applicable
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

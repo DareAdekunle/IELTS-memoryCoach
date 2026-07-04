@@ -5,6 +5,8 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from app.services.practice_service import get_random_writing_prompt
+from app.services.skill_classifier_service import classify_writing_skills
+from app.services.memory_service import apply_skill_classifications_batch
 from app.services.scoring_service import evaluate_writing
 from app.services.memory_service import (
     save_attempt,
@@ -143,6 +145,40 @@ if submitted:
                         f"🧠 {strengthened} pattern(s) have been reinforced "
                         f"in your memory profile."
                     )
+
+                # Phase D — Skill taxonomy classification and ranking
+                # This is a SEPARATE Qwen call (Phase C design) that maps
+                # this essay against the fixed 13-skill taxonomy and updates
+                # learner_skill_ranks via the deterministic rule engine.
+                classifications = classify_writing_skills(
+                    prompt=prompt["prompt"],
+                    essay=response
+                )
+
+                rank_results = apply_skill_classifications_batch(
+                    learner_id=learner_id,
+                    section="Writing",
+                    classifications=classifications
+                )
+
+                ranked_up_skills = [
+                    r for r in rank_results if r["ranked_up"]
+                ]
+
+                if ranked_up_skills:
+                    from app.services.skill_taxonomy_service import (
+                        get_skill_by_id,
+                        get_rank_name
+                    )
+                    for r in ranked_up_skills:
+                        skill_info = get_skill_by_id(r["skill_id"])
+                        new_rank_name = get_rank_name(r["current_rank"])
+                        st.success(
+                            f"🎯 Skill level up! "
+                            f"**{skill_info['skill_name']}** is now "
+                            f"**{new_rank_name}** "
+                            f"(rank {r['current_rank']}/5)"
+                        )
 
             except Exception as e:
                 st.warning(f"Feedback saved but memory update had an issue: {e}")
