@@ -5,3 +5,13 @@ sqlalchemy
 dashscope
 audio-recorder-streamlit
 pydub
+fastapi
+uvicorn[standard]
+python-jose[cryptography]
+passlib[bcrypt]
+httpx
+authlib
+python-multipart
+itsdangerous
+pydantic[email]
+bcrypt==4.0.1
