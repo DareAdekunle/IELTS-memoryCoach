@@ -12,7 +12,7 @@ load_dotenv()
 dashscope.api_key = os.getenv("DASHSCOPE_API_KEY")
 dashscope.base_http_api_url = "https://dashscope-intl.aliyuncs.com/api/v1"
 
-TTS_MODEL = "qwen3-tts-flash"
+TTS_MODEL = "qwen3-tts-flash-2025-11-27"
 
 # Cherry is a clear natural English voice
 # good for an IELTS examiner persona
