@@ -4,71 +4,121 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = OpenAI(
-    api_key=os.getenv("DASHSCOPE_API_KEY"),
-    base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+# ─── Alibaba Cloud Model Studio Configuration ─────────────────────────────────
+# Text AI inference runs through Alibaba Cloud Model Studio.
+# This keeps all AI logic within the Alibaba Cloud ecosystem,
+# using the 70M+ free token allocation from Model Studio.
+#
+# Uses a dedicated Singapore-region workspace endpoint for low
+# latency and network isolation within Alibaba Cloud infrastructure.
+#
+# The same DASHSCOPE_API_KEY is used for all three Qwen services:
+#   - Text generation (this file, via OpenAI-compatible SDK)
+#   - ASR speech-to-text (asr_service.py, via DashScope SDK)
+#   - TTS text-to-speech (tts_service.py, via DashScope SDK)
+
+_API_KEY = os.getenv("DASHSCOPE_API_KEY")
+
+# Dedicated Singapore workspace endpoint
+# Falls back to generic Model Studio endpoint if not set
+_BASE_URL = os.getenv(
+    "MODEL_STUDIO_ENDPOINT",
+    "https://dashscope.aliyuncs.com/compatible-mode/v1"
 )
 
-# Using the model name from your Qwen dashboard
-QWEN_MODEL = "qwen-plus"
+client = OpenAI(
+    api_key=_API_KEY,
+    base_url=_BASE_URL
+)
+
+# ─── Task-tiered model routing ────────────────────────────────────────────────
+# Different tasks require different model capabilities.
+# Using the right model for each task reduces cost and latency
+# without sacrificing output quality where it matters.
+#
+# qwen-plus  → complex reasoning tasks:
+#              essay evaluation, chat coaching, memory extraction
+#              (needs rich language understanding and generation)
+#
+# qwen-turbo → simple structured output tasks:
+#              skill classification (3-way choice per skill_id)
+#              (fast, cheap, sufficient for constrained output)
+
+QWEN_MODEL = os.getenv("QWEN_MODEL", "qwen-plus")
+QWEN_TURBO_MODEL = os.getenv("QWEN_TURBO_MODEL", "qwen-turbo")
 
 
-def call_qwen(prompt: str, system_message: str = None, temperature: float = 0.3) -> str:
+def call_qwen(
+    prompt: str,
+    system_message: str = None,
+    temperature: float = 0.7,
+    use_turbo: bool = False
+) -> str:
     """
-    Sends a prompt to Qwen and returns the response as a string.
+    Makes a single-turn text generation call to Qwen via Model Studio.
 
-    temperature controls how creative vs precise the response is:
-    - 0.0 to 0.3 = precise and consistent (good for scoring)
-    - 0.7 to 1.0 = more creative (good for coaching chat)
+    Args:
+        prompt:         The user message / task description
+        system_message: Optional system prompt for role/context setting
+        temperature:    Sampling temperature (0.0-1.0)
+        use_turbo:      If True, uses qwen-turbo instead of qwen-plus.
+                        Use for structured output tasks like classification.
+
+    Returns:
+        The model's response as a plain string.
+        Raises on network or API errors (caller handles gracefully).
     """
+    model = QWEN_TURBO_MODEL if use_turbo else QWEN_MODEL
+
     messages = []
-
     if system_message:
         messages.append({"role": "system", "content": system_message})
-
     messages.append({"role": "user", "content": prompt})
 
-    try:
-        response = client.chat.completions.create(
-            model=QWEN_MODEL,
-            messages=messages,
-            temperature=temperature
-        )
-        return response.choices[0].message.content
-
-    except Exception as e:
-        raise Exception(f"Qwen API call failed: {str(e)}")
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=temperature
+    )
+    return response.choices[0].message.content
 
 
-def call_qwen_for_json(prompt: str, system_message: str = None) -> str:
+def call_qwen_for_json(
+    prompt: str,
+    system_message: str = None,
+    temperature: float = 0.3,
+    use_turbo: bool = False
+) -> str:
     """
-    Same as call_qwen but specifically for when we expect a JSON response.
-    Uses very low temperature for maximum consistency.
+    Makes a Qwen call optimised for JSON output.
+    Uses lower temperature for more deterministic structured responses.
+
+    The raw string is returned — callers must parse via
+    app/utils/json_utils.safe_parse_json() which handles
+    markdown fences, smart quotes, and other common Qwen
+    JSON formatting quirks.
     """
-    json_system = "You are a precise IELTS evaluator. You must respond with valid JSON only. No explanations, no markdown, no code fences. Only the raw JSON object."
+    return call_qwen(
+        prompt=prompt,
+        system_message=system_message,
+        temperature=temperature,
+        use_turbo=use_turbo
+    )
 
-    if system_message:
-        json_system = system_message + "\n\n" + json_system
 
-    return call_qwen(prompt, system_message=json_system, temperature=0.1)
-
-def fix_broken_json(broken_response: str) -> str:
+def fix_broken_json(broken_json: str) -> str:
     """
-    If Qwen returns something that looks like JSON but fails to parse,
-    we send it back to Qwen and ask it to fix the formatting.
-    This is a last resort fallback.
+    Asks Qwen to repair malformed JSON it produced.
+    Used as a last-resort fallback when all local JSON parsing
+    strategies fail (e.g. apostrophes inside long essay feedback).
+
+    This is a self-healing pattern: Qwen repairs its own output
+    rather than failing the entire request.
     """
-    fix_prompt = f"""The following text is supposed to be a valid JSON object but it has formatting errors.
-Please fix it and return only the corrected valid JSON object with no other text.
-Do not change any of the actual content or values — only fix the JSON syntax.
-
-Broken JSON:
-{broken_response}
-
-Rules for fixing:
-- Remove any apostrophes or single quotes inside string values
-- Remove any unescaped special characters
-- Make sure all strings use double quotes
-- Return only the raw JSON object, nothing else
-"""
-    return call_qwen(fix_prompt, temperature=0.0)
+    repair_prompt = (
+        "The following is supposed to be valid JSON but contains "
+        "syntax errors. Fix it and return ONLY the corrected JSON "
+        "with no explanation, no markdown, no backticks:\n\n"
+        f"{broken_json}"
+    )
+    return call_qwen(repair_prompt, temperature=0.1, use_turbo=True)

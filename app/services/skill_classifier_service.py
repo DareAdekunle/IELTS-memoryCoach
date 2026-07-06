@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from app.services.qwen_service import call_qwen_for_json
+from app.services.qwen_service import client, QWEN_TURBO_MODEL
 from app.services.skill_taxonomy_service import (
     get_all_skill_ids,
     format_skill_list_for_prompt
@@ -50,7 +50,12 @@ def classify_writing_skills(prompt: str, essay: str, section: str = "Writing") -
     )
 
     try:
-        raw_response = call_qwen_for_json(full_prompt)
+        response = client.chat.completions.create(
+            model=QWEN_TURBO_MODEL,
+            messages=[{"role": "user", "content": full_prompt}],
+            temperature=0.1
+        )
+        raw_response = response.choices[0].message.content
     except Exception as e:
         # If the call fails entirely, mark everything not_applicable
         # rather than blocking the learner's feedback flow

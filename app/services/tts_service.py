@@ -1,124 +1,181 @@
 import os
 import sys
-import urllib.request
+import hashlib
+import requests
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 import dashscope
+from dashscope.audio.tts_v2 import SpeechSynthesizer
 from dotenv import load_dotenv
 
 load_dotenv()
 
 dashscope.api_key = os.getenv("DASHSCOPE_API_KEY")
-dashscope.base_http_api_url = "https://dashscope-intl.aliyuncs.com/api/v1"
 
+# ─── TTS Model Configuration ──────────────────────────────────────────────────
+# qwen3-tts-flash is nearly quota-exhausted — use the dated variant.
+# If this one runs low, check the DashScope console for other
+# qwen3-tts-* variants with remaining free quota.
 TTS_MODEL = "qwen3-tts-flash-2025-11-27"
+TTS_VOICE = "Cherry"
 
-# Cherry is a clear natural English voice
-# good for an IELTS examiner persona
-DEFAULT_VOICE = "Cherry"
+# ─── Audio Cache ──────────────────────────────────────────────────────────────
+# Generated audio is cached to disk to avoid redundant API calls.
+# Listening track scripts never change, so their audio is cached
+# permanently. Speaking feedback is NOT cached (unique per session).
+#
+# Cache lives outside the Docker container's ephemeral layer via
+# the Docker volume mount, so it persists across restarts.
+
+TTS_CACHE_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+    "tts_cache"
+)
+os.makedirs(TTS_CACHE_DIR, exist_ok=True)
 
 
-def text_to_speech(text: str, voice: str = DEFAULT_VOICE) -> dict:
+def _get_cache_key(text: str, voice: str = TTS_VOICE) -> str:
+    """Generates a stable cache key from text + voice combination."""
+    content = f"{voice}:{text}"
+    return hashlib.md5(content.encode()).hexdigest()
+
+
+def _get_cached_audio(cache_key: str) -> bytes | None:
+    """Returns cached audio bytes if available, None otherwise."""
+    cache_path = os.path.join(TTS_CACHE_DIR, f"{cache_key}.wav")
+    if os.path.exists(cache_path):
+        with open(cache_path, "rb") as f:
+            return f.read()
+    return None
+
+
+def _save_to_cache(cache_key: str, audio_bytes: bytes) -> None:
+    """Saves audio bytes to the disk cache."""
+    cache_path = os.path.join(TTS_CACHE_DIR, f"{cache_key}.wav")
+    with open(cache_path, "wb") as f:
+        f.write(audio_bytes)
+
+
+def _call_tts_api(text: str) -> dict:
     """
-    Converts examiner feedback text to speech using Qwen TTS.
+    Makes the actual DashScope TTS API call.
+    Returns a dict with success, audio_bytes, and error fields.
 
-    Steps:
-    1. Send text to qwen3-tts-flash
-    2. Get back a URL to the generated audio file
-    3. Download the audio from the URL
-    4. Return the audio bytes so Streamlit can play them
-
-    Returns a dict with:
-    - success (bool)
-    - audio_bytes (bytes) — the audio data
-    - audio_url (str) — the original URL
-    - error (str) — error message if failed
+    DashScope TTS returns a URL to the generated WAV file.
+    The audio field in the response is always empty — we must
+    download from the URL. This is a known DashScope quirk.
     """
-    if not text or not text.strip():
-        return {
-            "success": False,
-            "audio_bytes": None,
-            "audio_url": "",
-            "error": "No text provided for TTS"
-        }
-
-    # TTS works best with shorter chunks
-    # Truncate very long feedback to avoid timeouts
-    if len(text) > 2000:
-        text = text[:2000] + "..."
-
     try:
-        response = dashscope.audio.qwen_tts.SpeechSynthesizer.call(
+        synthesizer = SpeechSynthesizer(
             model=TTS_MODEL,
-            api_key=os.getenv("DASHSCOPE_API_KEY"),
-            text=text,
-            voice=voice
+            voice=TTS_VOICE
         )
+        response = synthesizer.call(text)
 
-        if response.status_code != 200:
+        if response is None:
             return {
                 "success": False,
                 "audio_bytes": None,
-                "audio_url": "",
-                "error": f"TTS API error: {response.message}"
+                "error": "TTS API returned None"
             }
 
-        # Extract the audio URL from the response
-        audio = response.output.get("audio", {})
-        audio_url = audio.get("url", "")
+        # DashScope TTS returns a URL — download the actual audio
+        audio_url = None
+        if hasattr(response, 'output') and response.output:
+            audio_data = response.output.get("audio", {})
+            audio_url = audio_data.get("url")
 
         if not audio_url:
             return {
                 "success": False,
                 "audio_bytes": None,
-                "audio_url": "",
                 "error": "No audio URL in TTS response"
             }
 
-        # Download the audio file from the URL
-        audio_bytes = _download_audio(audio_url)
-
-        if audio_bytes is None:
+        # Download the WAV file from the URL
+        wav_response = requests.get(audio_url, timeout=30)
+        if wav_response.status_code != 200:
             return {
                 "success": False,
                 "audio_bytes": None,
-                "audio_url": audio_url,
-                "error": "Failed to download audio from URL"
+                "error": f"Failed to download audio: HTTP {wav_response.status_code}"
             }
 
         return {
             "success": True,
-            "audio_bytes": audio_bytes,
-            "audio_url": audio_url,
-            "error": ""
+            "audio_bytes": wav_response.content,
+            "error": None
         }
 
     except Exception as e:
         return {
             "success": False,
             "audio_bytes": None,
-            "audio_url": "",
-            "error": f"TTS exception: {str(e)}"
+            "error": str(e)
         }
 
 
-def _download_audio(url: str) -> bytes | None:
+def examiner_speak(text: str, use_cache: bool = False) -> dict:
     """
-    Downloads audio bytes from a URL.
-    Returns None if download fails.
+    Converts text to speech using Cherry's voice via DashScope TTS.
+
+    For unique per-session content (Speaking Coach feedback):
+        use_cache=False — always generates fresh audio
+
+    For static content (Listening track scripts):
+        use_cache=True — checks disk cache first,
+        generates and caches only on first request.
+        Subsequent requests return instantly at zero API cost.
+
+    Returns:
+        {
+            "success": bool,
+            "audio_bytes": bytes | None,
+            "from_cache": bool,
+            "error": str | None
+        }
     """
-    try:
-        with urllib.request.urlopen(url, timeout=30) as response:
-            return response.read()
-    except Exception as e:
-        print(f"Failed to download audio from {url}: {e}")
-        return None
+    if use_cache:
+        cache_key = _get_cache_key(text)
+        cached = _get_cached_audio(cache_key)
+        if cached:
+            return {
+                "success": True,
+                "audio_bytes": cached,
+                "from_cache": True,
+                "error": None
+            }
+
+    result = _call_tts_api(text)
+    result["from_cache"] = False
+
+    # Cache the result if caching was requested and generation succeeded
+    if use_cache and result["success"] and result["audio_bytes"]:
+        cache_key = _get_cache_key(text)
+        _save_to_cache(cache_key, result["audio_bytes"])
+
+    return result
 
 
-def examiner_speak(feedback_text: str) -> dict:
+def generate_listening_audio(track: dict) -> dict:
     """
-    Convenience function specifically for examiner feedback.
-    Uses the Cherry voice and adds a brief examiner introduction.
+    Generates TTS audio for a listening track script.
+    Always uses cache — Listening track scripts never change,
+    so the first generation is cached permanently.
+
+    This means:
+    - First time: ~15-20s generation, costs TTS quota
+    - Every subsequent time: ~10ms disk read, costs nothing
+
+    Returns same shape as examiner_speak().
     """
-    return text_to_speech(feedback_text, voice=DEFAULT_VOICE)
+    script = track.get("script", "")
+    if not script:
+        return {
+            "success": False,
+            "audio_bytes": None,
+            "from_cache": False,
+            "error": "Track has no script"
+        }
+    return examiner_speak(script, use_cache=True)
