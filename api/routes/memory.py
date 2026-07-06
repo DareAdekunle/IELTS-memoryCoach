@@ -78,3 +78,56 @@ async def get_stats(
         }
 
     return get_memory_stats(current_user.learner_id)
+
+@router.get("/timeline")
+async def get_memory_timeline(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Returns memory evolution data for the timeline visualization.
+    Shows how each memory's confidence changed across attempts,
+    making the MemoryAgent's learning process visible.
+    """
+    if not current_user.learner_id:
+        return {"timeline": [], "attempts_count": 0}
+
+    from app.db.database import SessionLocal
+    from app.db.models import LearnerMemory, PracticeAttempt
+    from sqlalchemy import desc
+
+    db = SessionLocal()
+    try:
+        # Get all memories including archived
+        memories = db.query(LearnerMemory).filter(
+            LearnerMemory.learner_id == current_user.learner_id
+        ).order_by(LearnerMemory.created_at.asc()).all()
+
+        # Get attempt count per section for context
+        attempts = db.query(PracticeAttempt).filter(
+            PracticeAttempt.learner_id == current_user.learner_id
+        ).order_by(PracticeAttempt.created_at.asc()).all()
+
+        timeline = []
+        for mem in memories:
+            timeline.append({
+                "memory_id": mem.memory_id,
+                "skill": mem.skill,
+                "section": mem.section,
+                "memory_type": mem.memory_type,
+                "memory_text": mem.memory_text,
+                "confidence": float(mem.confidence or 0),
+                "evidence_count": mem.evidence_count or 0,
+                "status": mem.status,
+                "created_at": str(mem.created_at),
+                "updated_at": str(mem.updated_at)
+            })
+
+        return {
+            "timeline": timeline,
+            "attempts_count": len(attempts),
+            "total_memories": len(memories),
+            "active_count": len([m for m in memories if m.status == "active"]),
+            "archived_count": len([m for m in memories if m.status == "archived"])
+        }
+    finally:
+        db.close()
