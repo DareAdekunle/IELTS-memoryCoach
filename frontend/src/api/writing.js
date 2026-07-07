@@ -7,13 +7,14 @@ export const getWritingAttempts = () => client.get('/writing/attempts')
 
 /**
  * Streaming essay submission via Server-Sent Events.
- * Calls onToken for each streamed token (fast TTFT ~1-2s).
- * Calls onComplete with full parsed result when done.
- * Calls onError on any failure.
+ * Uses the same base URL as axios client — works in both
+ * development (/api/writing/submit/stream) and production.
  */
 export const submitEssayStream = async (data, onToken, onComplete, onError) => {
   const token = localStorage.getItem('token')
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+  // Use same base URL as axios client
+  const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
   try {
     const response = await fetch(`${API_BASE}/writing/submit/stream`, {
@@ -41,8 +42,6 @@ export const submitEssayStream = async (data, onToken, onComplete, onError) => {
 
       buffer += decoder.decode(value, { stream: true })
       const lines = buffer.split('\n')
-
-      // Keep incomplete last line in buffer
       buffer = lines.pop() || ''
 
       for (const line of lines) {

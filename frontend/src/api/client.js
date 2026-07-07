@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// In development: React (5173) and FastAPI (8000) run separately
+// In production: Nginx serves both — React on / and FastAPI on /api/
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 const client = axios.create({
   baseURL: API_BASE,
@@ -16,7 +18,7 @@ client.interceptors.request.use((config) => {
   return config
 })
 
-// If any request returns 401, clear token and redirect to login
+// 401 → clear token and redirect to login
 client.interceptors.response.use(
   (response) => response,
   (error) => {

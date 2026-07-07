@@ -1,5 +1,28 @@
-.env
 venv/
-__pycache__/
-*.db
 tts_cache/
+
+# Environment
+.env
+.env.production
+.env.test
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# TTS cache
+tts_cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Docker
+*.log

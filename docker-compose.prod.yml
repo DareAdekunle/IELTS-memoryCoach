@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ielts-memorycoach
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    environment:
+      - FRONTEND_URL=http://${ECS_PUBLIC_IP}
+      - GOOGLE_REDIRECT_URI=http://${ECS_PUBLIC_IP}/api/auth/google/callback
+    volumes:
+      # SQLite database — persists across container restarts and rebuilds
+      - db_data:/app/data/db
+      # TTS audio cache — avoids regenerating Listening track audio
+      - tts_cache:/app/tts_cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  db_data:
+    driver: local
+  tts_cache:
+    driver: local
