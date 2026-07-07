@@ -1,0 +1,142 @@
+{
+  "section": "Speaking",
+  "description": "Granular skill taxonomy for IELTS Speaking, derived from official IELTS Speaking Band Descriptors across the four marking criteria.",
+  "categories": [
+    {
+      "category_id": "sf",
+      "category_name": "Fluency and Coherence",
+      "description": "Ability to speak at length without unnatural hesitation and with logical organisation",
+      "skills": [
+        {
+          "skill_id": "sf_fluency",
+          "skill_name": "Spoken Fluency",
+          "description": "Speaking at a natural pace without excessive hesitation, repetition or self-correction",
+          "ranks": {
+            "1": "Frequent long pauses, heavy reliance on fillers (um, uh), cannot sustain speech for more than a few words.",
+            "2": "Noticeable hesitation and repetition; manages short turns but loses fluency on complex topics.",
+            "3": "Mostly fluent with occasional hesitation; self-correction does not significantly impede communication.",
+            "4": "Speaks fluently with only occasional hesitation; maintains flow even on abstract topics.",
+            "5": "Near-native fluency — natural pace, minimal hesitation, smooth self-correction when needed."
+          }
+        },
+        {
+          "skill_id": "sf_coherence",
+          "skill_name": "Spoken Coherence",
+          "description": "Organising ideas logically and connecting them clearly when speaking at length",
+          "ranks": {
+            "1": "Ideas are disorganised and hard to follow; no clear beginning, middle or end to responses.",
+            "2": "Basic logical sequence in simple responses; loses coherence in extended or complex answers.",
+            "3": "Mostly coherent responses; uses discourse markers to connect ideas in Part 2 and Part 3.",
+            "4": "Consistently coherent with clear development; naturally uses a range of linking expressions.",
+            "5": "Highly coherent responses with sophisticated organisation and seamless idea development."
+          }
+        },
+        {
+          "skill_id": "sf_extension",
+          "skill_name": "Answer Extension",
+          "description": "Developing answers beyond one or two sentences with relevant detail and reasoning",
+          "ranks": {
+            "1": "Gives one-word or very short answers; cannot extend beyond the minimum response.",
+            "2": "Extends simple answers but cannot sustain a long turn in Part 2 or develop abstract ideas.",
+            "3": "Extends most answers adequately; Part 2 responses reach the required length.",
+            "4": "Consistently develops extended answers with examples, reasons and explanations.",
+            "5": "Expertly extended answers — naturally develops and elaborates on all topics at length."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "sl",
+      "category_name": "Lexical Resource",
+      "description": "Range, precision and naturalness of vocabulary used in speech",
+      "skills": [
+        {
+          "skill_id": "sl_vocabulary_range",
+          "skill_name": "Spoken Vocabulary Range",
+          "description": "Using a variety of words and expressions rather than repeating the same limited vocabulary",
+          "ranks": {
+            "1": "Very limited vocabulary; frequent repetition of the same basic words.",
+            "2": "Uses familiar vocabulary but over-relies on a small set of words for all topics.",
+            "3": "Adequate range for most familiar topics; some repetition on abstract or specialist subjects.",
+            "4": "Good range across all topics; uses less common and idiomatic expressions appropriately.",
+            "5": "Wide, flexible vocabulary — uses precise, idiomatic and topic-specific language naturally."
+          }
+        },
+        {
+          "skill_id": "sl_paraphrase",
+          "skill_name": "Paraphrase and Circumlocution",
+          "description": "Ability to express meaning using alternative words when the exact word is unavailable",
+          "ranks": {
+            "1": "Stops completely when a word is unavailable; cannot find alternative expressions.",
+            "2": "Attempts paraphrase but the alternative is often vague or unclear.",
+            "3": "Uses paraphrase and circumlocution adequately in most situations.",
+            "4": "Confidently paraphrases with clear, accurate alternatives; rarely impeded by vocabulary gaps.",
+            "5": "Expert circumlocution — seamlessly describes concepts using multiple alternative expressions."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "sg",
+      "category_name": "Grammatical Range and Accuracy",
+      "description": "Variety and correctness of grammatical structures used in speech",
+      "skills": [
+        {
+          "skill_id": "sg_grammar_range",
+          "skill_name": "Grammatical Range",
+          "description": "Using a variety of simple and complex grammatical structures in speech",
+          "ranks": {
+            "1": "Only simple sentences; no attempt at complex structures.",
+            "2": "Attempts complex sentences but with limited variety; mostly relies on simple structures.",
+            "3": "Mix of simple and complex structures; uses conditionals, relative clauses and passives sometimes.",
+            "4": "Good range of complex structures; uses a variety of tenses and clause types naturally.",
+            "5": "Wide grammatical range — flexibly uses all complex structures including hypotheticals and modals."
+          }
+        },
+        {
+          "skill_id": "sg_grammar_accuracy",
+          "skill_name": "Grammatical Accuracy in Speech",
+          "description": "Producing grammatically correct speech with minimal errors that impede communication",
+          "ranks": {
+            "1": "Frequent errors in basic structures that impede understanding.",
+            "2": "Errors in complex structures but basic communication is maintained.",
+            "3": "Mostly accurate; errors in complex structures do not impede communication.",
+            "4": "High accuracy across simple and complex structures; rare errors that do not confuse.",
+            "5": "Near-perfect accuracy — errors are rare and do not affect communication at all."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "sp",
+      "category_name": "Pronunciation",
+      "description": "Clarity, intelligibility and natural features of spoken English",
+      "skills": [
+        {
+          "skill_id": "sp_intelligibility",
+          "skill_name": "Intelligibility",
+          "description": "Being clearly understood by the listener without excessive effort",
+          "ranks": {
+            "1": "Very difficult to understand; listener must ask for frequent repetition.",
+            "2": "Intelligible for familiar topics but difficult to follow on complex content.",
+            "3": "Mostly intelligible; occasional unclear words do not impede overall understanding.",
+            "4": "Consistently intelligible; accent does not impede communication.",
+            "5": "Fully intelligible at all times; clear and natural pronunciation throughout."
+          }
+        },
+        {
+          "skill_id": "sp_features",
+          "skill_name": "Pronunciation Features",
+          "description": "Using stress, rhythm and intonation naturally to convey meaning",
+          "ranks": {
+            "1": "Flat delivery with no sentence stress or intonation variation; sounds robotic.",
+            "2": "Some word stress but sentence-level stress and intonation are mostly absent.",
+            "3": "Uses stress and intonation in most sentences; some unnatural patterns remain.",
+            "4": "Natural stress and intonation in most contexts; enhances rather than impedes meaning.",
+            "5": "Native-like prosody — stress, rhythm and intonation are natural and communicatively effective."
+          }
+        }
+      ]
+    }
+  ]
+}

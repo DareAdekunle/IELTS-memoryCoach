@@ -134,19 +134,53 @@ def get_rank_definition(skill_id: str, rank: int, section: str = "Writing") -> s
 # Chat Coach can quote a learner's ACTUAL essay observation rather than
 # just stating a rank number.
 SKILL_ID_TO_MEMORY_LABELS = {
-    "tr_full_coverage": ["Task Response", "Idea Development"],
-    "tr_position_clarity": ["Thesis Clarity"],
-    "tr_idea_development": ["Idea Development"],
-    "tr_conclusion_synthesis": ["Conclusion", "Thesis Clarity"],
-    "cc_logical_progression": ["Organization"],
-    "cc_paragraphing": ["Organization"],
-    "cc_cohesive_devices": ["Organization", "Grammar"],
-    "lr_range": ["Vocabulary"],
-    "lr_precision": ["Vocabulary"],
+    # Writing (existing)
+    "tr_full_coverage":          ["Task Response", "Idea Development"],
+    "tr_position_clarity":       ["Thesis Clarity"],
+    "tr_idea_development":       ["Idea Development"],
+    "tr_conclusion_synthesis":   ["Conclusion", "Thesis Clarity"],
+    "cc_logical_progression":    ["Organization"],
+    "cc_paragraphing":           ["Organization"],
+    "cc_cohesive_devices":       ["Organization", "Grammar"],
+    "lr_range":                  ["Vocabulary"],
+    "lr_precision":              ["Vocabulary"],
     "lr_spelling_word_formation": ["Vocabulary", "Grammar"],
-    "gra_sentence_variety": ["Grammar"],
-    "gra_accuracy": ["Grammar"],
-    "gra_punctuation": ["Grammar"]
+    "gra_sentence_variety":      ["Grammar"],
+    "gra_accuracy":              ["Grammar"],
+    "gra_punctuation":           ["Grammar"],
+
+    # Reading (new)
+    "ri_detail_retrieval":       ["Detail Retrieval"],
+    "ri_skimming":               ["Main Idea", "Skimming"],
+    "ri_scanning":               ["Detail Retrieval", "Scanning"],
+    "rc_main_idea":              ["Main Idea"],
+    "rc_inference":              ["Inference"],
+    "rc_tfng":                   ["True False Not Given"],
+    "rc_writer_intent":          ["Inference", "Main Idea"],
+    "rv_context_meaning":        ["Vocabulary in Context"],
+    "rv_paraphrase":             ["Vocabulary in Context"],
+    "rt_paragraph_purpose":      ["Main Idea", "Organization"],
+
+    # Speaking (new)
+    "sf_fluency":                ["Fluency"],
+    "sf_coherence":              ["Organization", "Fluency"],
+    "sf_extension":              ["Idea Development", "Fluency"],
+    "sl_vocabulary_range":       ["Vocabulary", "Lexical Resource"],
+    "sl_paraphrase":             ["Vocabulary", "Lexical Resource"],
+    "sg_grammar_range":          ["Grammar", "Grammatical Range"],
+    "sg_grammar_accuracy":       ["Grammar", "Grammatical Range"],
+    "sp_intelligibility":        ["Pronunciation"],
+    "sp_features":               ["Pronunciation"],
+
+    # Listening (new)
+    "ld_detail_accuracy":        ["Detail Retrieval", "Accuracy"],
+    "ld_form_completion":        ["Detail Retrieval", "Form Completion"],
+    "ld_number_recognition":     ["Detail Retrieval"],
+    "lm_main_idea":              ["Main Idea"],
+    "lm_speaker_purpose":        ["Inference", "Main Idea"],
+    "li_inference":              ["Inference"],
+    "li_distractor_resistance":  ["Inference", "Detail Retrieval"],
+    "ls_prediction":             ["Strategy", "Main Idea"],
 }
 
 

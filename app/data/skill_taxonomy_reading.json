@@ -1,0 +1,154 @@
+{
+  "section": "Reading",
+  "description": "Granular skill taxonomy for IELTS Academic Reading, derived from official Cambridge IELTS Reading Band Descriptors and question-type performance criteria.",
+  "categories": [
+    {
+      "category_id": "ri",
+      "category_name": "Reading for Information",
+      "description": "Locating and retrieving specific information from texts",
+      "skills": [
+        {
+          "skill_id": "ri_detail_retrieval",
+          "skill_name": "Detail Retrieval",
+          "description": "Accurately locating and extracting specific facts, figures, and details from the text",
+          "ranks": {
+            "1": "Frequently cannot locate specific details; answers based on guessing or misreading.",
+            "2": "Locates obvious details in straightforward texts but misses details in complex or long passages.",
+            "3": "Reliably retrieves explicit details in most texts; occasional errors with dense or technical content.",
+            "4": "Consistently retrieves both explicit and implicit details across complex academic texts.",
+            "5": "Precisely locates and extracts all required details with full accuracy across all text types."
+          }
+        },
+        {
+          "skill_id": "ri_skimming",
+          "skill_name": "Skimming for Gist",
+          "description": "Rapidly reading to identify the main idea or purpose of a passage or paragraph",
+          "ranks": {
+            "1": "Reads word-by-word; cannot identify the overall gist of a passage efficiently.",
+            "2": "Identifies the general topic but misses the specific purpose or argument of sections.",
+            "3": "Identifies the main idea of most paragraphs; occasionally misses the central argument.",
+            "4": "Efficiently identifies the main idea, purpose and argument structure across all sections.",
+            "5": "Rapidly and accurately identifies gist, purpose and argumentative structure in all text types."
+          }
+        },
+        {
+          "skill_id": "ri_scanning",
+          "skill_name": "Scanning for Keywords",
+          "description": "Locating specific words, names, numbers or phrases without reading the full text",
+          "ranks": {
+            "1": "Cannot scan effectively; reads the entire passage to find specific information.",
+            "2": "Scans for exact words but misses synonyms, paraphrases and related expressions.",
+            "3": "Scans effectively for keywords and common synonyms in most texts.",
+            "4": "Efficiently scans for keywords, synonyms and paraphrased information across all texts.",
+            "5": "Expert scanning — instantly locates target information including complex paraphrases."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "rc",
+      "category_name": "Reading Comprehension",
+      "description": "Understanding meaning, argument and writer intent",
+      "skills": [
+        {
+          "skill_id": "rc_main_idea",
+          "skill_name": "Main Idea Identification",
+          "description": "Identifying the central theme or main argument of a passage or section",
+          "ranks": {
+            "1": "Confuses specific details with the main idea; cannot identify the central argument.",
+            "2": "Identifies the general topic but conflates it with a supporting detail or example.",
+            "3": "Correctly identifies the main idea in most texts; occasional confusion in abstract passages.",
+            "4": "Consistently identifies the central argument across all text types including academic abstracts.",
+            "5": "Precisely identifies the main idea and distinguishes it from supporting points in all texts."
+          }
+        },
+        {
+          "skill_id": "rc_inference",
+          "skill_name": "Inference and Implied Meaning",
+          "description": "Drawing logical conclusions from information that is implied but not explicitly stated",
+          "ranks": {
+            "1": "Cannot draw inferences; answers only based on explicitly stated information.",
+            "2": "Makes simple inferences in straightforward texts but fails with complex implied meaning.",
+            "3": "Draws reasonable inferences in most texts; struggles with abstract or nuanced implication.",
+            "4": "Consistently draws accurate inferences including from academic and technical texts.",
+            "5": "Expert inference — correctly interprets all implied meaning, tone and unstated conclusions."
+          }
+        },
+        {
+          "skill_id": "rc_tfng",
+          "skill_name": "True/False/Not Given Accuracy",
+          "description": "Correctly distinguishing between information that is true, false, or not given in the text",
+          "ranks": {
+            "1": "Confuses False and Not Given consistently; applies own knowledge rather than the text.",
+            "2": "Identifies True statements reliably but confuses False with Not Given.",
+            "3": "Correctly applies T/F/NG in most cases; occasional errors with borderline Not Given.",
+            "4": "Consistently accurate on T/F/NG across complex texts with subtle distinctions.",
+            "5": "Perfect T/F/NG accuracy — reliably distinguishes all three categories across all texts."
+          }
+        },
+        {
+          "skill_id": "rc_writer_intent",
+          "skill_name": "Writer's Purpose and Attitude",
+          "description": "Identifying the writer's purpose, opinion, attitude or degree of certainty",
+          "ranks": {
+            "1": "Cannot distinguish facts from opinions; misreads the writer's attitude consistently.",
+            "2": "Identifies obvious opinions but misses hedging language, irony or implicit attitude.",
+            "3": "Identifies writer's purpose and main attitude in most texts.",
+            "4": "Consistently identifies purpose, attitude and degree of certainty across complex texts.",
+            "5": "Expert identification of all dimensions of writer's stance including subtle hedging."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "rv",
+      "category_name": "Vocabulary in Context",
+      "description": "Understanding and using contextual vocabulary knowledge",
+      "skills": [
+        {
+          "skill_id": "rv_context_meaning",
+          "skill_name": "Vocabulary in Context",
+          "description": "Deducing the meaning of unfamiliar words from surrounding context",
+          "ranks": {
+            "1": "Cannot deduce word meaning from context; relies entirely on prior vocabulary knowledge.",
+            "2": "Deduces meaning of simple words from clear context; fails with academic or technical terms.",
+            "3": "Reliably deduces meaning of most unfamiliar words from contextual clues.",
+            "4": "Consistently deduces precise meaning from context including abstract academic vocabulary.",
+            "5": "Expert contextual deduction — accurately infers all word meanings including technical terms."
+          }
+        },
+        {
+          "skill_id": "rv_paraphrase",
+          "skill_name": "Paraphrase Recognition",
+          "description": "Recognising when a question or heading paraphrases information in the text",
+          "ranks": {
+            "1": "Cannot recognise paraphrases; only matches exact words between question and text.",
+            "2": "Recognises simple synonyms but misses structural paraphrases and complex rewording.",
+            "3": "Recognises most paraphrases including common synonyms and sentence restructuring.",
+            "4": "Consistently matches paraphrased questions to text across all complexity levels.",
+            "5": "Expert paraphrase recognition — instantly matches all reformulations including complex academic rewording."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "rt",
+      "category_name": "Text Structure",
+      "description": "Understanding how academic texts are organised and developed",
+      "skills": [
+        {
+          "skill_id": "rt_paragraph_purpose",
+          "skill_name": "Paragraph Purpose",
+          "description": "Identifying the function of individual paragraphs within the overall text structure",
+          "ranks": {
+            "1": "Cannot identify paragraph function; treats all paragraphs as containing the same type of information.",
+            "2": "Identifies introductions and conclusions but misses the function of body paragraphs.",
+            "3": "Correctly identifies the purpose of most paragraphs including examples and counter-arguments.",
+            "4": "Consistently maps paragraph function across complex multi-section academic texts.",
+            "5": "Expert structural analysis — precisely identifies all paragraph functions and their relationships."
+          }
+        }
+      ]
+    }
+  ]
+}

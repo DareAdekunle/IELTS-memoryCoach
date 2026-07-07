@@ -1,23 +1,29 @@
 import { useState, useEffect } from 'react'
-import { getPrompt, getWritingMemories, submitEssay } from '../api/writing'
+import {
+  getPrompt,
+  getWritingMemories,
+  submitEssayStream
+} from '../api/writing'
 import { PenLine, RefreshCw, Brain, ChevronRight, Loader2 } from 'lucide-react'
 
 const SKILL_LABELS = {
-  thesis_clarity: 'Thesis Clarity',
-  organization: 'Organization',
-  grammar: 'Grammar',
-  vocabulary: 'Vocabulary',
+  thesis_clarity:   'Thesis Clarity',
+  organization:     'Organization',
+  grammar:          'Grammar',
+  vocabulary:       'Vocabulary',
   idea_development: 'Idea Development'
 }
 
 export default function WritingCoach() {
-  const [prompt, setPrompt] = useState(null)
-  const [memories, setMemories] = useState([])
-  const [essay, setEssay] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [feedback, setFeedback] = useState(null)
-  const [error, setError] = useState('')
+  const [prompt, setPrompt]             = useState(null)
+  const [memories, setMemories]         = useState([])
+  const [essay, setEssay]               = useState('')
+  const [loading, setLoading]           = useState(true)
+  const [submitting, setSubmitting]     = useState(false)
+  const [feedback, setFeedback]         = useState(null)
+  const [streamingText, setStreamingText] = useState('')
+  const [isStreaming, setIsStreaming]   = useState(false)
+  const [error, setError]               = useState('')
 
   useEffect(() => {
     loadPromptAndMemories()
@@ -28,6 +34,8 @@ export default function WritingCoach() {
     setFeedback(null)
     setEssay('')
     setError('')
+    setStreamingText('')
+    setIsStreaming(false)
     try {
       const [promptRes, memRes] = await Promise.all([
         getPrompt(),
@@ -35,7 +43,7 @@ export default function WritingCoach() {
       ])
       setPrompt(promptRes.data)
       setMemories(memRes.data.memories || [])
-    } catch (err) {
+    } catch {
       setError('Could not load writing prompt. Please refresh.')
     } finally {
       setLoading(false)
@@ -45,27 +53,39 @@ export default function WritingCoach() {
   const handleSubmit = async () => {
     if (!prompt || essay.trim().length < 50) return
     setSubmitting(true)
+    setIsStreaming(true)
+    setStreamingText('')
+    setFeedback(null)
     setError('')
-    try {
-      const res = await submitEssay({
+
+    await submitEssayStream(
+      {
         prompt: prompt.prompt,
         task_type: prompt.task_type,
         essay: essay.trim()
-      })
-      setFeedback(res.data)
-    } catch (err) {
-      setError(
-        err.response?.data?.detail ||
-        'Something went wrong. Please try again.'
-      )
-    } finally {
-      setSubmitting(false)
-    }
+      },
+      // onToken — called for each streamed token
+      (token) => {
+        setStreamingText(prev => prev + token)
+      },
+      // onComplete — full parsed result ready
+      (result) => {
+        setFeedback(result)
+        setIsStreaming(false)
+        setSubmitting(false)
+        setStreamingText('')
+      },
+      // onError
+      (err) => {
+        setError(err)
+        setIsStreaming(false)
+        setSubmitting(false)
+        setStreamingText('')
+      }
+    )
   }
 
-  const wordCount = essay.trim()
-    ? essay.trim().split(/\s+/).length
-    : 0
+  const wordCount = essay.trim() ? essay.trim().split(/\s+/).length : 0
 
   if (loading) {
     return (
@@ -119,9 +139,7 @@ export default function WritingCoach() {
                   {mem.memory_type === 'weakness' ? '⚠️' : '✅'}
                 </span>
                 <p className="text-gray-400 text-sm">
-                  <span className="text-gray-300 font-medium">
-                    {mem.skill}:
-                  </span>{' '}
+                  <span className="text-gray-300 font-medium">{mem.skill}:</span>{' '}
                   {mem.memory_text}
                 </p>
               </div>
@@ -130,12 +148,12 @@ export default function WritingCoach() {
         </div>
       )}
 
-      {!feedback ? (
+      {/* Essay input phase */}
+      {!feedback && !isStreaming && (
         <>
           {/* Prompt card */}
           {prompt && (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl
-                            p-6 mb-6">
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-medium px-2.5 py-1 rounded-lg
                                  bg-purple-500/15 text-purple-400">
@@ -161,18 +179,15 @@ export default function WritingCoach() {
             </div>
           )}
 
-          {/* Essay input */}
+          {/* Essay textarea */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-3">
               <label className="text-sm font-medium text-gray-300">
                 Your response
               </label>
               <span className={`text-sm ${
-                wordCount >= 250
-                  ? 'text-green-400'
-                  : wordCount > 0
-                  ? 'text-yellow-400'
-                  : 'text-gray-500'
+                wordCount >= 250 ? 'text-green-400' :
+                wordCount > 0   ? 'text-yellow-400' : 'text-gray-500'
               }`}>
                 {wordCount} / 250 words minimum
               </span>
@@ -203,9 +218,7 @@ export default function WritingCoach() {
                   </p>
                 )}
                 {wordCount >= 250 && (
-                  <p className="text-green-400 text-sm">
-                    ✓ Word count looks good!
-                  </p>
+                  <p className="text-green-400 text-sm">✓ Word count looks good!</p>
                 )}
               </div>
               <button
@@ -217,22 +230,36 @@ export default function WritingCoach() {
                            rounded-xl transition-colors"
               >
                 {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Evaluating...
-                  </>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Evaluating...</>
                 ) : (
-                  <>
-                    Submit for feedback
-                    <ChevronRight className="w-4 h-4" />
-                  </>
+                  <>Submit for feedback <ChevronRight className="w-4 h-4" /></>
                 )}
               </button>
             </div>
           </div>
         </>
-      ) : (
-        /* Feedback display */
+      )}
+
+      {/* Streaming preview — tokens appearing in real time */}
+      {isStreaming && (
+        <div className="space-y-4">
+          <div className="bg-gray-900 border border-brand-500/30 rounded-2xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
+              <span className="text-brand-400 text-sm font-medium">
+                Your coach is writing feedback...
+              </span>
+            </div>
+            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap min-h-[60px]">
+              {streamingText}
+              <span className="inline-block w-0.5 h-4 bg-brand-500 animate-pulse ml-0.5 align-middle" />
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Full feedback display */}
+      {feedback && !isStreaming && (
         <div className="space-y-6">
 
           {/* Overall feedback */}
@@ -276,8 +303,7 @@ export default function WritingCoach() {
               </h2>
               <ul className="space-y-2">
                 {(feedback.strengths || []).map((s, i) => (
-                  <li key={i} className="text-gray-300 text-sm
-                                         flex items-start gap-2">
+                  <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
                     <span className="text-green-500 mt-0.5 flex-shrink-0">•</span>
                     {s}
                   </li>
@@ -291,8 +317,7 @@ export default function WritingCoach() {
               </h2>
               <ul className="space-y-2">
                 {(feedback.weaknesses || []).map((w, i) => (
-                  <li key={i} className="text-gray-300 text-sm
-                                         flex items-start gap-2">
+                  <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
                     <span className="text-yellow-500 mt-0.5 flex-shrink-0">•</span>
                     {w}
                   </li>
@@ -303,8 +328,7 @@ export default function WritingCoach() {
 
           {/* Recommended next step */}
           {feedback.recommended_next_step && (
-            <div className="bg-brand-500/10 border border-brand-500/30
-                            rounded-2xl p-6">
+            <div className="bg-brand-500/10 border border-brand-500/30 rounded-2xl p-6">
               <h2 className="text-base font-semibold text-brand-400 mb-2">
                 🎯 Recommended Next Step
               </h2>
@@ -314,10 +338,10 @@ export default function WritingCoach() {
             </div>
           )}
 
-          {/* Try again */}
+          {/* Actions */}
           <div className="flex gap-4">
             <button
-              onClick={() => setFeedback(null)}
+              onClick={() => { setFeedback(null); setStreamingText('') }}
               className="px-6 py-3 bg-gray-800 hover:bg-gray-700
                          text-white rounded-xl transition-colors"
             >

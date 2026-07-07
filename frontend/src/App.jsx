@@ -15,6 +15,9 @@ import ProgressDashboard from './pages/ProgressDashboard'
 import MemoryDashboard from './pages/MemoryDashboard'
 import ListeningCoach from './pages/ListeningCoach'
 import ChatCoach from './pages/ChatCoach'
+import SkillMastery from './pages/SkillMastery'
+
+
 
 function ProtectedShell({ children }) {
   return (
@@ -61,6 +64,9 @@ export default function App() {
           } />
           <Route path="/chat" element={
             <ProtectedShell><ChatCoach /></ProtectedShell>
+          } />
+          <Route path="/skills" element={
+            <ProtectedShell><SkillMastery /></ProtectedShell>
           } />
 
           {/* Catch-all route */} 
