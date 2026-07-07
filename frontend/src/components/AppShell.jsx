@@ -14,6 +14,7 @@ import {
   Mic,
   Headphones,
   MessageSquare,
+  Trophy,
 } from 'lucide-react'
 
 const navItems = [
@@ -22,9 +23,10 @@ const navItems = [
   { to: '/reading',    icon: BookOpen,         label: 'Reading Coach' },
   { to: '/speaking',   icon: Mic,              label: 'Speaking Coach' },
   { to: '/listening',  icon: Headphones,       label: 'Listening Coach' },
-  { to: '/chat',       icon: MessageSquare,    label: 'Chat Coach' },
+  { to: '/chat',       icon: MessageSquare,    label: 'IELTS Tutor' },
   { to: '/progress',   icon: TrendingUp,       label: 'Progress' },
   { to: '/memory',     icon: Brain,            label: 'Memory' },
+  { to: '/skills',     icon: Trophy,           label: 'Skill Mastery' },
 ]
 
 export default function AppShell({ children }) {

@@ -1,15 +1,61 @@
+"""
+app/services/chat_coach_service.py
+
+Specialist AI tutor service supporting all four IELTS sections.
+
+Each section has a dedicated tutor with section-specific:
+  - System prompt (specialist knowledge, teaching strategies)
+  - Skill taxonomy (for context building)
+  - Memory context (from learner's actual practice history)
+
+The tutor uses the MCP-style context builder to fetch the
+learner's weakest skill and relevant memories before opening
+the session — ensuring every conversation is grounded in
+real evidence from the learner's own practice.
+"""
+
 import os
 import sys
 import re
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from app.services.qwen_service import call_qwen
+from app.services.qwen_service import call_qwen, client, QWEN_MODEL
 from app.services.memory_service import build_chat_coach_context
 
 PROMPTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts")
 
 VALID_STATES = {"introduction", "explaining", "drilling", "bridge_to_practice"}
+
+# ─── Section → prompt file mapping ───────────────────────────────────────────
+
+TUTOR_PROMPTS = {
+    "Writing":   "writing_tutor_prompt.txt",
+    "Reading":   "reading_tutor_prompt.txt",
+    "Speaking":  "speaking_tutor_prompt.txt",
+    "Listening": "listening_tutor_prompt.txt",
+}
+
+SECTION_LABELS = {
+    "Writing":   "IELTS Writing",
+    "Reading":   "IELTS Reading",
+    "Speaking":  "IELTS Speaking",
+    "Listening": "IELTS Listening",
+}
+
+# ─── Welcome prompt (used when learner has no history) ───────────────────────
+
+WELCOME_PROMPT_TEMPLATE = """You are an expert {section_label} tutor.
+
+The learner has not yet submitted enough {section_label} practice to have a 
+personalised skill profile. Warmly welcome them and encourage them to complete 
+a {section_label} practice session first so you can personalise your coaching.
+
+Keep this short, warm and encouraging — 2-3 sentences maximum.
+
+After your reply, on its own line, include exactly:
+[STATE: introduction]
+"""
 
 
 def load_prompt_template(filename: str) -> str:
@@ -18,55 +64,11 @@ def load_prompt_template(filename: str) -> str:
         return f.read()
 
 
-def format_context_brief(context: dict) -> str:
-    """
-    Turns the context dict from build_chat_coach_context() into a
-    readable text block for the system prompt.
-    """
-    weakest = context["weakest_skill"]
-    skill_def = context["skill_definition"]
-
-    lines = [
-        f"Weakest skill: {skill_def['skill_name']} "
-        f"(category: {skill_def['category_name']})",
-        f"Skill description: {skill_def['description']}",
-        f"Current rank: {weakest['current_rank']}/5 "
-        f"({weakest['rank_name']})",
-        f"What this current rank looks like: "
-        f"{context['current_rank_text']}",
-        f"What the NEXT rank looks like (the goal): "
-        f"{context['next_rank_text']}",
-    ]
-
-    if context.get("evidence_memory"):
-        lines.append(
-            f"\nSpecific evidence from their writing: "
-            f"{context['evidence_memory']['memory_text']}"
-        )
-
-    if context.get("recent_essay"):
-        essay = context["recent_essay"]
-        # Truncate to keep the prompt manageable -- we don't need
-        # the full essay, just enough for the coach to reference it
-        excerpt = essay["essay"][:600]
-        lines.append(
-            f"\nTheir most recent essay was written for this prompt: "
-            f"\"{essay['prompt'][:150]}...\"\n"
-            f"Excerpt of what they wrote: \"{excerpt}...\""
-        )
-
-    return "\n".join(lines)
-
-
 def parse_state_tag(raw_response: str) -> tuple:
     """
-    Extracts the [STATE: xxx] tag from the end of a response and
-    returns (clean_text, state).
-
-    If no valid tag is found, defaults state to "explaining" --
-    a safe middle-ground state that doesn't trigger the bridge
-    button prematurely and doesn't restart the introduction
-    unnecessarily.
+    Extracts the [STATE: xxx] tag from the end of a response.
+    Returns (clean_text, state).
+    Defaults to "explaining" if tag is missing or invalid.
     """
     match = re.search(r'\[STATE:\s*(\w+)\]\s*$', raw_response.strip())
 
@@ -82,39 +84,97 @@ def parse_state_tag(raw_response: str) -> tuple:
     return clean_text, state
 
 
-def start_chat_session(learner_id: str, section: str = "Writing") -> dict:
+def format_context_brief(context: dict, section: str) -> str:
     """
-    Builds the opening message for a new Chat Coach session.
+    Formats the learner context into a readable text block
+    for injection into the specialist tutor system prompt.
+    """
+    weakest = context.get("weakest_skill")
+    skill_def = context.get("skill_definition")
 
-    Returns a dict with:
-    - message: the coach's opening text (tag already stripped)
-    - state: the current state ("introduction" or similar)
-    - has_history: whether this learner has skill evidence yet
-    - context: the raw context dict (needed for later turns)
+    if not weakest or not skill_def:
+        return f"No {section} skill data available yet for this learner."
+
+    lines = [
+        f"Section: {section}",
+        f"Weakest skill: {skill_def['skill_name']} "
+        f"(category: {skill_def['category_name']})",
+        f"Skill description: {skill_def['description']}",
+        f"Current rank: {weakest['current_rank']}/5 "
+        f"({weakest['rank_name']})",
+        f"What this rank looks like: {context.get('current_rank_text', '')}",
+        f"What the next rank looks like (the goal): "
+        f"{context.get('next_rank_text', '')}",
+    ]
+
+    if context.get("evidence_memory"):
+        lines.append(
+            f"\nSpecific evidence from their {section} practice: "
+            f"{context['evidence_memory']['memory_text']}"
+        )
+
+    if context.get("recent_essay"):
+        essay = context["recent_essay"]
+        excerpt = essay["essay"][:500]
+        lines.append(
+            f"\nTheir most recent {section} attempt was for: "
+            f"\"{essay['prompt'][:150]}...\"\n"
+            f"Excerpt: \"{excerpt}...\""
+        )
+
+    return "\n".join(lines)
+
+
+def start_chat_session(
+    learner_id: str,
+    section: str = "Writing"
+) -> dict:
     """
+    Starts a new specialist tutor session for the given section.
+
+    Selects the appropriate specialist tutor prompt, builds
+    personalised context from the learner's practice history,
+    and generates the tutor's opening message.
+
+    Returns:
+        message:       The tutor's opening text (state tag stripped)
+        state:         Current state ("introduction" etc.)
+        has_history:   Whether this learner has practice data
+        section:       Which section this session is for
+        system_prompt: Full system prompt for subsequent turns
+    """
+    # Validate section
+    if section not in TUTOR_PROMPTS:
+        section = "Writing"
+
+    # Build learner context
     context = build_chat_coach_context(learner_id, section)
 
+    # No history — use welcome message
     if not context["has_history"]:
-        template = load_prompt_template("chat_coach_welcome_prompt.txt")
-        raw_response = call_qwen(prompt=template, temperature=0.6)
+        welcome = WELCOME_PROMPT_TEMPLATE.format(
+            section_label=SECTION_LABELS[section]
+        )
+        raw_response = call_qwen(prompt=welcome, temperature=0.6)
         clean_text, state = parse_state_tag(raw_response)
 
         return {
             "message": clean_text,
             "state": state,
             "has_history": False,
-            "context": context
+            "section": section,
+            "system_prompt": ""
         }
 
-    context_brief = format_context_brief(context)
-    template = load_prompt_template("chat_coach_prompt.txt")
+    # Build specialist system prompt
+    context_brief = format_context_brief(context, section)
+    template = load_prompt_template(TUTOR_PROMPTS[section])
     system_prompt = template.format(context_brief=context_brief)
 
-    # The first turn just needs the coach to open -- no learner
-    # message yet, so we prompt it to begin the introduction
+    # Generate opening message
     opening_instruction = (
-        "Begin the conversation now by opening with the "
-        "INTRODUCTION step as described in your instructions."
+        f"Begin the {SECTION_LABELS[section]} tutoring session now "
+        f"with the INTRODUCTION step as described in your instructions."
     )
 
     raw_response = call_qwen(
@@ -128,8 +188,9 @@ def start_chat_session(learner_id: str, section: str = "Writing") -> dict:
         "message": clean_text,
         "state": state,
         "has_history": True,
-        "context": context,
-        "system_prompt": system_prompt
+        "section": section,
+        "system_prompt": system_prompt,
+        "context": context
     }
 
 
@@ -139,27 +200,22 @@ def continue_chat_session(
     learner_message: str
 ) -> dict:
     """
-    Continues an existing chat session with a new learner message.
+    Continues an existing tutor session with a new learner message.
 
-    conversation_history is a list of {"role": ..., "content": ...}
-    dicts representing the conversation SO FAR (not including the
-    new learner_message, which gets appended here).
+    conversation_history is the full conversation so far, NOT
+    including the new learner_message (which is appended here).
 
-    Returns a dict with:
-    - message: the coach's reply (tag stripped)
-    - state: the new state after this turn
+    Returns:
+        message: The tutor's reply (state tag stripped)
+        state:   The new conversation state
     """
     messages = conversation_history + [
         {"role": "user", "content": learner_message}
     ]
 
-    # call_qwen only accepts a single prompt + optional system_message,
-    # so we build the full message list manually here using the same
-    # underlying client setup as qwen_service, rather than forcing
-    # multi-turn history through a single-string prompt
-    from app.services.qwen_service import client, QWEN_MODEL
-
-    full_messages = [{"role": "system", "content": system_prompt}] + messages
+    full_messages = [
+        {"role": "system", "content": system_prompt}
+    ] + messages
 
     response = client.chat.completions.create(
         model=QWEN_MODEL,
@@ -167,11 +223,9 @@ def continue_chat_session(
         temperature=0.6
     )
     raw_response = response.choices[0].message.content
-
     clean_text, state = parse_state_tag(raw_response)
 
     return {
         "message": clean_text,
         "state": state
     }
-

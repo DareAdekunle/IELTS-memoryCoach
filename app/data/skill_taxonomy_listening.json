@@ -1,0 +1,130 @@
+{
+  "section": "Listening",
+  "description": "Granular skill taxonomy for IELTS Listening, derived from official IELTS Listening Band Descriptors and question-type performance criteria across all four parts.",
+  "categories": [
+    {
+      "category_id": "ld",
+      "category_name": "Detail and Specific Information",
+      "description": "Accurately capturing specific facts, numbers, names and details from audio",
+      "skills": [
+        {
+          "skill_id": "ld_detail_accuracy",
+          "skill_name": "Detail Accuracy",
+          "description": "Accurately recording specific facts, numbers, dates and names heard in the audio",
+          "ranks": {
+            "1": "Frequently mishears or misses specific details; poor accuracy on numbers and names.",
+            "2": "Captures obvious details in slow, clear speech but misses details in natural pace audio.",
+            "3": "Reliably captures most specific details; occasional errors with fast speech or accents.",
+            "4": "Consistently accurate on specific details across all four parts and accent types.",
+            "5": "Perfect detail accuracy — captures all specific information including in fast, accented speech."
+          }
+        },
+        {
+          "skill_id": "ld_form_completion",
+          "skill_name": "Form and Note Completion",
+          "description": "Accurately completing forms, notes and tables with information from the audio",
+          "ranks": {
+            "1": "Cannot match audio information to form fields; fills in wrong sections or leaves blanks.",
+            "2": "Completes obvious form fields but misses information requiring prediction or inference.",
+            "3": "Completes most form fields accurately; occasional spelling errors or missed items.",
+            "4": "Consistently accurate form completion with correct spelling and appropriate format.",
+            "5": "Perfect form completion — accurately captures and formats all required information."
+          }
+        },
+        {
+          "skill_id": "ld_number_recognition",
+          "skill_name": "Number and Spelling Recognition",
+          "description": "Accurately capturing numbers, prices, dates, times and spelled-out words",
+          "ranks": {
+            "1": "Frequently mishears numbers and cannot follow spelled words.",
+            "2": "Captures simple numbers but struggles with large figures, decimals or spelled sequences.",
+            "3": "Reliably captures most numbers and spellings at normal pace.",
+            "4": "Consistently accurate with all number formats and letter-by-letter spelling.",
+            "5": "Perfect accuracy on all numerical and spelling information at any speed."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "lm",
+      "category_name": "Main Idea and Gist",
+      "description": "Understanding the overall purpose, topic and main points of audio passages",
+      "skills": [
+        {
+          "skill_id": "lm_main_idea",
+          "skill_name": "Main Idea from Audio",
+          "description": "Identifying the main topic, purpose or argument of a spoken passage",
+          "ranks": {
+            "1": "Cannot identify the main idea; focuses on individual words rather than overall meaning.",
+            "2": "Identifies the general topic but cannot state the main argument or purpose.",
+            "3": "Correctly identifies the main idea in most passages; occasional errors in Part 4.",
+            "4": "Consistently identifies the main idea and purpose across all four parts.",
+            "5": "Expert main idea identification — instantly grasps purpose and argument in all audio types."
+          }
+        },
+        {
+          "skill_id": "lm_speaker_purpose",
+          "skill_name": "Speaker Purpose and Attitude",
+          "description": "Identifying why a speaker says something and their attitude or opinion",
+          "ranks": {
+            "1": "Cannot identify speaker purpose or attitude; misses all opinion and attitude markers.",
+            "2": "Identifies obvious opinions but misses hedging, irony or implicit attitude.",
+            "3": "Identifies speaker purpose and main attitude in most contexts.",
+            "4": "Consistently identifies purpose, attitude and degree of certainty across all parts.",
+            "5": "Expert identification of all speaker stances including subtle attitude and implicit purpose."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "li",
+      "category_name": "Inference and Context",
+      "description": "Drawing conclusions from implied meaning in spoken English",
+      "skills": [
+        {
+          "skill_id": "li_inference",
+          "skill_name": "Inference from Audio",
+          "description": "Drawing logical conclusions from what is implied but not explicitly stated in the audio",
+          "ranks": {
+            "1": "Cannot make inferences from audio; only answers based on explicitly stated information.",
+            "2": "Makes simple inferences from clear context but fails with subtle implied meaning.",
+            "3": "Draws reasonable inferences in most contexts; struggles with Part 3 abstract discussion.",
+            "4": "Consistently draws accurate inferences including from complex academic discussions.",
+            "5": "Expert audio inference — correctly interprets all implied meaning across all four parts."
+          }
+        },
+        {
+          "skill_id": "li_distractor_resistance",
+          "skill_name": "Distractor Resistance",
+          "description": "Avoiding incorrect answers that are mentioned in the audio but are not the correct response",
+          "ranks": {
+            "1": "Frequently selects distractor answers; cannot distinguish correct answers from distractors.",
+            "2": "Avoids obvious distractors but is misled by information that is later corrected.",
+            "3": "Resists most distractors; occasionally misled by information that contradicts the answer.",
+            "4": "Consistently identifies and ignores distractors including subtle corrections and changes.",
+            "5": "Expert distractor resistance — never misled by incorrect options or false information."
+          }
+        }
+      ]
+    },
+    {
+      "category_id": "ls",
+      "category_name": "Listening Strategies",
+      "description": "Effective use of prediction, keyword tracking and note-taking while listening",
+      "skills": [
+        {
+          "skill_id": "ls_prediction",
+          "skill_name": "Answer Prediction",
+          "description": "Using questions and context to predict the type of answer before hearing it",
+          "ranks": {
+            "1": "Does not predict answer type; surprised by question formats and misses answers.",
+            "2": "Predicts answer type for simple questions but not for complex multi-part items.",
+            "3": "Effectively predicts answer type for most question formats.",
+            "4": "Consistently predicts both answer type and probable content before listening.",
+            "5": "Expert prediction — accurately anticipates answer type and content for all question formats."
+          }
+        }
+      ]
+    }
+  ]
+}
