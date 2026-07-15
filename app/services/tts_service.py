@@ -13,6 +13,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 dashscope.api_key = os.getenv("DASHSCOPE_API_KEY")
+dashscope.base_http_api_url = os.getenv(
+    "DASHSCOPE_BASE_URL",
+    "https://ws-65ggehps6g6aqox2.ap-southeast-1.maas.aliyuncs.com/api/v1"
+)
 
 # ─── TTS Model Configuration ──────────────────────────────────────────────────
 TTS_MODEL = "qwen3-tts-flash-2025-11-27"

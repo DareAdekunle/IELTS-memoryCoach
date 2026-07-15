@@ -209,7 +209,8 @@ async def submit_essay_stream(
     full_prompt = template.format(
         prompt=request.prompt,
         essay=request.essay,
-        memories=memory_context
+        memories=memory_context,
+        rubric="Task Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy"
     )
 
     from app.services.qwen_service import client, QWEN_MODEL
