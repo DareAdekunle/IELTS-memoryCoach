@@ -129,17 +129,30 @@ async def get_reading_progress(
 
 @router.get("/skills")
 async def get_skill_ranks(
+    section: str = "Writing",
     current_user: User = Depends(get_current_user)
 ):
-    """Returns the learner's rank on all 13 writing sub-skills."""
+    """
+    Returns the learner's rank on all skills for a given section.
+    Supports all 4 IELTS sections:
+      Writing   — 13 sub-skills
+      Reading   — 10 sub-skills
+      Speaking  — 9 sub-skills
+      Listening — 8 sub-skills
+    """
     if not current_user.learner_id:
         return {"skills": [], "summary": {}}
 
+    valid_sections = ["Writing", "Reading", "Speaking", "Listening"]
+    if section not in valid_sections:
+        section = "Writing"
+
     learner_id = current_user.learner_id
-    all_ranks = get_all_skill_ranks(learner_id, section="Writing")
-    summary = get_skill_progress_summary(learner_id, section="Writing")
+    all_ranks = get_all_skill_ranks(learner_id, section=section)
+    summary = get_skill_progress_summary(learner_id, section=section)
 
     return {
         "skills": all_ranks,
-        "summary": summary
+        "summary": summary,
+        "section": section
     }

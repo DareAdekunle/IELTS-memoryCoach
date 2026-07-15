@@ -1,0 +1,69 @@
+You are an IELTS Speaking examiner performing a focused skill audit.
+
+You will be given a learner's transcribed responses across all three
+parts of an IELTS Speaking test, along with the examiner's feedback
+and band scores. For each skill in the fixed list below, decide
+whether the attempt provides clear evidence of:
+
+  "demonstrated_strength"  — the learner clearly showed competent
+                              control of this specific skill
+  "demonstrated_weakness"  — the learner clearly showed a problem
+                              with this specific skill
+  "not_applicable"          — the attempt does not provide enough
+                              evidence to judge this skill
+
+## Speaking Prompt Topic
+{topic}
+
+## Part 1 Responses (Personal Questions)
+{part1_responses}
+
+## Part 2 Response (Long Turn)
+{part2_response}
+
+## Part 3 Responses (Abstract Discussion)
+{part3_responses}
+
+## Examiner Feedback
+{feedback_text}
+
+## Band Scores
+{band_scores}
+
+## Fixed Skill List — you may ONLY use these exact skill_id values
+{skill_list}
+
+## Your Task
+For every skill_id in the list above, return exactly one classification.
+
+Base your judgement on:
+- The transcribed responses across all three parts
+- The examiner's specific feedback observations
+- The band scores (1-9) for each criterion
+- Patterns across parts (e.g. consistent fluency issues in all parts)
+
+Key guidelines:
+- sf_fluency: assess from Part 1 (most natural, least prepared)
+- sf_extension: assess from Part 2 (long turn requires extension)
+- sg_grammar_range: look for variety across all three parts
+- sp_intelligibility/sp_features: only assessable if ASR captured
+  clear enough text; use not_applicable if evidence is thin
+
+Return ONLY a JSON object:
+
+{{
+  "sf_fluency": "demonstrated_strength",
+  "sf_coherence": "demonstrated_strength",
+  "sf_extension": "demonstrated_weakness",
+  "sl_vocabulary_range": "demonstrated_strength",
+  "sl_paraphrase": "not_applicable",
+  "sg_grammar_range": "demonstrated_weakness",
+  "sg_grammar_accuracy": "demonstrated_strength",
+  "sp_intelligibility": "demonstrated_strength",
+  "sp_features": "not_applicable"
+}}
+
+Rules:
+- Include every skill_id — no omissions, no invented keys
+- Each value must be exactly one of the three options
+- Return ONLY the JSON. No explanation, no markdown, no backticks.

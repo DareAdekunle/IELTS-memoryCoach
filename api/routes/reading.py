@@ -18,15 +18,20 @@ from app.services.memory_service import (
     get_relevant_memories,
     save_reading_attempt,
     extract_reading_memories,
-    update_memories
+    update_memories,
+    apply_skill_classifications_batch
 )
+from app.services.skill_classifier_service import classify_reading_skills
+from app.utils.logger import get_logger
+
+logger = get_logger("api.routes.reading")
 
 router = APIRouter(prefix="/reading", tags=["reading"])
 
 
 class SubmitReadingRequest(BaseModel):
     passage_id: str
-    answers: dict  # {"q1": "B", "q2": "True", "q3": "some text answer"}
+    answers: dict
 
 
 @router.get("/passages")
@@ -34,10 +39,7 @@ async def get_passages(
     difficulty: Optional[str] = None,
     current_user: User = Depends(get_current_user)
 ):
-    """
-    Returns a summary list of all available reading passages.
-    Used to populate the passage selection screen.
-    """
+    """Returns all reading passage summaries."""
     summaries = get_all_passages_summary()
     if difficulty:
         summaries = [
@@ -52,7 +54,7 @@ async def get_random_reading_passage(
     difficulty: Optional[str] = None,
     current_user: User = Depends(get_current_user)
 ):
-    """Returns a random full reading passage with all questions."""
+    """Returns a random full reading passage."""
     try:
         passage = get_random_passage(difficulty=difficulty)
         return {"passage": passage}
@@ -79,11 +81,10 @@ async def get_reading_memories(
     """Returns active reading memories for the memory panel."""
     if not current_user.learner_id:
         return {"memories": []}
-
     memories = get_relevant_memories(
         current_user.learner_id,
         section="Reading",
-        limit=5
+        limit=3
     )
     return {"memories": memories}
 
@@ -96,9 +97,8 @@ async def submit_reading(
 ):
     """
     Submits reading answers for evaluation.
-    Objective questions (MC, T/F/NG) checked instantly.
-    Short answers evaluated by Qwen.
-    Returns results immediately, memory tasks run in background.
+    Returns results immediately.
+    Memory extraction + skill classification run in background.
     """
     if not current_user.learner_id:
         raise HTTPException(
@@ -107,13 +107,10 @@ async def submit_reading(
         )
 
     learner_id = current_user.learner_id
-
-    # Get the passage
     passage = get_passage_by_id(request.passage_id)
     if not passage:
         raise HTTPException(status_code=404, detail="Passage not found")
 
-    # Evaluate answers
     try:
         results = evaluate_reading_attempt(
             passage=passage,
@@ -125,18 +122,16 @@ async def submit_reading(
             detail=f"Evaluation failed: {str(e)}"
         )
 
-    # Save attempt synchronously
     try:
         save_reading_attempt(
             learner_id=learner_id,
             attempt_result=results
         )
     except Exception as e:
-        print(f"Warning: Could not save reading attempt: {e}")
+        logger.warning(f"Could not save reading attempt: {e}")
 
-    # Memory tasks in background
     background_tasks.add_task(
-        _run_reading_post_tasks,
+        _reading_post_tasks,
         learner_id=learner_id,
         results=results
     )
@@ -152,15 +147,20 @@ async def submit_reading(
     }
 
 
-async def _run_reading_post_tasks(learner_id: str, results: dict):
-    """Background memory tasks for reading submissions."""
+async def _reading_post_tasks(learner_id: str, results: dict):
+    """
+    Background tasks after reading submission.
+    Runs memory extraction AND skill classification.
+    Both are non-blocking — errors logged but never surface to learner.
+    """
+    # Memory extraction (existing)
     try:
         extract_reading_memories(
             learner_id=learner_id,
             attempt_result=results
         )
     except Exception as e:
-        print(f"Reading memory extraction failed: {e}")
+        logger.warning(f"Reading memory extraction failed: {e}")
 
     try:
         skill_accuracy = results.get("skill_accuracy", {})
@@ -173,12 +173,12 @@ async def _run_reading_post_tasks(learner_id: str, results: dict):
                     for skill, acc in skill_accuracy.items()
                 },
                 "strengths": [
-                    f"{skill} accuracy: {acc}%"
+                    f"{skill}: {acc}%"
                     for skill, acc in skill_accuracy.items()
                     if acc >= 80
                 ],
                 "weaknesses": [
-                    f"{skill} accuracy: {acc}%"
+                    f"{skill}: {acc}%"
                     for skill, acc in skill_accuracy.items()
                     if acc < 60
                 ],
@@ -189,4 +189,28 @@ async def _run_reading_post_tasks(learner_id: str, results: dict):
             }
         )
     except Exception as e:
-        print(f"Reading memory update failed: {e}")
+        logger.warning(f"Reading memory update failed: {e}")
+
+    # Skill classification (NEW — updates learner_skill_ranks)
+    try:
+        classifications = classify_reading_skills(
+            passage_title=results.get("passage_title", ""),
+            question_results=results.get("question_results", []),
+            skill_accuracy=results.get("skill_accuracy", {}),
+            total_score=results.get("total_score", 0),
+            max_score=results.get("max_score", 1),
+            percentage=results.get("percentage", 0)
+        )
+        rank_results = apply_skill_classifications_batch(
+            learner_id=learner_id,
+            section="Reading",
+            classifications=classifications
+        )
+        ranked_up = [r for r in rank_results if r.get("ranked_up")]
+        if ranked_up:
+            logger.info(
+                f"Reading rank-ups for {learner_id}: "
+                f"{[r['skill_id'] for r in ranked_up]}"
+            )
+    except Exception as e:
+        logger.warning(f"Reading skill classification failed: {e}")

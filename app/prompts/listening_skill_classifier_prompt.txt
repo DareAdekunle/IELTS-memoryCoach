@@ -1,0 +1,70 @@
+You are an IELTS Listening examiner performing a focused skill audit.
+
+You will be given a learner's answers to a listening track along with
+the correct answers, their score, and skill accuracy data. For each
+skill in the fixed list below, decide whether the attempt provides
+clear evidence of:
+
+  "demonstrated_strength"  — the learner clearly showed competent
+                              control of this specific skill
+  "demonstrated_weakness"  — the learner clearly showed a problem
+                              with this specific skill
+  "not_applicable"          — the attempt does not provide enough
+                              evidence to judge this skill
+
+## Track Title
+{track_title}
+
+## Part
+Part {part} — {part_description}
+
+## Question Results
+{question_results}
+
+## Skill Accuracy by Type
+{skill_accuracy}
+
+## Overall Score
+{total_score} / {max_score} ({percentage}%)
+
+## Fixed Skill List — you may ONLY use these exact skill_id values
+{skill_list}
+
+## Your Task
+For every skill_id in the list above, return exactly one classification.
+
+Base your judgement on:
+- Which question types the learner got right/wrong
+- The skill accuracy data by type
+- The specific errors made
+
+Key guidelines:
+- ld_detail_accuracy: assess from all question types
+- ld_form_completion: only if form/note completion questions present
+- ld_number_recognition: only if numbers/dates/times tested
+- lm_main_idea: only assessable in Parts 2 and 4 (monologue)
+- lm_speaker_purpose: only in Parts 3 and 4
+- li_inference: only if inference-based questions were in the track
+- li_distractor_resistance: look for patterns of selecting the first
+  mentioned option rather than the confirmed answer
+- ls_prediction: not directly assessable from answers alone —
+  use not_applicable unless clear evidence of poor question
+  preparation (all wrong in order suggests no preview)
+
+Return ONLY a JSON object:
+
+{{
+  "ld_detail_accuracy": "demonstrated_strength",
+  "ld_form_completion": "demonstrated_weakness",
+  "ld_number_recognition": "not_applicable",
+  "lm_main_idea": "demonstrated_strength",
+  "lm_speaker_purpose": "not_applicable",
+  "li_inference": "demonstrated_weakness",
+  "li_distractor_resistance": "demonstrated_strength",
+  "ls_prediction": "not_applicable"
+}}
+
+Rules:
+- Include every skill_id — no omissions, no invented keys
+- Each value must be exactly one of the three options
+- Return ONLY the JSON. No explanation, no markdown, no backticks.
