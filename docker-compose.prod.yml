@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   app:
     build:
@@ -9,16 +8,22 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     env_file:
       - .env
     environment:
-      - FRONTEND_URL=http://${ECS_PUBLIC_IP}
-      - GOOGLE_REDIRECT_URI=http://${ECS_PUBLIC_IP}/api/auth/google/callback
+      - FRONTEND_URL=https://ielts.qonda.xyz
+      - GOOGLE_REDIRECT_URI=https://ielts.qonda.xyz/api/auth/google/callback
     volumes:
       # SQLite database — persists across container restarts and rebuilds
       - db_data:/app/data/db
       # TTS audio cache — avoids regenerating Listening track audio
       - tts_cache:/app/tts_cache
+      # Let's Encrypt SSL certificates — mounted read-only into container
+      - /etc/letsencrypt/live/ielts.qonda.xyz/fullchain.pem:/etc/letsencrypt/live/ielts.qonda.xyz/fullchain.pem:ro
+      - /etc/letsencrypt/live/ielts.qonda.xyz/privkey.pem:/etc/letsencrypt/live/ielts.qonda.xyz/privkey.pem:ro
+      # Certbot webroot for renewals
+      - /var/www/certbot:/var/www/certbot:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
