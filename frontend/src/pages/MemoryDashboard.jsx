@@ -26,7 +26,7 @@ function ConfidenceBar({ value, max = 1 }) {
   const color = pct >= 70 ? 'bg-green-500' : pct >= 40 ? 'bg-yellow-500' : 'bg-red-500'
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: pct + '%' }} />
       </div>
       <span className="text-gray-500 text-xs w-8 text-right">{pct}%</span>
@@ -50,14 +50,14 @@ function TimelineCard({ memory }) {
       (isArchived ? 'opacity-60' : '')
     }>
       {/* Timeline line */}
-      <div className="absolute left-3 top-0 bottom-0 w-px bg-gray-800" />
+      <div className="absolute left-3 top-0 bottom-0 w-px bg-gray-100" />
 
       {/* Timeline dot */}
       <div className={
         'absolute left-0 top-1 w-6 h-6 rounded-full flex items-center ' +
         'justify-center text-xs border-2 ' +
         (isArchived
-          ? 'bg-gray-800 border-gray-600'
+          ? 'bg-gray-100 border-gray-300'
           : memory.memory_type === 'weakness'
           ? 'bg-yellow-500/20 border-yellow-500/50'
           : 'bg-green-500/20 border-green-500/50')
@@ -69,20 +69,20 @@ function TimelineCard({ memory }) {
       <div className={
         'rounded-xl p-4 border ' +
         (isArchived
-          ? 'border-gray-700 bg-gray-900/50'
-          : TYPE_COLORS[memory.memory_type] || 'border-gray-800 bg-gray-900')
+          ? 'border-gray-200 bg-white/50'
+          : TYPE_COLORS[memory.memory_type] || 'border-gray-200 bg-white')
       }>
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-white text-sm font-medium">{memory.skill}</span>
+            <span className="text-gray-900 text-sm font-medium">{memory.skill}</span>
             <span className={
               'text-xs px-2 py-0.5 rounded-full ' +
-              (SECTION_COLORS[memory.section] || 'bg-gray-700 text-gray-400')
+              (SECTION_COLORS[memory.section] || 'bg-gray-200 text-gray-500')
             }>
               {memory.section}
             </span>
             {isArchived && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-400">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-500">
                 Mastered
               </span>
             )}
@@ -92,7 +92,7 @@ function TimelineCard({ memory }) {
           </span>
         </div>
 
-        <p className="text-gray-300 text-sm leading-relaxed mb-3">
+        <p className="text-gray-600 text-sm leading-relaxed mb-3">
           {memory.memory_text}
         </p>
 
@@ -148,23 +148,23 @@ export default function MemoryDashboard() {
       key={mem.memory_id}
       className={
         'rounded-xl p-4 border ' +
-        (TYPE_COLORS[mem.memory_type] || 'border-gray-800 bg-gray-900')
+        (TYPE_COLORS[mem.memory_type] || 'border-gray-200 bg-white')
       }
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span>{TYPE_ICONS[mem.memory_type] || '📝'}</span>
-          <span className="text-white text-sm font-medium">{mem.skill}</span>
+          <span className="text-gray-900 text-sm font-medium">{mem.skill}</span>
           <span className={
             'text-xs px-2 py-0.5 rounded-full ' +
-            (SECTION_COLORS[mem.section] || 'bg-gray-700 text-gray-400')
+            (SECTION_COLORS[mem.section] || 'bg-gray-200 text-gray-500')
           }>
             {mem.section}
           </span>
         </div>
         <div className="flex-shrink-0 text-right">
           <div className="flex items-center gap-1 justify-end">
-            <div className="h-1.5 w-16 bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-1.5 w-16 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-brand-500 rounded-full"
                 style={{ width: Math.round((mem.confidence || 0) * 100) + '%' }}
@@ -177,7 +177,7 @@ export default function MemoryDashboard() {
           <p className="text-gray-600 text-xs mt-0.5">{mem.evidence_count} evidence</p>
         </div>
       </div>
-      <p className="text-gray-300 text-sm leading-relaxed">{mem.memory_text}</p>
+      <p className="text-gray-600 text-sm leading-relaxed">{mem.memory_text}</p>
     </div>
   )
 
@@ -194,11 +194,11 @@ export default function MemoryDashboard() {
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Brain className="w-6 h-6 text-green-400" />
           Memory Dashboard
         </h1>
-        <p className="text-gray-400 mt-1">
+        <p className="text-gray-500 mt-1">
           Everything your coach has learned about you — and how it evolved
         </p>
       </div>
@@ -217,8 +217,8 @@ export default function MemoryDashboard() {
                 : '—'
             }
           ].map(({ label, value }) => (
-            <div key={label} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-              <p className="text-xl font-bold text-white">{value}</p>
+            <div key={label} className="bg-white border border-gray-200 rounded-2xl p-4">
+              <p className="text-xl font-bold text-gray-900">{value}</p>
               <p className="text-gray-500 text-sm mt-0.5">{label}</p>
             </div>
           ))}
@@ -232,19 +232,19 @@ export default function MemoryDashboard() {
             <button
               key={section}
               onClick={() => { setSectionFilter(section); setTab('timeline') }}
-              className="bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-3 text-left transition-colors"
+              className="bg-white border border-gray-200 hover:border-gray-200 rounded-xl p-3 text-left transition-colors"
             >
               <span className={
                 'text-xs font-medium px-2 py-0.5 rounded-full ' +
-                (SECTION_COLORS[section] || 'bg-gray-700 text-gray-400')
+                (SECTION_COLORS[section] || 'bg-gray-200 text-gray-500')
               }>
                 {section}
               </span>
               <div className="mt-2 space-y-1">
-                <p className="text-gray-400 text-xs">
+                <p className="text-gray-500 text-xs">
                   ⚠️ {weaknesses} weakness{weaknesses !== 1 ? 'es' : ''}
                 </p>
-                <p className="text-gray-400 text-xs">
+                <p className="text-gray-500 text-xs">
                   ✅ {strengths} strength{strengths !== 1 ? 's' : ''}
                 </p>
                 {archived > 0 && (
@@ -269,8 +269,8 @@ export default function MemoryDashboard() {
             className={
               'px-4 py-2 rounded-xl text-sm font-medium transition-colors ' +
               (tab === t.id
-                ? 'bg-brand-500 text-white'
-                : 'bg-gray-800 text-gray-400 hover:text-white')
+                ? 'bg-brand-500 text-gray-900'
+                : 'bg-gray-100 text-gray-500 hover:text-gray-900')
             }
           >
             {t.label}
@@ -290,8 +290,8 @@ export default function MemoryDashboard() {
                 className={
                   'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ' +
                   (sectionFilter === s
-                    ? 'bg-gray-600 text-white'
-                    : 'bg-gray-800 text-gray-500 hover:text-gray-300')
+                    ? 'bg-gray-600 text-gray-900'
+                    : 'bg-gray-100 text-gray-500 hover:text-gray-600')
                 }
               >
                 {s}
@@ -300,7 +300,7 @@ export default function MemoryDashboard() {
           </div>
 
           {filteredTimeline.length === 0 ? (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center">
+            <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center">
               <Brain className="w-12 h-12 text-gray-700 mx-auto mb-3" />
               <p className="text-gray-500">
                 No memories yet for this section. Complete some practice sessions
@@ -344,7 +344,7 @@ export default function MemoryDashboard() {
       {tab === 'active' && (
         <div className="space-y-3">
           {memories.active.length === 0 ? (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center">
+            <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center">
               <Brain className="w-12 h-12 text-gray-700 mx-auto mb-3" />
               <p className="text-gray-500">
                 No active memories yet. Complete some practice sessions
@@ -361,7 +361,7 @@ export default function MemoryDashboard() {
       {tab === 'archived' && (
         <div className="space-y-3">
           {memories.archived.length === 0 ? (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center">
+            <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center">
               <Archive className="w-12 h-12 text-gray-700 mx-auto mb-3" />
               <p className="text-gray-500">
                 No mastered skills yet. Memories are archived when your

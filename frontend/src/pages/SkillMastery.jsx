@@ -20,7 +20,7 @@ const BAND_COLORS = {
 
 function getBandColors(band) {
   if (band === null || band === undefined) {
-    return { bg: 'bg-gray-800', border: 'border-gray-700', text: 'text-gray-500', bar: 'bg-gray-700' }
+    return { bg: 'bg-gray-100', border: 'border-gray-200', text: 'text-gray-500', bar: 'bg-gray-200' }
   }
   return BAND_COLORS[band] || BAND_COLORS[4.0]
 }
@@ -58,7 +58,7 @@ function StreakDots({ streak, threshold = 3 }) {
       {[...Array(threshold)].map((_, i) => (
         <div
           key={i}
-          className={'w-2.5 h-2.5 rounded-full ' + (i < streak ? 'bg-brand-500' : 'bg-gray-700')}
+          className={'w-2.5 h-2.5 rounded-full ' + (i < streak ? 'bg-brand-500' : 'bg-gray-200')}
         />
       ))}
     </div>
@@ -83,15 +83,15 @@ function SkillCard({ skill, isWeakest }) {
       'rounded-2xl p-4 border transition-all ' +
       (isWeakest
         ? 'border-brand-500/50 bg-brand-500/5'
-        : 'border-gray-800 bg-gray-900 hover:border-gray-700')
+        : 'border-gray-200 bg-white hover:border-gray-200')
     }>
       {/* Header row */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-white font-medium text-sm truncate">{skill.skill_name}</p>
+            <p className="text-gray-900 font-medium text-sm truncate">{skill.skill_name}</p>
             {isWeakest && (
-              <span className="flex items-center gap-1 text-xs text-brand-400 bg-brand-500/15 px-2 py-0.5 rounded-full flex-shrink-0">
+              <span className="flex items-center gap-1 text-xs text-brand-600 bg-brand-500/15 px-2 py-0.5 rounded-full flex-shrink-0">
                 <Zap className="w-3 h-3" />Focus
               </span>
             )}
@@ -111,7 +111,7 @@ function SkillCard({ skill, isWeakest }) {
             <span className="text-gray-600 text-xs">→ {nextBandDisplay}</span>
           )}
         </div>
-        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
           <div
             className={'h-full rounded-full transition-all ' + colors.bar}
             style={{ width: pct + '%' }}
@@ -228,18 +228,18 @@ export default function SkillMastery() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Trophy className="w-6 h-6 text-yellow-400" />
             Skill Mastery
           </h1>
-          <p className="text-gray-400 mt-1">
+          <p className="text-gray-500 mt-1">
             Your IELTS band estimates across all skills
           </p>
         </div>
         <Link
           to={sectionConfig.practiceLink}
           className={
-            'flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-xl transition-colors ' +
+            'flex items-center gap-2 px-4 py-2 text-gray-900 text-sm font-medium rounded-xl transition-colors ' +
             sectionConfig.bg + ' ' + sectionConfig.color
           }
         >
@@ -256,8 +256,8 @@ export default function SkillMastery() {
           { label: 'Band 8.0+ skills', value: totalAdvanced },
           { label: 'Active section', value: activeSection },
         ].map(({ label, value }) => (
-          <div key={label} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-            <p className="text-xl font-bold text-white">{value}</p>
+          <div key={label} className="bg-white border border-gray-200 rounded-2xl p-4">
+            <p className="text-xl font-bold text-gray-900">{value}</p>
             <p className="text-gray-500 text-sm mt-0.5">{label}</p>
           </div>
         ))}
@@ -283,7 +283,7 @@ export default function SkillMastery() {
                 'px-4 py-2 rounded-xl text-sm font-medium transition-colors ' +
                 (isActive
                   ? cfg.bg + ' ' + cfg.color + ' ' + cfg.border + ' border'
-                  : 'bg-gray-800 text-gray-400 hover:text-white')
+                  : 'bg-gray-100 text-gray-500 hover:text-gray-900')
               }
             >
               {section}
@@ -301,10 +301,10 @@ export default function SkillMastery() {
           <div className="flex items-start gap-4">
             <TrendingUp className={'w-6 h-6 flex-shrink-0 mt-0.5 ' + sectionConfig.color} />
             <div>
-              <p className="text-white font-medium mb-1">
+              <p className="text-gray-900 font-medium mb-1">
                 Submit a {activeSection} practice session to unlock your band estimates
               </p>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-500 text-sm">
                 After each session, the Coach classifies your performance across{' '}
                 {currentSkills.length} {activeSection} skills and assigns an estimated
                 IELTS band (4.0–8.5) per skill. Three consecutive strong performances
@@ -318,8 +318,8 @@ export default function SkillMastery() {
       {/* Section summary + coach recommendation */}
       <div className="grid lg:grid-cols-3 gap-4 mb-6">
         {/* Section stats */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-          <p className="text-sm font-medium text-gray-400 mb-3">{activeSection} overview</p>
+        <div className="bg-white border border-gray-200 rounded-2xl p-4">
+          <p className="text-sm font-medium text-gray-500 mb-3">{activeSection} overview</p>
           <div className="space-y-2">
             {[
               {
@@ -341,7 +341,7 @@ export default function SkillMastery() {
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between">
                 <span className="text-gray-500 text-sm">{label}</span>
-                <span className="text-white text-sm font-medium">{value}</span>
+                <span className="text-gray-900 text-sm font-medium">{value}</span>
               </div>
             ))}
           </div>
@@ -354,14 +354,14 @@ export default function SkillMastery() {
               <Zap className={'w-4 h-4 ' + sectionConfig.color} />
               <span className={'text-sm font-medium ' + sectionConfig.color}>Coach recommendation</span>
             </div>
-            <p className="text-white font-semibold mb-1">{weakest.skill_name}</p>
-            <p className="text-gray-400 text-sm mb-3">
+            <p className="text-gray-900 font-semibold mb-1">{weakest.skill_name}</p>
+            <p className="text-gray-500 text-sm mb-3">
               {weakest.category_name}
               {weakest.band !== null && (
                 <span className="ml-2">· Currently {weakest.band_display}</span>
               )}
               {(weakest.clean_streak || 0) > 0 && (
-                <span className="text-brand-400 ml-2">
+                <span className="text-brand-600 ml-2">
                   · {3 - (weakest.clean_streak || 0)} more to {weakest.band !== null ? `Band ${(weakest.band + 0.5).toFixed(1)}` : 'next band'}
                 </span>
               )}
@@ -377,26 +377,26 @@ export default function SkillMastery() {
       </div>
 
       {/* How bands work */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-6">
-        <h3 className="text-sm font-semibold text-gray-300 mb-3">How band estimates work</h3>
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-6">
+        <h3 className="text-sm font-semibold text-gray-600 mb-3">How band estimates work</h3>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <p className="text-2xl mb-1">✍️</p>
-            <p className="text-white text-xs font-medium">Complete a session</p>
+            <p className="text-gray-900 text-xs font-medium">Complete a session</p>
             <p className="text-gray-500 text-xs mt-1">
               The Coach classifies each skill as strength, weakness, or not applicable
             </p>
           </div>
           <div>
             <p className="text-2xl mb-1">🔥</p>
-            <p className="text-white text-xs font-medium">Build a streak</p>
+            <p className="text-gray-900 text-xs font-medium">Build a streak</p>
             <p className="text-gray-500 text-xs mt-1">
               3 consecutive strengths lifts your band by 0.5. Any weakness resets streak to 0
             </p>
           </div>
           <div>
             <p className="text-2xl mb-1">🏆</p>
-            <p className="text-white text-xs font-medium">Reach Band 8.5</p>
+            <p className="text-gray-900 text-xs font-medium">Reach Band 8.5</p>
             <p className="text-gray-500 text-xs mt-1">
               Bands range 4.0–8.5 per skill. Your overall band is the average across all assessed skills
             </p>
@@ -416,7 +416,7 @@ export default function SkillMastery() {
       </div>
 
       {/* Band legend */}
-      <div className="mt-6 bg-gray-900 border border-gray-800 rounded-2xl p-4">
+      <div className="mt-6 bg-white border border-gray-200 rounded-2xl p-4">
         <p className="text-gray-500 text-xs mb-3 font-medium">Band scale</p>
         <div className="flex flex-wrap gap-3">
           {[
@@ -430,7 +430,7 @@ export default function SkillMastery() {
             return (
               <div key={band} className="flex items-center gap-2">
                 <div className={'w-3 h-3 rounded-full ' + colors.bar} />
-                <span className="text-gray-400 text-xs">
+                <span className="text-gray-500 text-xs">
                   {band.toFixed(1)}–{(band + 0.5).toFixed(1)} — {label}
                 </span>
               </div>
