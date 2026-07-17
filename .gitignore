@@ -26,3 +26,7 @@ frontend/dist/
 
 # Docker
 *.log
+
+# Agents markdown files
+AGENT.md
+CLAUDE.md

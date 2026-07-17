@@ -4,7 +4,7 @@
     "title": "The History of Public Libraries",
     "difficulty": "beginner",
     "topic": "Society and Culture",
-    "passage": "Public libraries have played an important role in communities for hundreds of years. The first public libraries appeared in ancient civilisations, where collections of clay tablets and papyrus scrolls were stored for scholars and government officials. However, these early libraries were not open to the general public.\n\nThe modern concept of a free public library — one that any member of the public could use without charge — developed in the nineteenth century. In 1850, the British Parliament passed the Public Libraries Act, which allowed local councils to establish free libraries funded by local taxes. This was a significant development because it meant that ordinary working-class people, not just the wealthy, could access books and educational materials.\n\nIn the United States, the growth of public libraries was greatly accelerated by the philanthropist Andrew Carnegie. Between 1883 and 1929, Carnegie donated more than 56 million dollars to build 2,509 libraries across the English-speaking world. Carnegie believed strongly that libraries gave poor people the opportunity to educate themselves and improve their lives.\n\nToday, public libraries offer far more than books. Many libraries provide access to computers and the internet, host community events, offer language classes, and provide support services for job seekers. Despite the rise of digital technology and concerns about declining visitor numbers, public libraries remain an important community resource in many countries around the world.",
+    "passage": "Public libraries have played an important role in communities for hundreds of years. The first public libraries appeared in ancient civilisations, where collections of clay tablets and papyrus scrolls were stored for scholars and government officials. However, these early libraries were not open to the general public.\n\nThe modern concept of a free public library \u2014 one that any member of the public could use without charge \u2014 developed in the nineteenth century. In 1850, the British Parliament passed the Public Libraries Act, which allowed local councils to establish free libraries funded by local taxes. This was a significant development because it meant that ordinary working-class people, not just the wealthy, could access books and educational materials.\n\nIn the United States, the growth of public libraries was greatly accelerated by the philanthropist Andrew Carnegie. Between 1883 and 1929, Carnegie donated more than 56 million dollars to build 2,509 libraries across the English-speaking world. Carnegie believed strongly that libraries gave poor people the opportunity to educate themselves and improve their lives.\n\nToday, public libraries offer far more than books. Many libraries provide access to computers and the internet, host community events, offer language classes, and provide support services for job seekers. Despite the rise of digital technology and concerns about declining visitor numbers, public libraries remain an important community resource in many countries around the world.",
     "questions": [
       {
         "question_id": "q1",
@@ -53,7 +53,7 @@
         "question_type": "true_false_ng",
         "question": "Early libraries in ancient civilisations were available to everyone in the community.",
         "answer": "False",
-        "explanation": "The passage states that early libraries were not open to the general public — they were for scholars and government officials only.",
+        "explanation": "The passage states that early libraries were not open to the general public \u2014 they were for scholars and government officials only.",
         "skill": "detail_retrieval"
       },
       {
@@ -111,7 +111,7 @@
     "title": "The Science of Sleep",
     "difficulty": "intermediate",
     "topic": "Health and Science",
-    "passage": "Sleep is one of the most fundamental biological needs of the human body, yet it remains one of the least understood. Scientists have known for decades that sleep deprivation has serious consequences for physical and mental health, but the precise mechanisms by which sleep restores and repairs the body are still being investigated.\n\nDuring sleep, the body goes through several distinct stages. The first stage is light sleep, during which the body begins to relax and brain activity slows. This is followed by deeper stages of non-REM sleep, where the body carries out most of its physical repair work — releasing growth hormones, repairing muscle tissue and consolidating memories. The final stage, REM sleep (Rapid Eye Movement), is associated with vivid dreaming and is believed to play a crucial role in emotional processing and creative thinking.\n\nResearch has consistently shown that adults need between seven and nine hours of sleep per night for optimal functioning. However, surveys suggest that a significant proportion of people in industrialised countries regularly sleep for fewer than six hours. This widespread sleep deprivation has been linked to increased risks of obesity, diabetes, cardiovascular disease and weakened immune function.\n\nOne factor that has significantly disrupted natural sleep patterns is the widespread use of electronic devices before bed. The blue light emitted by smartphones and computer screens suppresses the production of melatonin, the hormone responsible for signalling to the body that it is time to sleep. Sleep researchers strongly recommend avoiding screens for at least one hour before bedtime to allow melatonin levels to rise naturally.\n\nDespite growing awareness of the importance of sleep, many societies continue to treat sleep deprivation as a badge of honour — a sign of hard work and productivity. This cultural attitude, researchers argue, is one of the most significant barriers to addressing what some have described as a global sleep deprivation epidemic.",
+    "passage": "Sleep is one of the most fundamental biological needs of the human body, yet it remains one of the least understood. Scientists have known for decades that sleep deprivation has serious consequences for physical and mental health, but the precise mechanisms by which sleep restores and repairs the body are still being investigated.\n\nDuring sleep, the body goes through several distinct stages. The first stage is light sleep, during which the body begins to relax and brain activity slows. This is followed by deeper stages of non-REM sleep, where the body carries out most of its physical repair work \u2014 releasing growth hormones, repairing muscle tissue and consolidating memories. The final stage, REM sleep (Rapid Eye Movement), is associated with vivid dreaming and is believed to play a crucial role in emotional processing and creative thinking.\n\nResearch has consistently shown that adults need between seven and nine hours of sleep per night for optimal functioning. However, surveys suggest that a significant proportion of people in industrialised countries regularly sleep for fewer than six hours. This widespread sleep deprivation has been linked to increased risks of obesity, diabetes, cardiovascular disease and weakened immune function.\n\nOne factor that has significantly disrupted natural sleep patterns is the widespread use of electronic devices before bed. The blue light emitted by smartphones and computer screens suppresses the production of melatonin, the hormone responsible for signalling to the body that it is time to sleep. Sleep researchers strongly recommend avoiding screens for at least one hour before bedtime to allow melatonin levels to rise naturally.\n\nDespite growing awareness of the importance of sleep, many societies continue to treat sleep deprivation as a badge of honour \u2014 a sign of hard work and productivity. This cultural attitude, researchers argue, is one of the most significant barriers to addressing what some have described as a global sleep deprivation epidemic.",
     "questions": [
       {
         "question_id": "q1",
@@ -218,7 +218,7 @@
     "title": "The Economics of Artificial Intelligence",
     "difficulty": "advanced",
     "topic": "Technology and Economy",
-    "passage": "The rapid advancement of artificial intelligence technologies is reshaping global labour markets in ways that economists are only beginning to understand. While technological disruption is not a new phenomenon — the Industrial Revolution displaced millions of agricultural and craft workers — the speed and breadth of AI-driven change presents challenges that may require fundamentally new economic and social policy responses.\n\nProponents of AI adoption argue that, as with previous technological revolutions, the displacement of workers in some sectors will be offset by the creation of new industries and job categories that do not yet exist. Historical precedent appears to support this view: the mechanisation of agriculture in the twentieth century, for example, did not result in mass permanent unemployment but rather a shift of labour into manufacturing and service industries.\n\nHowever, critics contend that AI represents a qualitatively different kind of technological disruption. Unlike previous technologies that primarily replaced physical labour, AI systems are increasingly capable of performing complex cognitive tasks — legal research, medical diagnosis, financial analysis and creative work — that were previously considered the exclusive domain of highly educated professionals. This, critics argue, means that the displacement effects of AI may be both broader and deeper than those of previous technological transitions.\n\nA further complication is the pace of change. Historical labour market transitions, while disruptive, typically unfolded over generations, giving workers, educational institutions and policy makers time to adapt. The current rate of AI development, by contrast, may compress these transitions into years rather than decades, potentially leaving both individuals and institutions unable to adapt quickly enough.\n\nEconomists remain divided on the long-term employment effects of AI. Some foresee a future of radical abundance in which AI-generated productivity gains are widely shared, reducing the need for human labour while raising living standards. Others warn of increasing inequality, in which the economic gains from AI accrue primarily to those who own the technology rather than those whose labour it displaces. The resolution of this debate will depend not only on the trajectory of AI development itself but on the policy choices that governments make in the coming decades.",
+    "passage": "The rapid advancement of artificial intelligence technologies is reshaping global labour markets in ways that economists are only beginning to understand. While technological disruption is not a new phenomenon \u2014 the Industrial Revolution displaced millions of agricultural and craft workers \u2014 the speed and breadth of AI-driven change presents challenges that may require fundamentally new economic and social policy responses.\n\nProponents of AI adoption argue that, as with previous technological revolutions, the displacement of workers in some sectors will be offset by the creation of new industries and job categories that do not yet exist. Historical precedent appears to support this view: the mechanisation of agriculture in the twentieth century, for example, did not result in mass permanent unemployment but rather a shift of labour into manufacturing and service industries.\n\nHowever, critics contend that AI represents a qualitatively different kind of technological disruption. Unlike previous technologies that primarily replaced physical labour, AI systems are increasingly capable of performing complex cognitive tasks \u2014 legal research, medical diagnosis, financial analysis and creative work \u2014 that were previously considered the exclusive domain of highly educated professionals. This, critics argue, means that the displacement effects of AI may be both broader and deeper than those of previous technological transitions.\n\nA further complication is the pace of change. Historical labour market transitions, while disruptive, typically unfolded over generations, giving workers, educational institutions and policy makers time to adapt. The current rate of AI development, by contrast, may compress these transitions into years rather than decades, potentially leaving both individuals and institutions unable to adapt quickly enough.\n\nEconomists remain divided on the long-term employment effects of AI. Some foresee a future of radical abundance in which AI-generated productivity gains are widely shared, reducing the need for human labour while raising living standards. Others warn of increasing inequality, in which the economic gains from AI accrue primarily to those who own the technology rather than those whose labour it displaces. The resolution of this debate will depend not only on the trajectory of AI development itself but on the policy choices that governments make in the coming decades.",
     "questions": [
       {
         "question_id": "q1",
@@ -267,7 +267,7 @@
         "question_type": "true_false_ng",
         "question": "All economists agree that AI will ultimately create more jobs than it destroys.",
         "answer": "False",
-        "explanation": "The passage states economists remain divided on the long-term employment effects of AI. Some are optimistic, others warn of inequality — there is no consensus.",
+        "explanation": "The passage states economists remain divided on the long-term employment effects of AI. Some are optimistic, others warn of inequality \u2014 there is no consensus.",
         "skill": "detail_retrieval"
       },
       {
@@ -316,6 +316,739 @@
         "question": "The passage presents two contrasting views of AI's economic future. Summarise both views in your own words.",
         "answer": "One view is optimistic: AI will generate so much productivity that living standards will rise and the benefits will be widely shared. The other view is pessimistic: the economic gains from AI will mostly go to the owners of the technology rather than ordinary workers, leading to greater inequality.",
         "explanation": "A complete answer must accurately summarise both the optimistic view of radical abundance and shared gains, and the pessimistic view of inequality and concentrated ownership of AI benefits.",
+        "skill": "inference"
+      }
+    ]
+  },
+  {
+    "passage_id": "reading_004",
+    "title": "The Benefits of Urban Green Spaces",
+    "difficulty": "beginner",
+    "topic": "Environment and Health",
+    "passage": "Parks, gardens and other green spaces are an important part of life in towns and cities. Research has shown that spending time in nature, even in small urban parks, can have significant benefits for people's physical and mental health.\n\nOne of the most well-known benefits of green spaces is their effect on stress. Studies conducted in several countries have found that people who visit parks regularly report lower levels of anxiety and stress than those who spend most of their time indoors. Even a short walk through a park has been shown to reduce the level of stress hormones in the body.\n\nGreen spaces also encourage physical activity. People who live near parks are more likely to exercise regularly because they have convenient, free outdoor spaces available to them. Children who grow up near parks tend to be more physically active and healthier than children who live in areas with few green spaces.\n\nIn addition to individual health benefits, urban green spaces provide important environmental services. Trees and plants in cities absorb carbon dioxide, clean the air, and reduce the urban heat island effect \u2014 the tendency for cities to be significantly warmer than surrounding rural areas. Green spaces also absorb rainwater, which helps to prevent flooding during heavy rainfall.\n\nDespite these benefits, green spaces in many cities are under threat from urban development. As cities grow and demand for housing increases, parks and gardens are sometimes converted into building land. Many urban planners and health experts argue that protecting and expanding green spaces should be a priority for city governments.",
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "What is the main argument of this passage?",
+        "options": {
+          "A": "Cities should ban new housing development",
+          "B": "Urban green spaces provide important health and environmental benefits",
+          "C": "People who live near parks are always healthier",
+          "D": "Trees are the most important plants in a city"
+        },
+        "answer": "B",
+        "explanation": "The passage discusses both health benefits (stress reduction, physical activity) and environmental benefits (air cleaning, flood prevention) of urban green spaces, making B the best summary of the main argument.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "According to the passage, what effect do parks have on stress hormones?",
+        "options": {
+          "A": "They have no effect on stress hormones",
+          "B": "They increase stress hormone levels",
+          "C": "A short walk in a park can reduce stress hormone levels",
+          "D": "Only long visits to parks reduce stress hormones"
+        },
+        "answer": "C",
+        "explanation": "The passage states that even a short walk through a park has been shown to reduce the level of stress hormones in the body.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "What is the 'urban heat island effect' mentioned in the passage?",
+        "options": {
+          "A": "The warming effect of trees on surrounding areas",
+          "B": "The tendency for cities to be warmer than rural areas",
+          "C": "The effect of carbon dioxide on city temperatures",
+          "D": "The impact of flooding on urban temperatures"
+        },
+        "answer": "B",
+        "explanation": "The passage defines the urban heat island effect as 'the tendency for cities to be significantly warmer than surrounding rural areas'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "true_false_ng",
+        "question": "Research has shown that people who visit parks regularly have lower stress levels than those who stay indoors.",
+        "answer": "True",
+        "explanation": "The passage directly states that people who visit parks regularly report lower levels of anxiety and stress than those who spend most of their time indoors.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "true_false_ng",
+        "question": "Children who live near parks always perform better at school than other children.",
+        "answer": "Not Given",
+        "explanation": "The passage states that children near parks tend to be more physically active and healthier, but says nothing about academic performance.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "true_false_ng",
+        "question": "Urban green spaces can help reduce flooding in cities.",
+        "answer": "True",
+        "explanation": "The passage states that green spaces absorb rainwater, which helps to prevent flooding during heavy rainfall.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "true_false_ng",
+        "question": "All city governments currently prioritise the protection of green spaces.",
+        "answer": "False",
+        "explanation": "The passage says experts argue that protecting green spaces SHOULD be a priority \u2014 implying that many governments do not currently treat it as one.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "According to the passage, why are people who live near parks more likely to exercise regularly?",
+        "answer": "Because they have convenient, free outdoor spaces available to them",
+        "acceptable_answers": [
+          "convenient free outdoor spaces",
+          "they have free outdoor spaces nearby",
+          "convenient and free spaces for exercise"
+        ],
+        "explanation": "The passage states that people near parks exercise more because they have convenient, free outdoor spaces available to them.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q9",
+        "question_type": "short_answer",
+        "question": "What threat do urban green spaces face according to the final paragraph?",
+        "answer": "Urban development and conversion to building land",
+        "acceptable_answers": [
+          "urban development",
+          "conversion to building land",
+          "housing development",
+          "being converted for housing"
+        ],
+        "explanation": "The passage states that parks and gardens are sometimes converted into building land as cities grow and demand for housing increases.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q10",
+        "question_type": "short_answer",
+        "question": "Name two environmental services provided by urban green spaces.",
+        "answer": "Absorbing carbon dioxide and cleaning the air / reducing urban heat island effect / absorbing rainwater to prevent flooding",
+        "acceptable_answers": [
+          "absorb carbon dioxide and clean the air",
+          "reduce urban heat island effect",
+          "absorb rainwater / prevent flooding",
+          "clean the air and absorb rainwater"
+        ],
+        "explanation": "The passage lists several environmental services: absorbing CO2, cleaning the air, reducing the heat island effect, and absorbing rainwater to prevent flooding.",
+        "skill": "detail_retrieval"
+      }
+    ]
+  },
+  {
+    "passage_id": "reading_005",
+    "title": "Sleep and Academic Performance",
+    "difficulty": "beginner",
+    "topic": "Health and Education",
+    "passage": "Sleep is one of the most important factors affecting a student's ability to learn and perform well academically. Despite this, many students \u2014 particularly teenagers and university students \u2014 regularly fail to get enough sleep. Research suggests that most adults need between seven and nine hours of sleep per night, but surveys show that a large proportion of students sleep for only five or six hours.\n\nWhen a person sleeps, the brain processes and stores information learned during the day. This process, known as memory consolidation, is essential for long-term learning. Students who get enough sleep are better able to retain information, solve problems creatively, and concentrate for extended periods. In contrast, students who are sleep-deprived often struggle to pay attention in class, make more errors on tests, and find it harder to manage their emotions.\n\nTechnology is one of the main reasons why students do not sleep enough. Many students use smartphones, tablets and computers late at night, and the blue light emitted by these devices interferes with the production of melatonin \u2014 a hormone that helps the body prepare for sleep. Social media use in particular has been linked to delayed sleep times and poorer sleep quality among teenagers.\n\nSome schools and universities have responded to this problem by adjusting their start times. Research conducted in the United States found that when high schools started later in the morning, student attendance improved, grades increased, and reported rates of depression among students fell. However, changing school start times is a complex issue that affects transport schedules, working parents and after-school activities.\n\nExperts recommend that students develop consistent sleep routines, avoid screens for at least one hour before bed, and create a calm sleeping environment. These simple strategies can significantly improve sleep quality and, as a result, academic performance.",
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "According to the passage, how many hours of sleep do most adults need per night?",
+        "options": {
+          "A": "Five to six hours",
+          "B": "Six to eight hours",
+          "C": "Seven to nine hours",
+          "D": "Eight to ten hours"
+        },
+        "answer": "C",
+        "explanation": "The passage clearly states that most adults need between seven and nine hours of sleep per night.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "What is 'memory consolidation' as described in the passage?",
+        "options": {
+          "A": "A type of sleeping disorder",
+          "B": "The brain's process of storing information learned during the day",
+          "C": "A method students use to revise before exams",
+          "D": "The effect of blue light on the brain"
+        },
+        "answer": "B",
+        "explanation": "The passage defines memory consolidation as the process by which the brain processes and stores information learned during the day.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "What did US research find when high schools started later?",
+        "options": {
+          "A": "Students slept for longer but grades fell",
+          "B": "Transport costs increased significantly",
+          "C": "Attendance improved and depression rates fell",
+          "D": "Parents reported higher levels of stress"
+        },
+        "answer": "C",
+        "explanation": "The passage states that when high schools started later, student attendance improved, grades increased, and reported rates of depression fell.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "true_false_ng",
+        "question": "Blue light from screens helps the body produce melatonin.",
+        "answer": "False",
+        "explanation": "The passage states the opposite \u2014 blue light from screens interferes with the production of melatonin.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "true_false_ng",
+        "question": "Sleep-deprived students find it harder to manage their emotions.",
+        "answer": "True",
+        "explanation": "The passage directly states that sleep-deprived students find it harder to manage their emotions.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "true_false_ng",
+        "question": "All schools and universities have changed their start times to help students sleep more.",
+        "answer": "False",
+        "explanation": "The passage says SOME schools and universities have responded by adjusting start times, and notes that changing times is a complex issue \u2014 implying most have not done so.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "true_false_ng",
+        "question": "The passage implies that technology companies are responsible for poor student sleep.",
+        "answer": "Not Given",
+        "explanation": "The passage links technology use to poor sleep but does not place responsibility on technology companies specifically.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "Why does social media use particularly affect teenagers' sleep?",
+        "answer": "It has been linked to delayed sleep times and poorer sleep quality",
+        "acceptable_answers": [
+          "linked to delayed sleep times",
+          "causes delayed sleep and poorer quality sleep",
+          "delays sleep time and reduces sleep quality"
+        ],
+        "explanation": "The passage states that social media use in particular has been linked to delayed sleep times and poorer sleep quality among teenagers.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q9",
+        "question_type": "short_answer",
+        "question": "Give two reasons why changing school start times is described as a complex issue.",
+        "answer": "It affects transport schedules and working parents / after-school activities",
+        "acceptable_answers": [
+          "transport schedules and working parents",
+          "after-school activities",
+          "affects transport and parents' work schedules"
+        ],
+        "explanation": "The passage mentions that changing school start times affects transport schedules, working parents and after-school activities.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q10",
+        "question_type": "short_answer",
+        "question": "According to the experts quoted in the passage, what should students do for at least one hour before bed?",
+        "answer": "Avoid screens",
+        "acceptable_answers": [
+          "avoid screens",
+          "stay away from screens",
+          "not use screens or devices"
+        ],
+        "explanation": "Experts recommend students avoid screens for at least one hour before bed to improve sleep quality.",
+        "skill": "detail_retrieval"
+      }
+    ]
+  },
+  {
+    "passage_id": "reading_006",
+    "title": "The Rise of Remote Work",
+    "difficulty": "intermediate",
+    "topic": "Work and Technology",
+    "passage": "The widespread adoption of remote work, accelerated dramatically by the COVID-19 pandemic, has fundamentally altered the relationship between employees and their workplaces. What began as an emergency measure for many organisations has evolved into a permanent feature of the modern employment landscape, raising complex questions about productivity, well-being, and organisational culture.\n\nProponents of remote work point to compelling productivity data. A landmark study by Stanford economist Nicholas Bloom found that remote workers were 13 percent more productive than their office-based counterparts, primarily due to fewer interruptions and reduced commuting fatigue. Furthermore, companies that adopted flexible working arrangements reported lower staff turnover rates, as employees placed significant value on the autonomy and work-life balance that remote arrangements afforded.\n\nHowever, the picture is considerably more nuanced than the productivity statistics suggest. Remote work has exacerbated inequalities within organisations. Knowledge workers \u2014 those whose jobs can be performed on a computer \u2014 have benefited disproportionately, while workers in manual, service, or caregiving roles have been largely excluded from the flexibility revolution. Even among office-based professionals, studies have documented a phenomenon termed 'proximity bias', whereby managers unconsciously favour employees they can see physically, disadvantaging remote workers in promotions and high-visibility assignments.\n\nThe psychological dimensions of remote work present a further layer of complexity. While many employees report greater satisfaction with their working arrangements, extended periods of remote work have been associated with feelings of isolation, blurred boundaries between professional and personal life, and difficulties in establishing collegial relationships with new colleagues. Junior employees, in particular, have reported challenges in accessing the informal mentorship and observational learning that physical proximity to experienced colleagues provides.\n\nOrganisations are increasingly experimenting with hybrid models that attempt to capture the benefits of both arrangements. These typically require employees to attend the office for a defined number of days per week, preserving opportunities for collaborative work and social connection whilst retaining the flexibility that has become a defining expectation of modern workers. Yet hybrid models introduce their own complications, including the need for significant investment in office redesign and the challenge of coordinating schedules across distributed teams.\n\nThe long-term equilibrium of remote and in-person work remains contested. What is clear is that the pandemic fundamentally disrupted assumptions that had governed office culture for decades, and the negotiation between employer expectations and employee preferences will continue to shape the workplace for years to come.",
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "What does the writer mean by 'proximity bias' in paragraph 3?",
+        "options": {
+          "A": "The tendency for remote workers to be more productive than office workers",
+          "B": "Managers unconsciously favouring employees they can physically see",
+          "C": "The preference of employees for working close to home",
+          "D": "The bias of companies towards hiring local candidates"
+        },
+        "answer": "B",
+        "explanation": "The passage defines proximity bias as a phenomenon 'whereby managers unconsciously favour employees they can see physically, disadvantaging remote workers in promotions and high-visibility assignments'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "According to the Stanford study cited, why were remote workers more productive?",
+        "options": {
+          "A": "They worked longer hours than office employees",
+          "B": "They had access to better technology at home",
+          "C": "They experienced fewer interruptions and less commuting fatigue",
+          "D": "They were better paid than their office counterparts"
+        },
+        "answer": "C",
+        "explanation": "The passage states that remote workers were more productive 'primarily due to fewer interruptions and reduced commuting fatigue'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "What challenge do junior employees face with remote work, according to the passage?",
+        "options": {
+          "A": "They are more likely to be made redundant",
+          "B": "They find it harder to use digital communication tools",
+          "C": "They lack access to informal mentorship and observational learning",
+          "D": "They receive lower salaries when working remotely"
+        },
+        "answer": "C",
+        "explanation": "The passage states that junior employees have reported challenges 'in accessing the informal mentorship and observational learning that physical proximity to experienced colleagues provides'.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "true_false_ng",
+        "question": "The Stanford study found that remote workers were exactly 13 percent more productive than office workers.",
+        "answer": "True",
+        "explanation": "The passage explicitly states the study found remote workers were 13 percent more productive than their office-based counterparts.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "true_false_ng",
+        "question": "Manual and service workers have benefited equally from the flexibility revolution.",
+        "answer": "False",
+        "explanation": "The passage states that workers in manual, service, or caregiving roles 'have been largely excluded from the flexibility revolution'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "true_false_ng",
+        "question": "The writer believes that hybrid working models are the ideal solution to the remote work debate.",
+        "answer": "Not Given",
+        "explanation": "The passage describes hybrid models as an experiment and notes they 'introduce their own complications', but the writer does not express a personal view that they are ideal.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "true_false_ng",
+        "question": "Companies that adopted flexible working reported lower staff turnover.",
+        "answer": "True",
+        "explanation": "The passage directly states that companies with flexible arrangements 'reported lower staff turnover rates'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "What psychological difficulties have been associated with extended remote work according to the passage?",
+        "answer": "Feelings of isolation, blurred boundaries between professional and personal life, and difficulties establishing collegial relationships",
+        "acceptable_answers": [
+          "isolation and blurred work-life boundaries",
+          "feelings of isolation",
+          "difficulty building relationships with colleagues"
+        ],
+        "explanation": "The passage lists isolation, blurred professional/personal boundaries, and difficulties establishing collegial relationships as psychological difficulties of extended remote work.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q9",
+        "question_type": "short_answer",
+        "question": "What two challenges do hybrid models introduce according to the final paragraphs?",
+        "answer": "The need for investment in office redesign and the challenge of coordinating schedules across distributed teams",
+        "acceptable_answers": [
+          "office redesign costs and schedule coordination",
+          "redesigning offices and coordinating team schedules"
+        ],
+        "explanation": "The passage mentions 'significant investment in office redesign' and 'the challenge of coordinating schedules across distributed teams' as complications of hybrid models.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q10",
+        "question_type": "short_answer",
+        "question": "In your own words, explain what the writer means by remote work becoming a 'permanent feature of the modern employment landscape'.",
+        "answer": "Remote work is no longer a temporary emergency measure but has become an established and lasting part of how people work",
+        "acceptable_answers": [
+          "it is now a lasting part of working life",
+          "remote work is here to stay permanently",
+          "it is established as a long-term way of working"
+        ],
+        "explanation": "The writer contrasts the initial emergency adoption with its evolution into something lasting and established, suggesting remote work is now a standard part of employment.",
+        "skill": "inference"
+      }
+    ]
+  },
+  {
+    "passage_id": "reading_007",
+    "title": "The Psychology of Colour in Consumer Behaviour",
+    "difficulty": "intermediate",
+    "topic": "Psychology and Marketing",
+    "passage": "Colour is among the most powerful tools available to marketers and designers, influencing consumer perception and purchasing behaviour in ways that are frequently subliminal. Research in environmental psychology suggests that colour accounts for up to 90 percent of an initial product assessment, with consumers forming impressions within ninety seconds of first exposure. This rapid cognitive processing reflects the deep neurological roots of colour perception, which evolved long before conscious reasoning.\n\nThe emotional associations attached to specific colours are both universal and culturally variable, a paradox that complicates the work of global brands. Red, for instance, universally activates the sympathetic nervous system, elevating heart rate and creating a sense of urgency \u2014 a property exploited by fast food chains and retail sale promotions alike. Yet in China, red carries connotations of prosperity and celebration, whereas in certain South African contexts it is associated with mourning. Blue, conversely, consistently triggers associations with trust, competence and calm across diverse cultural contexts, which explains its dominance in the branding of financial institutions and technology companies.\n\nRetailers have long understood that the environment in which products are displayed shapes purchasing decisions as profoundly as the products themselves. Warm colours such as red and orange create a sense of excitement and stimulate impulse purchasing when used in retail environments, while cooler hues encourage deliberation and are more commonly employed in luxury settings where considered purchasing is the norm. Supermarkets frequently position red-labelled promotional items at eye level, exploiting the colour's attention-capturing properties to maximise uptake of high-margin products.\n\nThe relationship between colour and perceived product quality is particularly pronounced in the food and beverage industry. Studies have shown that consumers rate identical beverages differently depending on the colour of their packaging. Orange-coloured packaging increased perceived sweetness, while white packaging led consumers to rate products as lighter and less filling. These findings have significant implications for manufacturers seeking to influence consumer expectations without altering the product itself.\n\nDespite the compelling evidence for colour's influence, the field is complicated by individual variation, contextual factors and the saturation of colour-based marketing strategies. As consumers become more aware of persuasion techniques, the effectiveness of simple colour associations may diminish. Nevertheless, colour remains a foundational element of brand identity and product design, with companies investing substantially in colour research and trademarking distinctive hues as intellectual property.",
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "According to the passage, what percentage of an initial product assessment is accounted for by colour?",
+        "options": {
+          "A": "Up to 60 percent",
+          "B": "Exactly 90 percent",
+          "C": "Up to 90 percent",
+          "D": "More than 90 percent"
+        },
+        "answer": "C",
+        "explanation": "The passage states that colour accounts for 'up to 90 percent' of an initial product assessment \u2014 not exactly 90 percent.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "Why does the writer describe colour associations as a 'paradox' in paragraph 2?",
+        "options": {
+          "A": "Because colours have no consistent meaning across cultures",
+          "B": "Because associations are both universal and culturally variable simultaneously",
+          "C": "Because red and blue have opposite effects on the nervous system",
+          "D": "Because global brands cannot use colour effectively"
+        },
+        "answer": "B",
+        "explanation": "The writer describes the paradox as colour associations being 'both universal and culturally variable' \u2014 seemingly contradictory properties that complicate global branding.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "Why is blue commonly used by financial institutions and technology companies?",
+        "options": {
+          "A": "It is the cheapest colour to reproduce in printing",
+          "B": "It consistently triggers associations with trust, competence and calm",
+          "C": "Research shows it increases impulse purchasing",
+          "D": "It has strong cultural significance in Western markets"
+        },
+        "answer": "B",
+        "explanation": "The passage directly states that blue 'consistently triggers associations with trust, competence and calm across diverse cultural contexts', explaining its use by these industries.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "true_false_ng",
+        "question": "Warm colours such as red and orange are most commonly used in luxury retail settings.",
+        "answer": "False",
+        "explanation": "The passage states the opposite \u2014 warm colours stimulate impulse purchasing, while cooler hues are 'more commonly employed in luxury settings'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "true_false_ng",
+        "question": "Consumers are always aware when colour is being used to influence their purchasing decisions.",
+        "answer": "False",
+        "explanation": "The passage describes colour's influence as 'frequently subliminal', meaning consumers are often unaware of it.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "true_false_ng",
+        "question": "Some companies have trademarked specific colours as intellectual property.",
+        "answer": "True",
+        "explanation": "The passage's final sentence states that companies invest in 'trademarking distinctive hues as intellectual property'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "true_false_ng",
+        "question": "The effectiveness of colour-based marketing is likely to increase as consumers become more educated.",
+        "answer": "False",
+        "explanation": "The passage suggests the opposite \u2014 as consumers become more aware of persuasion techniques, 'the effectiveness of simple colour associations may diminish'.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "What effect does red have on the human body according to paragraph 2?",
+        "answer": "It activates the sympathetic nervous system, elevating heart rate and creating a sense of urgency",
+        "acceptable_answers": [
+          "elevates heart rate and creates urgency",
+          "activates sympathetic nervous system",
+          "increases heart rate and urgency"
+        ],
+        "explanation": "The passage states red 'universally activates the sympathetic nervous system, elevating heart rate and creating a sense of urgency'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q9",
+        "question_type": "short_answer",
+        "question": "How did orange-coloured packaging affect consumer perception of beverages in the study described?",
+        "answer": "It increased perceived sweetness",
+        "acceptable_answers": [
+          "made drinks seem sweeter",
+          "consumers rated them as sweeter",
+          "increased the perception of sweetness"
+        ],
+        "explanation": "The passage states that 'orange-coloured packaging increased perceived sweetness' in identical beverages.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q10",
+        "question_type": "short_answer",
+        "question": "In the context of this passage, what does 'subliminal' mean?",
+        "answer": "Below conscious awareness / occurring without the person being aware of it",
+        "acceptable_answers": [
+          "below conscious awareness",
+          "without the person realising",
+          "unconscious influence",
+          "happening without awareness"
+        ],
+        "explanation": "The passage uses subliminal to mean that colour influences consumers in ways they are not consciously aware of, as reinforced by the later discussion of awareness diminishing effectiveness.",
+        "skill": "inference"
+      }
+    ]
+  },
+  {
+    "passage_id": "reading_008",
+    "title": "Deep Sea Mining: Promise and Peril",
+    "difficulty": "advanced",
+    "topic": "Environment and Technology",
+    "passage": "The abyssal plains of the world's oceans \u2014 vast, dark expanses lying four to six kilometres below the surface \u2014 contain mineral deposits of extraordinary richness. Polymetallic nodules, potato-sized concretions studded with cobalt, nickel, manganese and rare earth elements, carpet these seabeds in concentrations that dwarf terrestrial reserves. As the global transition to clean energy technologies accelerates, demand for these minerals \u2014 essential components of electric vehicle batteries, wind turbines and solar panels \u2014 has generated intense commercial interest in what many are calling the final frontier of resource extraction.\n\nThe economic case for deep sea mining is compelling on its face. The Clarion-Clipperton Zone, a fracture zone spanning the central Pacific between Hawaii and Mexico, is estimated to contain more nickel and cobalt than all known land-based reserves combined. Proponents argue that harvesting these resources could reduce geopolitical dependency on terrestrial mining concentrated in politically volatile regions, stabilise supply chains for clean energy technologies, and generate substantial revenue for the sponsoring states of mining operations under the framework established by the International Seabed Authority.\n\nYet the scientific community has responded with considerable alarm. Deep sea ecosystems are among the least understood on Earth, yet initial surveys suggest they harbour extraordinary and largely undocumented biodiversity. The nodules themselves, formed over millions of years through geological processes, constitute the primary habitat for scores of species found nowhere else on the planet. Sediment plumes generated by mining operations would travel hundreds of kilometres, potentially suffocating filter feeders and disrupting chemosynthetic ecosystems surrounding hydrothermal vents. Critically, recovery timescales for disturbed abyssal habitats are measured not in years but in centuries \u2014 if recovery occurs at all.\n\nThe regulatory landscape reflects these tensions. The International Seabed Authority (ISA), established under the United Nations Convention on the Law of the Sea, holds jurisdiction over extraction in international waters and has issued thirty exploration licences to date. However, the ISA's dual mandate \u2014 to both promote and regulate the exploitation of seabed resources \u2014 has attracted criticism from environmental groups who argue that a body tasked with generating revenue cannot be an objective regulator. A moratorium on commercial deep sea mining has been called for by a growing coalition of nations, scientists and technology companies, including several electronics manufacturers who have pledged to exclude deep-sea minerals from their supply chains.\n\nThe debate over deep sea mining encapsulates a fundamental tension in the green transition: the environmental cost of producing the technologies required to combat climate change. Solar panels require silver and silicon; wind turbines demand rare earth magnets; electric vehicle batteries consume lithium, cobalt and nickel at industrial scale. The uncomfortable arithmetic of decarbonisation suggests that demand for these materials will outstrip terrestrial supply within decades, making some form of alternative extraction seemingly inevitable. Whether the abyssal plains will bear that burden, or whether recycling technology and material substitution can render deep sea mining unnecessary, remains one of the defining resource questions of the twenty-first century.",
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "What does the writer mean by 'the final frontier of resource extraction' in paragraph 1?",
+        "options": {
+          "A": "Deep sea mining is the most expensive form of resource extraction",
+          "B": "The deep sea is the last major unexploited source of mineral resources",
+          "C": "Deep sea resources are the most valuable minerals in the world",
+          "D": "Deep sea mining is currently prohibited in international law"
+        },
+        "answer": "B",
+        "explanation": "The phrase 'final frontier' implies a last remaining unexplored or unexploited territory. In context, the deep sea is described as the last major area available for mineral extraction.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "What specific criticism is made of the International Seabed Authority?",
+        "options": {
+          "A": "It has issued too many exploration licences without proper oversight",
+          "B": "Its dual mandate to promote and regulate mining creates a conflict of interest",
+          "C": "It does not represent the interests of developing nations",
+          "D": "It has failed to establish any framework for deep sea mining"
+        },
+        "answer": "B",
+        "explanation": "The passage states that the ISA's dual mandate \u2014 to 'both promote and regulate the exploitation of seabed resources' \u2014 has attracted criticism because a body tasked with generating revenue cannot be an objective regulator.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "What is the writer's overall attitude towards deep sea mining?",
+        "options": {
+          "A": "Strongly supportive of commercial mining operations",
+          "B": "Strongly opposed on environmental grounds",
+          "C": "Balanced, presenting both the economic case and environmental concerns",
+          "D": "Uncertain, as the writer lacks sufficient information to form a view"
+        },
+        "answer": "C",
+        "explanation": "The passage presents the economic arguments in paragraphs 1-2 and the environmental concerns in paragraphs 3-4, concluding with a balanced framing of the fundamental tension \u2014 suggesting a deliberately balanced rather than advocacy stance.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "true_false_ng",
+        "question": "The Clarion-Clipperton Zone contains more nickel and cobalt than all known land-based reserves combined.",
+        "answer": "True",
+        "explanation": "The passage directly states this estimate: the zone 'is estimated to contain more nickel and cobalt than all known land-based reserves combined'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "true_false_ng",
+        "question": "Scientists have a comprehensive understanding of deep sea ecosystems.",
+        "answer": "False",
+        "explanation": "The passage states that deep sea ecosystems are 'among the least understood on Earth', directly contradicting the claim of comprehensive understanding.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "true_false_ng",
+        "question": "The writer implies that abandoning fossil fuels necessarily creates new environmental dilemmas.",
+        "answer": "True",
+        "explanation": "The final paragraph's 'uncomfortable arithmetic of decarbonisation' and the passage's central tension \u2014 clean energy requiring environmentally damaging minerals \u2014 implies that the green transition itself creates new environmental problems.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "true_false_ng",
+        "question": "All electronics manufacturers have pledged to exclude deep-sea minerals from their supply chains.",
+        "answer": "False",
+        "explanation": "The passage states that 'several electronics manufacturers' have made this pledge \u2014 not all of them.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "Why are recovery timescales for disturbed abyssal habitats particularly alarming according to the passage?",
+        "answer": "Because recovery is measured in centuries rather than years, if recovery occurs at all",
+        "acceptable_answers": [
+          "recovery takes centuries not years",
+          "measured in centuries and may not occur at all",
+          "very slow recovery \u2014 centuries \u2014 if it happens"
+        ],
+        "explanation": "The passage states 'recovery timescales for disturbed abyssal habitats are measured not in years but in centuries \u2014 if recovery occurs at all', making disturbance potentially permanent on a human timescale.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q9",
+        "question_type": "short_answer",
+        "question": "According to the passage, what two alternatives to deep sea mining might render it unnecessary?",
+        "answer": "Recycling technology and material substitution",
+        "acceptable_answers": [
+          "recycling technology and material substitution",
+          "better recycling and finding substitute materials"
+        ],
+        "explanation": "The final paragraph asks 'whether recycling technology and material substitution can render deep sea mining unnecessary'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q10",
+        "question_type": "short_answer",
+        "question": "How does the passage characterise the relationship between the clean energy transition and mineral extraction?",
+        "answer": "As a fundamental tension \u2014 clean energy technologies require minerals whose extraction causes environmental damage, creating a paradox at the heart of decarbonisation",
+        "acceptable_answers": [
+          "a fundamental tension between green technology and mining",
+          "clean energy requires environmentally damaging mining",
+          "the green transition depends on resource extraction that harms the environment"
+        ],
+        "explanation": "The passage describes this as 'a fundamental tension in the green transition: the environmental cost of producing the technologies required to combat climate change'.",
+        "skill": "inference"
+      }
+    ]
+  },
+  {
+    "passage_id": "reading_009",
+    "title": "The Neuroscience of Decision Making Under Uncertainty",
+    "difficulty": "advanced",
+    "topic": "Science and Psychology",
+    "passage": "Every decision made in the absence of complete information engages a neural architecture far more complex than the rational choice models that dominated economic thinking for much of the twentieth century. The expected utility framework, which held that humans systematically evaluate probabilistic outcomes and select the option that maximises anticipated benefit, has been progressively dismantled by four decades of research at the intersection of economics, psychology and cognitive neuroscience.\n\nThe foundational challenge to rational choice theory came from the work of psychologists Daniel Kahneman and Amos Tversky, whose prospect theory demonstrated that humans evaluate outcomes relative to a reference point rather than in absolute terms, and that losses are felt approximately twice as keenly as equivalent gains \u2014 a phenomenon they termed loss aversion. This asymmetry has profound implications: individuals will frequently accept economically inferior options to avoid the psychological pain of loss, a pattern observable from financial markets to medical decision making.\n\nNeuroimaging research has subsequently identified the competing neural systems that underpin decision making under uncertainty. The ventromedial prefrontal cortex (vmPFC), which integrates emotional signals with cognitive appraisal, appears critical to advantageous decision making, as evidenced by patients with vmPFC lesions who demonstrate an inability to learn from negative outcomes despite intact logical reasoning. Conversely, the amygdala \u2014 classically associated with fear processing \u2014 contributes to risk aversion by amplifying the emotional salience of potential losses, while dopaminergic pathways mediate the anticipatory pleasure associated with potential gains.\n\nA particularly counterintuitive finding concerns the role of incidental affect \u2014 emotional states arising from sources entirely unrelated to the decision at hand \u2014 in shaping choice behaviour. Research by Lerner and colleagues demonstrated that incidentally induced sadness increased participants' willingness to pay for ordinary consumer goods, an effect attributed to a motivational tendency to change one's circumstances. Anger, conversely, increased risk tolerance and reduced perception of threat, suggesting that the emotional context in which decisions are made may be as consequential as the decision parameters themselves.\n\nThese findings carry substantial implications for policy design. Behavioural economics, which applies these psychological insights to economic and social policy, has demonstrated that small changes to the architecture of choice \u2014 the order in which options are presented, the framing of outcomes as gains or losses, the designation of a default option \u2014 can produce dramatic shifts in population-level behaviour without restricting freedom of choice. Organ donation rates, retirement savings, energy consumption and health screening uptake have all been successfully modified through such 'nudge' interventions, often at negligible cost compared to traditional regulatory or incentive-based approaches.\n\nThe ethical dimensions of this knowledge remain contested. If human decision making is systematically irrational and susceptible to architectural manipulation, the question of who should design choice environments, and in whose interests, becomes urgent. Critics argue that nudge interventions are paternalistic, removing genuine agency by exploiting cognitive vulnerabilities that individuals are powerless to override. Proponents counter that choice architecture is unavoidable \u2014 every environment already shapes decisions in ways that are rarely neutral \u2014 and that designing it transparently and in the public interest is preferable to leaving it to market forces.",
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "What does 'loss aversion' mean as described in the passage?",
+        "options": {
+          "A": "The tendency to avoid making decisions when outcomes are uncertain",
+          "B": "The phenomenon whereby losses feel approximately twice as painful as equivalent gains",
+          "C": "A rational preference for avoiding financial risk in investment decisions",
+          "D": "The inability of patients with vmPFC lesions to learn from negative outcomes"
+        },
+        "answer": "B",
+        "explanation": "The passage explicitly defines loss aversion as the finding that 'losses are felt approximately twice as keenly as equivalent gains'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "What is the significance of patients with vmPFC lesions in the passage's argument?",
+        "options": {
+          "A": "They demonstrate that rational decision making is located in the amygdala",
+          "B": "They show that emotional signals are irrelevant to good decision making",
+          "C": "They provide evidence that the vmPFC is critical to advantageous decision making",
+          "D": "They prove that dopamine is the primary driver of risk aversion"
+        },
+        "answer": "C",
+        "explanation": "The passage uses vmPFC lesion patients as evidence that the vmPFC is 'critical to advantageous decision making' \u2014 because damage to it impairs the ability to learn from negative outcomes despite intact logical reasoning.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "What does the writer mean by 'incidental affect' in paragraph 4?",
+        "options": {
+          "A": "Emotional responses deliberately induced by advertisers",
+          "B": "Emotional states arising from sources unrelated to the decision being made",
+          "C": "The unconscious influence of past experiences on current decisions",
+          "D": "The secondary effects of decision making on emotional well-being"
+        },
+        "answer": "B",
+        "explanation": "The passage defines incidental affect as 'emotional states arising from sources entirely unrelated to the decision at hand'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "true_false_ng",
+        "question": "Kahneman and Tversky's prospect theory supported the expected utility framework of rational choice.",
+        "answer": "False",
+        "explanation": "The passage describes prospect theory as a 'foundational challenge to rational choice theory', not support for it.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "true_false_ng",
+        "question": "Induced sadness in research participants decreased their willingness to pay for consumer goods.",
+        "answer": "False",
+        "explanation": "The passage states the opposite \u2014 'incidentally induced sadness increased participants' willingness to pay for ordinary consumer goods'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "true_false_ng",
+        "question": "The writer suggests that all choice environments are already shaped by existing forces, whether intentionally designed or not.",
+        "answer": "True",
+        "explanation": "The proponents' counter-argument states that 'choice architecture is unavoidable \u2014 every environment already shapes decisions in ways that are rarely neutral', which the writer presents without refutation.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "true_false_ng",
+        "question": "The passage concludes that nudge interventions are clearly more ethical than traditional regulatory approaches.",
+        "answer": "Not Given",
+        "explanation": "The passage presents both the critics' and proponents' views on nudge ethics without reaching a conclusion about which approach is more ethical.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "short_answer",
+        "question": "What role does the amygdala play in decision making under uncertainty according to paragraph 3?",
+        "answer": "It contributes to risk aversion by amplifying the emotional salience of potential losses",
+        "acceptable_answers": [
+          "amplifies emotional salience of losses",
+          "contributes to risk aversion",
+          "makes potential losses feel more significant"
+        ],
+        "explanation": "The passage states the amygdala 'contributes to risk aversion by amplifying the emotional salience of potential losses'.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q9",
+        "question_type": "short_answer",
+        "question": "Give two examples of population behaviours that have been modified through nudge interventions.",
+        "answer": "Organ donation rates and retirement savings / energy consumption / health screening uptake",
+        "acceptable_answers": [
+          "organ donation and retirement savings",
+          "energy consumption and health screening",
+          "any two of: organ donation, retirement savings, energy consumption, health screening"
+        ],
+        "explanation": "The passage lists organ donation rates, retirement savings, energy consumption and health screening uptake as examples modified through nudge interventions.",
+        "skill": "detail_retrieval"
+      },
+      {
+        "question_id": "q10",
+        "question_type": "short_answer",
+        "question": "In your own words, explain the main criticism of nudge interventions presented in the final paragraph.",
+        "answer": "Critics argue nudges are paternalistic because they exploit cognitive vulnerabilities people cannot consciously override, effectively removing genuine agency even while appearing to preserve choice",
+        "acceptable_answers": [
+          "they exploit cognitive weaknesses people cannot resist",
+          "paternalistic \u2014 removes real agency by manipulating decisions",
+          "exploits cognitive vulnerabilities without people being able to resist"
+        ],
+        "explanation": "The passage states critics argue nudge interventions are 'paternalistic, removing genuine agency by exploiting cognitive vulnerabilities that individuals are powerless to override'.",
         "skill": "inference"
       }
     ]

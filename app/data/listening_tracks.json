@@ -5,16 +5,25 @@
     "title": "Registering at a Health Centre",
     "context": "A new patient is registering at a local health centre. Listen to the conversation between the receptionist and the patient.",
     "difficulty": "beginner",
-    "speakers": ["Receptionist", "Patient"],
+    "speakers": [
+      "Receptionist",
+      "Patient"
+    ],
     "script": "Receptionist: Good morning. Welcome to Greenfield Health Centre. How can I help you today?\nPatient: Hi. I would like to register as a new patient please.\nReceptionist: Of course. I just need to take a few details from you. Could I start with your full name?\nPatient: Yes, it is Michael Thomas Carter.\nReceptionist: Thank you Mr Carter. And could I have your date of birth?\nPatient: It is the fourteenth of March, nineteen eighty-eight.\nReceptionist: Perfect. And what is your current address?\nPatient: I am at forty-two Birchwood Avenue. That is B-I-R-C-H-W-O-O-D Avenue. The postcode is SW6 4PN.\nReceptionist: Thank you. And a contact phone number?\nPatient: My mobile is zero seven seven zero nine eight eight three four five.\nReceptionist: Great. Do you have a preferred doctor? We have Doctor Singh and Doctor Patel currently accepting new patients.\nPatient: I would prefer Doctor Patel if possible.\nReceptionist: No problem at all. And finally, do you have any known allergies we should record?\nPatient: Yes, I am allergic to penicillin.\nReceptionist: I have noted that. Your first appointment with Doctor Patel will be on Wednesday the twenty-second at ten thirty in the morning. Does that work for you?\nPatient: Yes that is perfect. Thank you very much.\nReceptionist: You are welcome Mr Carter. See you on Wednesday.",
-    "question_type_mix": ["form_completion"],
+    "question_type_mix": [
+      "form_completion"
+    ],
     "questions": [
       {
         "question_id": "q1",
         "question_type": "form_completion",
         "question": "Patient's full name:",
         "answer": "Michael Thomas Carter",
-        "acceptable_answers": ["Michael Thomas Carter", "Michael Carter", "M T Carter"],
+        "acceptable_answers": [
+          "Michael Thomas Carter",
+          "Michael Carter",
+          "M T Carter"
+        ],
         "explanation": "The patient clearly states his full name as Michael Thomas Carter when asked by the receptionist.",
         "skill": "detail_accuracy"
       },
@@ -23,7 +32,13 @@
         "question_type": "form_completion",
         "question": "Date of birth:",
         "answer": "14th March 1988",
-        "acceptable_answers": ["14th March 1988", "14 March 1988", "14/03/1988", "March 14 1988", "fourteenth of march nineteen eighty eight"],
+        "acceptable_answers": [
+          "14th March 1988",
+          "14 March 1988",
+          "14/03/1988",
+          "March 14 1988",
+          "fourteenth of march nineteen eighty eight"
+        ],
         "explanation": "The patient gives his date of birth as the fourteenth of March, nineteen eighty-eight.",
         "skill": "detail_accuracy"
       },
@@ -32,7 +47,11 @@
         "question_type": "form_completion",
         "question": "Street address:",
         "answer": "42 Birchwood Avenue",
-        "acceptable_answers": ["42 Birchwood Avenue", "forty-two Birchwood Avenue", "42 birchwood ave"],
+        "acceptable_answers": [
+          "42 Birchwood Avenue",
+          "forty-two Birchwood Avenue",
+          "42 birchwood ave"
+        ],
         "explanation": "The patient gives his address as forty-two Birchwood Avenue and even spells out Birchwood.",
         "skill": "detail_accuracy"
       },
@@ -41,7 +60,11 @@
         "question_type": "form_completion",
         "question": "Postcode:",
         "answer": "SW6 4PN",
-        "acceptable_answers": ["SW6 4PN", "sw6 4pn", "SW64PN"],
+        "acceptable_answers": [
+          "SW6 4PN",
+          "sw6 4pn",
+          "SW64PN"
+        ],
         "explanation": "The patient states the postcode is SW6 4PN immediately after giving his street address.",
         "skill": "detail_accuracy"
       },
@@ -50,7 +73,11 @@
         "question_type": "form_completion",
         "question": "Preferred doctor:",
         "answer": "Doctor Patel",
-        "acceptable_answers": ["Doctor Patel", "Dr Patel", "Patel"],
+        "acceptable_answers": [
+          "Doctor Patel",
+          "Dr Patel",
+          "Patel"
+        ],
         "explanation": "When offered a choice between Doctor Singh and Doctor Patel, the patient chooses Doctor Patel.",
         "skill": "detail_accuracy"
       },
@@ -59,7 +86,10 @@
         "question_type": "form_completion",
         "question": "Known allergy:",
         "answer": "Penicillin",
-        "acceptable_answers": ["penicillin", "Penicillin"],
+        "acceptable_answers": [
+          "penicillin",
+          "Penicillin"
+        ],
         "explanation": "The patient states he is allergic to penicillin when asked about known allergies.",
         "skill": "detail_accuracy"
       },
@@ -68,7 +98,12 @@
         "question_type": "form_completion",
         "question": "Appointment date:",
         "answer": "Wednesday 22nd",
-        "acceptable_answers": ["Wednesday the 22nd", "Wednesday 22nd", "22nd Wednesday", "wednesday twenty-second"],
+        "acceptable_answers": [
+          "Wednesday the 22nd",
+          "Wednesday 22nd",
+          "22nd Wednesday",
+          "wednesday twenty-second"
+        ],
         "explanation": "The receptionist confirms the first appointment is on Wednesday the twenty-second.",
         "skill": "detail_accuracy"
       },
@@ -77,7 +112,13 @@
         "question_type": "form_completion",
         "question": "Appointment time:",
         "answer": "10:30",
-        "acceptable_answers": ["10:30", "10.30", "ten thirty", "10:30am", "half past ten"],
+        "acceptable_answers": [
+          "10:30",
+          "10.30",
+          "ten thirty",
+          "10:30am",
+          "half past ten"
+        ],
         "explanation": "The receptionist states the appointment is at ten thirty in the morning.",
         "skill": "detail_accuracy"
       }
@@ -89,9 +130,13 @@
     "title": "City Walking Tour Introduction",
     "context": "You will hear a tour guide giving an introduction to a city walking tour. Listen carefully and answer the questions.",
     "difficulty": "beginner",
-    "speakers": ["Tour Guide"],
+    "speakers": [
+      "Tour Guide"
+    ],
     "script": "Tour Guide: Good morning everyone and welcome to the Old Quarter Walking Tour. My name is Sarah and I will be your guide today. Before we set off I would like to go over a few important details.\n\nToday's tour will last approximately two and a half hours. We will be covering around four kilometres on foot so I recommend comfortable shoes. If at any point you need to stop please just raise your hand and let me know.\n\nWe will be visiting six main sites today. We will start here at the Central Market, then move on to the old Cathedral, followed by the historic Merchant Quarter. After a short break at the riverside gardens we will visit the Maritime Museum and finish at the famous Clock Tower where you will have a wonderful view of the whole city.\n\nA few important things to note. The Maritime Museum has a small entrance fee of four pounds fifty. All other sites are free of charge. Photography is welcome everywhere except inside the Cathedral where it is strictly prohibited.\n\nIf you have any questions during the tour please do not hesitate to ask. There will also be time for shopping and refreshments near the Clock Tower at the end. Our meeting point if anyone gets separated is the fountain in front of the Central Market.\n\nRight, I think we are all set. Let us begin our journey through this wonderful city.",
-    "question_type_mix": ["multiple_choice"],
+    "question_type_mix": [
+      "multiple_choice"
+    ],
     "questions": [
       {
         "question_id": "q1",
@@ -185,9 +230,15 @@
     "title": "Two Students Discussing a Research Project",
     "context": "You will hear two university students, James and Priya, discussing their group research project. Listen and answer the questions.",
     "difficulty": "intermediate",
-    "speakers": ["James", "Priya"],
-    "script": "James: Hi Priya. Have you had a chance to look at the project brief yet?\nPriya: Yes I read through it last night. I think the topic is really interesting but I am a bit worried about the timeline. We only have three weeks.\nJames: I know. I was thinking we should divide the work up straight away so we are not wasting time. There are four main sections — the literature review, the methodology, the data collection, and the analysis.\nPriya: That makes sense. I am quite comfortable with the literature review since I did something similar last semester. I could take that on.\nJames: Perfect. I was actually hoping you would say that because I am more comfortable with the data side. I could handle the methodology and data collection.\nPriya: Great. That leaves the analysis. Should we do that together?\nJames: I think that would be best actually. The analysis is the part that really needs two people looking at it to make sure we are interpreting things correctly.\nPriya: Agreed. Now the other thing I wanted to discuss is our sources. The brief says we need at least fifteen academic sources.\nJames: Fifteen? I thought it was ten.\nPriya: No, I checked twice. It definitely says fifteen. And they need to be from peer-reviewed journals published in the last ten years.\nJames: Right, okay. That is going to take some time. Do you have access to the university library database?\nPriya: Yes I renewed my access last week. I can share my login details with you if you need them.\nJames: That would be really helpful actually. Oh and one more thing — when is the presentation?\nPriya: The presentation is on the seventeenth. But the written report is due three days before that, so on the fourteenth.\nJames: Right. So we really need to have the analysis done by the twelfth at the latest to give ourselves time to write up.\nPriya: Exactly. Shall we meet again on Friday to check on progress?\nJames: Friday works for me. Let us say two o'clock in the library study room.",
-    "question_type_mix": ["multiple_choice", "short_answer"],
+    "speakers": [
+      "James",
+      "Priya"
+    ],
+    "script": "James: Hi Priya. Have you had a chance to look at the project brief yet?\nPriya: Yes I read through it last night. I think the topic is really interesting but I am a bit worried about the timeline. We only have three weeks.\nJames: I know. I was thinking we should divide the work up straight away so we are not wasting time. There are four main sections \u2014 the literature review, the methodology, the data collection, and the analysis.\nPriya: That makes sense. I am quite comfortable with the literature review since I did something similar last semester. I could take that on.\nJames: Perfect. I was actually hoping you would say that because I am more comfortable with the data side. I could handle the methodology and data collection.\nPriya: Great. That leaves the analysis. Should we do that together?\nJames: I think that would be best actually. The analysis is the part that really needs two people looking at it to make sure we are interpreting things correctly.\nPriya: Agreed. Now the other thing I wanted to discuss is our sources. The brief says we need at least fifteen academic sources.\nJames: Fifteen? I thought it was ten.\nPriya: No, I checked twice. It definitely says fifteen. And they need to be from peer-reviewed journals published in the last ten years.\nJames: Right, okay. That is going to take some time. Do you have access to the university library database?\nPriya: Yes I renewed my access last week. I can share my login details with you if you need them.\nJames: That would be really helpful actually. Oh and one more thing \u2014 when is the presentation?\nPriya: The presentation is on the seventeenth. But the written report is due three days before that, so on the fourteenth.\nJames: Right. So we really need to have the analysis done by the twelfth at the latest to give ourselves time to write up.\nPriya: Exactly. Shall we meet again on Friday to check on progress?\nJames: Friday works for me. Let us say two o'clock in the library study room.",
+    "question_type_mix": [
+      "multiple_choice",
+      "short_answer"
+    ],
     "questions": [
       {
         "question_id": "q1",
@@ -236,7 +287,12 @@
         "question_type": "short_answer",
         "question": "When is the written report due?",
         "answer": "The fourteenth",
-        "acceptable_answers": ["the fourteenth", "14th", "on the 14th", "three days before the presentation"],
+        "acceptable_answers": [
+          "the fourteenth",
+          "14th",
+          "on the 14th",
+          "three days before the presentation"
+        ],
         "explanation": "Priya states the written report is due on the fourteenth, which is three days before the presentation on the seventeenth.",
         "skill": "detail_accuracy"
       },
@@ -245,7 +301,12 @@
         "question_type": "short_answer",
         "question": "Where will James and Priya meet on Friday?",
         "answer": "The library study room",
-        "acceptable_answers": ["the library study room", "library study room", "study room in the library", "library"],
+        "acceptable_answers": [
+          "the library study room",
+          "library study room",
+          "study room in the library",
+          "library"
+        ],
         "explanation": "James and Priya agree to meet at two o'clock in the library study room on Friday.",
         "skill": "detail_accuracy"
       },
@@ -254,7 +315,11 @@
         "question_type": "short_answer",
         "question": "What requirement must all academic sources meet?",
         "answer": "They must be from peer-reviewed journals published in the last ten years.",
-        "acceptable_answers": ["peer reviewed journals in the last ten years", "peer-reviewed and published in last 10 years", "from peer reviewed journals last ten years"],
+        "acceptable_answers": [
+          "peer reviewed journals in the last ten years",
+          "peer-reviewed and published in last 10 years",
+          "from peer reviewed journals last ten years"
+        ],
         "explanation": "Priya specifies that sources need to be from peer-reviewed journals published in the last ten years.",
         "skill": "detail_accuracy"
       }
@@ -266,16 +331,27 @@
     "title": "Lecture on Urban Green Spaces",
     "context": "You will hear part of a university lecture on the importance of urban green spaces. Listen carefully and answer the questions.",
     "difficulty": "advanced",
-    "speakers": ["Lecturer"],
-    "script": "Lecturer: Good afternoon everyone. Today I want to talk about something that is becoming increasingly important in urban planning — the role of green spaces in modern cities.\n\nNow when we talk about urban green spaces we are referring to parks, gardens, tree-lined streets, community allotments and even green rooftops. Research consistently shows that access to these spaces has profound effects on both physical and mental wellbeing.\n\nA landmark study conducted in Copenhagen in two thousand and fifteen tracked over three thousand residents for a period of five years. The study found that people who lived within three hundred metres of a green space had a twenty-three percent lower risk of developing stress-related conditions. That is a remarkable finding.\n\nBut the benefits go beyond individual health. Green spaces play a critical role in what urban planners call the urban heat island effect. Cities tend to be significantly warmer than surrounding rural areas due to the concentration of buildings, roads and human activity. Trees and vegetation help counteract this by providing shade and releasing moisture through a process called evapotranspiration. Cities with high levels of green coverage can be up to four degrees cooler on average than those without.\n\nThere are also significant biodiversity benefits. Urban green spaces act as wildlife corridors, allowing species to move between larger natural habitats. A study of London's parks found over two thousand species of plants, insects and birds living within the city boundaries.\n\nHowever, there is a growing concern among researchers about what is called green gentrification. This refers to the phenomenon where improving green spaces in a neighbourhood drives up property values and ultimately pushes out lower income residents who can no longer afford to live there. This has been documented in cities including New York, Barcelona and Seoul.\n\nSo the challenge for urban planners is not simply to create more green spaces but to ensure that the benefits of those spaces are equitably distributed across all communities regardless of income level. This requires careful policy design, community consultation and in some cases rent control measures to prevent displacement.\n\nIn our next session we will look at specific case studies of cities that have managed this balance successfully. For now I would like you to consider the question of who urban planning ultimately serves and whether the current approach in your own city reflects the needs of all its residents.",
-    "question_type_mix": ["short_answer", "form_completion"],
+    "speakers": [
+      "Lecturer"
+    ],
+    "script": "Lecturer: Good afternoon everyone. Today I want to talk about something that is becoming increasingly important in urban planning \u2014 the role of green spaces in modern cities.\n\nNow when we talk about urban green spaces we are referring to parks, gardens, tree-lined streets, community allotments and even green rooftops. Research consistently shows that access to these spaces has profound effects on both physical and mental wellbeing.\n\nA landmark study conducted in Copenhagen in two thousand and fifteen tracked over three thousand residents for a period of five years. The study found that people who lived within three hundred metres of a green space had a twenty-three percent lower risk of developing stress-related conditions. That is a remarkable finding.\n\nBut the benefits go beyond individual health. Green spaces play a critical role in what urban planners call the urban heat island effect. Cities tend to be significantly warmer than surrounding rural areas due to the concentration of buildings, roads and human activity. Trees and vegetation help counteract this by providing shade and releasing moisture through a process called evapotranspiration. Cities with high levels of green coverage can be up to four degrees cooler on average than those without.\n\nThere are also significant biodiversity benefits. Urban green spaces act as wildlife corridors, allowing species to move between larger natural habitats. A study of London's parks found over two thousand species of plants, insects and birds living within the city boundaries.\n\nHowever, there is a growing concern among researchers about what is called green gentrification. This refers to the phenomenon where improving green spaces in a neighbourhood drives up property values and ultimately pushes out lower income residents who can no longer afford to live there. This has been documented in cities including New York, Barcelona and Seoul.\n\nSo the challenge for urban planners is not simply to create more green spaces but to ensure that the benefits of those spaces are equitably distributed across all communities regardless of income level. This requires careful policy design, community consultation and in some cases rent control measures to prevent displacement.\n\nIn our next session we will look at specific case studies of cities that have managed this balance successfully. For now I would like you to consider the question of who urban planning ultimately serves and whether the current approach in your own city reflects the needs of all its residents.",
+    "question_type_mix": [
+      "short_answer",
+      "form_completion"
+    ],
     "questions": [
       {
         "question_id": "q1",
         "question_type": "short_answer",
         "question": "Name TWO types of urban green spaces mentioned by the lecturer.",
         "answer": "Any two of: parks, gardens, tree-lined streets, community allotments, green rooftops.",
-        "acceptable_answers": ["parks and gardens", "parks and tree-lined streets", "parks and allotments", "gardens and rooftops", "allotments and parks"],
+        "acceptable_answers": [
+          "parks and gardens",
+          "parks and tree-lined streets",
+          "parks and allotments",
+          "gardens and rooftops",
+          "allotments and parks"
+        ],
         "explanation": "The lecturer lists parks, gardens, tree-lined streets, community allotments and green rooftops as examples of urban green spaces.",
         "skill": "detail_accuracy"
       },
@@ -284,7 +360,10 @@
         "question_type": "short_answer",
         "question": "How long did the Copenhagen study last?",
         "answer": "Five years",
-        "acceptable_answers": ["five years", "5 years"],
+        "acceptable_answers": [
+          "five years",
+          "5 years"
+        ],
         "explanation": "The lecturer states the Copenhagen study tracked over three thousand residents for a period of five years.",
         "skill": "detail_accuracy"
       },
@@ -293,7 +372,11 @@
         "question_type": "short_answer",
         "question": "What percentage lower risk of stress-related conditions was found in the Copenhagen study?",
         "answer": "23 percent",
-        "acceptable_answers": ["23 percent", "23%", "twenty-three percent"],
+        "acceptable_answers": [
+          "23 percent",
+          "23%",
+          "twenty-three percent"
+        ],
         "explanation": "The study found people living within three hundred metres of a green space had a twenty-three percent lower risk of stress-related conditions.",
         "skill": "detail_accuracy"
       },
@@ -302,7 +385,10 @@
         "question_type": "form_completion",
         "question": "Process by which trees release moisture: ___",
         "answer": "Evapotranspiration",
-        "acceptable_answers": ["evapotranspiration", "evapotranspiration process"],
+        "acceptable_answers": [
+          "evapotranspiration",
+          "evapotranspiration process"
+        ],
         "explanation": "The lecturer explains that trees release moisture through a process called evapotranspiration.",
         "skill": "detail_accuracy"
       },
@@ -311,7 +397,10 @@
         "question_type": "form_completion",
         "question": "Cities with high green coverage can be up to ___ degrees cooler.",
         "answer": "Four",
-        "acceptable_answers": ["four", "4"],
+        "acceptable_answers": [
+          "four",
+          "4"
+        ],
         "explanation": "The lecturer states cities with high levels of green coverage can be up to four degrees cooler on average.",
         "skill": "detail_accuracy"
       },
@@ -320,7 +409,10 @@
         "question_type": "form_completion",
         "question": "Term for green spaces driving up property values and displacing residents: ___",
         "answer": "Green gentrification",
-        "acceptable_answers": ["green gentrification", "green gentrification phenomenon"],
+        "acceptable_answers": [
+          "green gentrification",
+          "green gentrification phenomenon"
+        ],
         "explanation": "The lecturer introduces the term green gentrification to describe the phenomenon where improving green spaces drives up property values and pushes out lower income residents.",
         "skill": "main_idea"
       },
@@ -329,7 +421,11 @@
         "question_type": "short_answer",
         "question": "Name ONE city where green gentrification has been documented.",
         "answer": "Any one of: New York, Barcelona, Seoul.",
-        "acceptable_answers": ["new york", "barcelona", "seoul"],
+        "acceptable_answers": [
+          "new york",
+          "barcelona",
+          "seoul"
+        ],
         "explanation": "The lecturer mentions New York, Barcelona and Seoul as cities where green gentrification has been documented.",
         "skill": "detail_accuracy"
       },
@@ -338,9 +434,639 @@
         "question_type": "short_answer",
         "question": "According to the lecturer, what is needed to prevent displacement of residents?",
         "answer": "Careful policy design, community consultation and rent control measures.",
-        "acceptable_answers": ["policy design and community consultation", "rent control", "careful policy design", "community consultation and rent control"],
+        "acceptable_answers": [
+          "policy design and community consultation",
+          "rent control",
+          "careful policy design",
+          "community consultation and rent control"
+        ],
         "explanation": "The lecturer states that preventing displacement requires careful policy design, community consultation and in some cases rent control measures.",
         "skill": "main_idea"
+      }
+    ]
+  },
+  {
+    "track_id": "listening_005",
+    "part": 2,
+    "title": "Library Membership and Services",
+    "context": "A librarian is giving information to new members about the library's services and facilities.",
+    "difficulty": "beginner",
+    "speakers": [
+      "Librarian"
+    ],
+    "script": "Good afternoon everyone, and welcome to Westfield Community Library. My name is Sandra, and I'm going to give you a quick overview of our services so you can make the most of your new membership.\n\nFirst, let me tell you about borrowing. Standard members can borrow up to eight items at a time. That includes books, DVDs, and audiobooks. Your loan period is three weeks for most items, though DVDs are one week only. If you need more time, you can renew online up to three times \u2014 just log in with your membership number.\n\nYour membership number is printed on your card, which you received when you registered. Please keep this safe \u2014 if you lose it, there is a replacement fee of two pounds fifty.\n\nNow, we have several study spaces available. On the ground floor, we have a quiet reading room \u2014 absolutely no phone calls or talking in there, please. On the first floor, there are six group study rooms that you can book for up to two hours at a time. Bookings must be made at least twenty-four hours in advance at the front desk or online. We also have free Wi-Fi throughout the building \u2014 the password changes every Monday and is displayed on the noticeboard near the entrance.\n\nFor those of you interested in digital resources, your library card gives you free access to over thirty thousand ebooks and audiobooks through the BorrowBox app. Just download the app and sign in with your library card number. We also have free access to several newspaper archives and academic databases \u2014 ask at the front desk for details.\n\nFinally, we run a number of community events throughout the year. Our most popular is the monthly book club, which meets on the first Thursday of each month at seven in the evening. We also offer free computer skills classes every Tuesday morning at ten o'clock \u2014 these are very popular so booking is essential. And on the last Saturday of each month, we hold a children's storytelling session at half past ten in the morning.\n\nIf you have any questions at all, please don't hesitate to ask any member of staff. We're here to help. Enjoy your membership!",
+    "question_type_mix": [
+      "form_completion",
+      "multiple_choice"
+    ],
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "form_completion",
+        "question": "Maximum items standard members can borrow:",
+        "answer": "8",
+        "acceptable_answers": [
+          "8",
+          "eight",
+          "8 items",
+          "eight items"
+        ],
+        "explanation": "The librarian clearly states that standard members can borrow up to eight items at a time.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "form_completion",
+        "question": "Loan period for DVDs:",
+        "answer": "One week",
+        "acceptable_answers": [
+          "one week",
+          "1 week",
+          "a week",
+          "7 days"
+        ],
+        "explanation": "The librarian specifies that DVDs have a loan period of one week only, shorter than the standard three weeks.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "form_completion",
+        "question": "Replacement fee for lost membership card:",
+        "answer": "\u00a32.50",
+        "acceptable_answers": [
+          "\u00a32.50",
+          "2.50",
+          "two pounds fifty",
+          "2 pounds 50"
+        ],
+        "explanation": "The librarian states there is a replacement fee of two pounds fifty for a lost card.",
+        "skill": "number_recognition"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "form_completion",
+        "question": "Maximum booking time for group study rooms:",
+        "answer": "Two hours",
+        "acceptable_answers": [
+          "two hours",
+          "2 hours",
+          "2hrs"
+        ],
+        "explanation": "The librarian states that group study rooms can be booked for up to two hours at a time.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "form_completion",
+        "question": "Advance notice required for study room bookings:",
+        "answer": "24 hours",
+        "acceptable_answers": [
+          "24 hours",
+          "twenty-four hours",
+          "a day in advance",
+          "one day"
+        ],
+        "explanation": "Bookings must be made at least twenty-four hours in advance.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "form_completion",
+        "question": "Number of ebooks and audiobooks available through BorrowBox:",
+        "answer": "Over 30,000",
+        "acceptable_answers": [
+          "over 30,000",
+          "thirty thousand",
+          "more than 30000",
+          "30,000+"
+        ],
+        "explanation": "The librarian mentions access to over thirty thousand ebooks and audiobooks through the BorrowBox app.",
+        "skill": "number_recognition"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "form_completion",
+        "question": "Book club meeting day and time:",
+        "answer": "First Thursday of the month at 7pm",
+        "acceptable_answers": [
+          "first Thursday, 7pm",
+          "first Thursday at 7 in the evening",
+          "Thursday 7pm"
+        ],
+        "explanation": "The librarian states the book club meets on the first Thursday of each month at seven in the evening.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "form_completion",
+        "question": "Children's storytelling session time:",
+        "answer": "10:30am",
+        "acceptable_answers": [
+          "10:30",
+          "half past ten",
+          "10.30am",
+          "half past ten in the morning"
+        ],
+        "explanation": "The children's storytelling session is held at half past ten in the morning on the last Saturday of each month.",
+        "skill": "detail_accuracy"
+      }
+    ]
+  },
+  {
+    "track_id": "listening_006",
+    "part": 3,
+    "title": "Two Students Planning a Group Presentation",
+    "context": "Two university students, Maya and James, are planning a group presentation for their environmental studies course.",
+    "difficulty": "intermediate",
+    "speakers": [
+      "Maya",
+      "James"
+    ],
+    "script": "Maya: Right, so we need to finalise what we're each doing for the presentation on sustainable urban transport. Have you had a chance to look at the brief?\n\nJames: Yeah, I read through it last night. So we need fifteen minutes total, split between the two of us, and we have to address at least three of the four topics they've listed.\n\nMaya: Which four topics are those again?\n\nJames: Electric vehicles, cycling infrastructure, public transport funding, and congestion charging. I was thinking we should probably skip congestion charging \u2014 it's quite controversial and I don't think we have enough time to do it justice.\n\nMaya: I agree actually. I think the other three connect more naturally anyway. What were you thinking for the structure?\n\nJames: Well, I was going to suggest I take electric vehicles, since I did my last essay on battery technology. But honestly, I think the most interesting angle for our presentation might be to focus on what cities can do in the short term rather than long-term solutions.\n\nMaya: That's a really good point. EVs are important but they're a ten-year solution, not something cities can implement next year. Cycling infrastructure is actually where you see the fastest results \u2014 Copenhagen tripled its cycling rates within five years of investing properly.\n\nJames: Right. So maybe you take cycling infrastructure with that Copenhagen example, and I look at public transport \u2014 specifically bus rapid transit systems since they're cheap to implement compared to light rail.\n\nMaya: That works. What about the format? Should we do slides or more of a discussion?\n\nJames: I think slides are safer \u2014 the module guide says the tutor prefers structured presentations. But I don't want it to be death by PowerPoint either. What if we limit ourselves to eight slides maximum?\n\nMaya: That's fine, but I'd say ten slides \u2014 eight might not give us enough space to develop the arguments properly. We've got fifteen minutes after all.\n\nJames: Fair enough. What about visuals? I was thinking maps would work really well to show before-and-after urban planning changes.\n\nMaya: Yes, definitely. And I found some great infographics on the European Cyclists Federation website that show the economic benefits. Can you sort out the graphs for the transport funding section?\n\nJames: Sure. I'll pull the data from the government transport statistics report \u2014 it's the most reliable source. When should we meet to put the slides together?\n\nMaya: What about Wednesday afternoon? The library study rooms are free after two o'clock.\n\nJames: Wednesday works for me. Let's say two thirty to give us time to grab lunch first.\n\nMaya: Perfect. And we should probably do a practice run the day before the presentation to check the timing.\n\nJames: Definitely. I always go over time in presentations, so a practice run is essential for me.",
+    "question_type_mix": [
+      "multiple_choice",
+      "form_completion"
+    ],
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "multiple_choice",
+        "question": "Why do the students decide to skip congestion charging?",
+        "options": {
+          "A": "They do not know enough about the topic",
+          "B": "The tutor specifically excluded it from the brief",
+          "C": "It is controversial and they lack time to cover it properly",
+          "D": "It is not relevant to urban transport"
+        },
+        "answer": "C",
+        "explanation": "James says congestion charging is 'quite controversial and I don't think we have enough time to do it justice', giving two reasons \u2014 controversy and insufficient time.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "multiple_choice",
+        "question": "What overall focus do the students agree on for their presentation?",
+        "options": {
+          "A": "Long-term technological solutions for transport",
+          "B": "What cities can do in the short term",
+          "C": "A comparison of European and Asian transport systems",
+          "D": "The economic costs of sustainable transport"
+        },
+        "answer": "B",
+        "explanation": "James suggests focusing on 'what cities can do in the short term rather than long-term solutions', and Maya agrees enthusiastically.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "multiple_choice",
+        "question": "What example does Maya use to support the case for cycling infrastructure?",
+        "options": {
+          "A": "Amsterdam doubled its cycling rates in ten years",
+          "B": "Copenhagen tripled its cycling rates within five years",
+          "C": "London reduced car use by 30 percent through cycling investment",
+          "D": "Berlin built 200 kilometres of new cycle lanes in three years"
+        },
+        "answer": "B",
+        "explanation": "Maya specifically mentions that 'Copenhagen tripled its cycling rates within five years of investing properly'.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "multiple_choice",
+        "question": "Why does James prefer bus rapid transit over light rail for his section?",
+        "options": {
+          "A": "It is more popular with commuters",
+          "B": "It is cheaper to implement",
+          "C": "The tutor recommended it as a case study",
+          "D": "It produces fewer carbon emissions"
+        },
+        "answer": "B",
+        "explanation": "James says he will look at 'bus rapid transit systems since they're cheap to implement compared to light rail'.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "form_completion",
+        "question": "Agreed maximum number of slides:",
+        "answer": "10",
+        "acceptable_answers": [
+          "10",
+          "ten",
+          "ten slides"
+        ],
+        "explanation": "James suggests eight slides but Maya counters with ten, and James agrees with 'fair enough'. Ten is the final agreed number.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "form_completion",
+        "question": "Source James will use for transport funding data:",
+        "answer": "Government transport statistics report",
+        "acceptable_answers": [
+          "government transport statistics report",
+          "government statistics report",
+          "government transport statistics"
+        ],
+        "explanation": "James says he will pull data 'from the government transport statistics report \u2014 it's the most reliable source'.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "form_completion",
+        "question": "Agreed time to meet on Wednesday:",
+        "answer": "2:30pm",
+        "acceptable_answers": [
+          "2:30",
+          "two thirty",
+          "half past two",
+          "2.30pm"
+        ],
+        "explanation": "Maya suggests two o'clock but James says 'let's say two thirty to give us time to grab lunch first', and Maya agrees.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "form_completion",
+        "question": "Reason James says a practice run is essential for him personally:",
+        "answer": "He always goes over time in presentations",
+        "acceptable_answers": [
+          "he goes over time",
+          "always runs over time",
+          "he tends to go over the time limit"
+        ],
+        "explanation": "James says 'I always go over time in presentations, so a practice run is essential for me'.",
+        "skill": "main_idea"
+      }
+    ]
+  },
+  {
+    "track_id": "listening_007",
+    "part": 4,
+    "title": "Lecture: The Science of Habit Formation",
+    "context": "A psychology lecturer is giving a talk on the neuroscience and psychology of how habits are formed and changed.",
+    "difficulty": "intermediate",
+    "speakers": [
+      "Lecturer"
+    ],
+    "script": "Good morning everyone. Today I want to talk about something that affects virtually every aspect of our daily lives \u2014 habits. Specifically, I want to look at what neuroscience tells us about how habits form, why they're so hard to break, and what the research suggests about how we might change them more effectively.\n\nLet me start with the basics. A habit, in neuroscientific terms, is a behaviour that has become automatised through repetition. What happens at the neural level is that repeated behaviours cause the relevant neural pathways to become more efficient \u2014 a process called myelination. Myelin is a fatty substance that wraps around nerve fibres, speeding up signal transmission. The more a behaviour is repeated, the more myelinated its associated pathways become, and the less conscious effort it requires. This is why experienced drivers can hold a conversation while navigating traffic \u2014 the driving behaviours have become so automatised that they require minimal cognitive resources.\n\nNow, the key structure in habit formation is the basal ganglia \u2014 a cluster of nuclei deep in the brain that play a central role in procedural learning and routine behaviour. When we first learn a new behaviour, the prefrontal cortex \u2014 the seat of conscious decision making \u2014 is highly active. But as the behaviour becomes habitual, control shifts to the basal ganglia, which operates largely outside conscious awareness. This neural handover is what makes habits both powerful and difficult to modify \u2014 once a behaviour is basal ganglia territory, it runs almost automatically in response to environmental cues.\n\nCharles Duhigg, whose 2012 book The Power of Habit popularised this research, described what he called the habit loop: a three-part cycle of cue, routine and reward. The cue is the trigger \u2014 a time of day, a place, a person, an emotion. The routine is the behaviour itself. And the reward is what reinforces the behaviour, encouraging the brain to encode it as worth repeating. Critically, Duhigg and others have argued that the most effective strategy for breaking a bad habit is not to eliminate the cue or the reward, but to substitute a different routine \u2014 one that delivers a similar reward in response to the same cue.\n\nRecent research has complicated this relatively tidy picture in interesting ways. A 2010 study by Phillippa Lally at University College London tracked participants attempting to establish new health habits. The study found that on average it took sixty-six days for a new behaviour to become automatic \u2014 significantly longer than the widely-cited twenty-one day figure, which has no scientific basis. Crucially, the study also found considerable individual variation, with habit formation timescales ranging from eighteen to two hundred and fifty-four days.\n\nWhat does this mean for us practically? First, it suggests that the common experience of failing to maintain a new habit after a few weeks is not a character flaw but simply a reflection of the biological timescale involved. Second, it means that missing a single day of practice does not significantly derail habit formation \u2014 the Lally study found that occasional lapses had minimal impact on long-term habit development. And third, it reinforces the importance of environmental design. Because habits are triggered by environmental cues, deliberately restructuring your environment to expose yourself more frequently to habit-relevant cues is one of the most effective strategies available.\n\nIn summary, habits are neural efficiencies \u2014 the brain's way of automating frequently performed behaviours to free up cognitive resources. Understanding the mechanisms of habit formation gives us a more realistic and compassionate framework for behaviour change, and one that is considerably more effective than willpower alone.",
+    "question_type_mix": [
+      "form_completion",
+      "multiple_choice"
+    ],
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "form_completion",
+        "question": "Technical term for the process that makes neural pathways more efficient through repetition:",
+        "answer": "Myelination",
+        "acceptable_answers": [
+          "myelination",
+          "myelinisation"
+        ],
+        "explanation": "The lecturer defines myelination as the process by which repeated behaviours cause neural pathways to become more efficient.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "form_completion",
+        "question": "Brain structure central to habit formation once behaviour becomes automatic:",
+        "answer": "Basal ganglia",
+        "acceptable_answers": [
+          "basal ganglia",
+          "the basal ganglia"
+        ],
+        "explanation": "The lecturer explains that the basal ganglia is the key structure in habit formation, taking over control from the prefrontal cortex as behaviours become automatic.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "form_completion",
+        "question": "Author of 'The Power of Habit' (2012):",
+        "answer": "Charles Duhigg",
+        "acceptable_answers": [
+          "Charles Duhigg",
+          "Duhigg"
+        ],
+        "explanation": "The lecturer directly names Charles Duhigg as the author of The Power of Habit, published in 2012.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "form_completion",
+        "question": "Average number of days for a new habit to become automatic according to Lally's study:",
+        "answer": "66 days",
+        "acceptable_answers": [
+          "66",
+          "sixty-six",
+          "66 days",
+          "sixty-six days"
+        ],
+        "explanation": "The lecturer states that the Lally study found it took on average sixty-six days for a new behaviour to become automatic.",
+        "skill": "number_recognition"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "form_completion",
+        "question": "Range of individual variation in habit formation timescales found in the study:",
+        "answer": "18 to 254 days",
+        "acceptable_answers": [
+          "18 to 254 days",
+          "eighteen to two hundred and fifty-four days",
+          "18-254 days"
+        ],
+        "explanation": "The lecturer states that habit formation timescales ranged from eighteen to two hundred and fifty-four days in the Lally study.",
+        "skill": "number_recognition"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "multiple_choice",
+        "question": "According to Duhigg's habit loop, what is the most effective strategy for breaking a bad habit?",
+        "options": {
+          "A": "Eliminating the cue that triggers the behaviour",
+          "B": "Removing the reward associated with the behaviour",
+          "C": "Substituting a different routine in response to the same cue",
+          "D": "Using willpower to resist the routine when the cue appears"
+        },
+        "answer": "C",
+        "explanation": "The lecturer states that Duhigg argues the most effective strategy is 'to substitute a different routine \u2014 one that delivers a similar reward in response to the same cue'.",
+        "skill": "main_idea"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "multiple_choice",
+        "question": "What does the Lally study suggest about missing a single day of practice?",
+        "options": {
+          "A": "It significantly reduces the chance of forming the habit",
+          "B": "It resets the habit formation process to the beginning",
+          "C": "It has minimal impact on long-term habit development",
+          "D": "It depends entirely on the type of habit being formed"
+        },
+        "answer": "C",
+        "explanation": "The lecturer explicitly states that 'the Lally study found that occasional lapses had minimal impact on long-term habit development'.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "multiple_choice",
+        "question": "What practical implication does the lecturer draw from the finding that habits are triggered by environmental cues?",
+        "options": {
+          "A": "People should avoid environments where bad habits are triggered",
+          "B": "Deliberately restructuring your environment to expose you to habit-relevant cues is effective",
+          "C": "The environment is more important than the reward in habit formation",
+          "D": "Moving to a new environment is the most reliable way to break old habits"
+        },
+        "answer": "B",
+        "explanation": "The lecturer states that 'deliberately restructuring your environment to expose yourself more frequently to habit-relevant cues is one of the most effective strategies available'.",
+        "skill": "inference"
+      }
+    ]
+  },
+  {
+    "track_id": "listening_008",
+    "part": 4,
+    "title": "Lecture: Ocean Acidification and Marine Ecosystems",
+    "context": "An environmental science lecturer is delivering a talk on the causes and consequences of ocean acidification.",
+    "difficulty": "advanced",
+    "speakers": [
+      "Lecturer"
+    ],
+    "script": "Good afternoon. Today's lecture concerns what many marine scientists have described as the 'evil twin' of climate change \u2014 ocean acidification. While it receives considerably less public attention than global warming, ocean acidification represents one of the most consequential and least reversible changes currently occurring in Earth's biosphere.\n\nLet me begin with the chemistry. The oceans absorb approximately a quarter of all carbon dioxide emitted by human activities \u2014 a process that has, paradoxically, slowed the rate of atmospheric warming while fundamentally altering ocean chemistry. When CO2 dissolves in seawater, it reacts with water molecules to form carbonic acid, which subsequently dissociates to release hydrogen ions. It is this increase in hydrogen ion concentration that constitutes ocean acidification. Since the beginning of industrialisation, the average pH of the surface ocean has fallen from 8.2 to 8.1 \u2014 a change that appears modest but represents a 26 percent increase in acidity on the logarithmic pH scale.\n\nThe biological implications of this chemical shift are profound, particularly for calcifying organisms \u2014 those that construct shells, skeletons or other structures from calcium carbonate. These include corals, molluscs, echinoderms and a vast array of planktonic organisms. The problem is thermodynamic: as seawater becomes more acidic, the saturation state of calcium carbonate minerals decreases, making it increasingly energetically costly for organisms to precipitate and maintain calcified structures. At sufficiently low pH levels, structures already formed begin to dissolve \u2014 a process that is actively occurring in some polar regions where cold, CO2-rich waters already approach corrosive conditions.\n\nThe ecological cascades triggered by the disruption of calcifying organisms are difficult to model with precision but are widely expected to be severe. Pteropods \u2014 small planktonic molluscs sometimes called sea butterflies \u2014 are a foundational prey species for salmon, mackerel, herring and baleen whales across much of the northern hemisphere. Experimental studies have demonstrated that current levels of acidification are already causing shell dissolution in pteropod populations in the Southern Ocean. Since pteropods form the base of several major marine food webs, their decline would propagate disruption throughout entire ecosystems in ways that are, by definition, impossible to fully predict.\n\nCoral reefs present a particularly well-documented case study. Reefs are constructed by coral polyps \u2014 tiny animals that secrete calcium carbonate exoskeletons. These structures grow slowly, often at rates of less than one centimetre per year for massive corals, and take centuries to accumulate the reef systems that support an estimated 25 percent of all marine species. Research published in Nature in 2018 found that coral calcification rates on the Great Barrier Reef have declined by more than 40 percent since 1976, attributable to a combination of warming and acidification. Below a pH of approximately 7.8 \u2014 projected under high-emissions scenarios by the end of this century \u2014 net reef erosion exceeds accretion, and reef frameworks begin to structurally collapse.\n\nWhat renders ocean acidification particularly intractable as a policy problem is its deep temporal dynamics. Even in an optimistic scenario in which CO2 emissions reached zero tomorrow, the oceans would continue to acidify for decades as they equilibrated with the elevated atmospheric CO2 already present. Full recovery of ocean chemistry to pre-industrial conditions would, under any plausible emissions trajectory, require thousands of years. This temporal disconnect between human decision-making timescales and oceanographic response timescales is, I would argue, the central challenge for environmental governance in the twenty-first century.",
+    "question_type_mix": [
+      "form_completion",
+      "multiple_choice"
+    ],
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "form_completion",
+        "question": "Proportion of human CO2 emissions absorbed by the oceans:",
+        "answer": "Approximately a quarter",
+        "acceptable_answers": [
+          "a quarter",
+          "approximately 25%",
+          "about 25 percent",
+          "one quarter"
+        ],
+        "explanation": "The lecturer states that 'the oceans absorb approximately a quarter of all carbon dioxide emitted by human activities'.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "form_completion",
+        "question": "Pre-industrial average pH of surface ocean:",
+        "answer": "8.2",
+        "acceptable_answers": [
+          "8.2",
+          "pH 8.2"
+        ],
+        "explanation": "The lecturer states the pH has fallen 'from 8.2 to 8.1' since industrialisation began.",
+        "skill": "number_recognition"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "form_completion",
+        "question": "Percentage increase in ocean acidity since industrialisation:",
+        "answer": "26 percent",
+        "acceptable_answers": [
+          "26%",
+          "26 percent",
+          "26"
+        ],
+        "explanation": "The lecturer explains that a pH fall from 8.2 to 8.1 'represents a 26 percent increase in acidity on the logarithmic pH scale'.",
+        "skill": "number_recognition"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "form_completion",
+        "question": "Common name for pteropods mentioned in the lecture:",
+        "answer": "Sea butterflies",
+        "acceptable_answers": [
+          "sea butterflies",
+          "sea butterfly"
+        ],
+        "explanation": "The lecturer describes pteropods as 'small planktonic molluscs sometimes called sea butterflies'.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "form_completion",
+        "question": "Decline in coral calcification rates on the Great Barrier Reef since 1976:",
+        "answer": "More than 40 percent",
+        "acceptable_answers": [
+          "more than 40%",
+          "over 40 percent",
+          "40%+",
+          "more than 40"
+        ],
+        "explanation": "The lecturer cites research finding that 'coral calcification rates on the Great Barrier Reef have declined by more than 40 percent since 1976'.",
+        "skill": "number_recognition"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "multiple_choice",
+        "question": "Why does the lecturer describe ocean acidification as paradoxical?",
+        "options": {
+          "A": "Because acidification causes both harm and benefit to marine life",
+          "B": "Because absorbing CO2 slows warming but simultaneously damages ocean chemistry",
+          "C": "Because the oceans produce CO2 whilst also absorbing it",
+          "D": "Because acidification is more visible than climate change but less discussed"
+        },
+        "answer": "B",
+        "explanation": "The lecturer describes the paradox as the fact that ocean CO2 absorption 'has slowed the rate of atmospheric warming while fundamentally altering ocean chemistry' \u2014 two contradictory consequences of the same process.",
+        "skill": "inference"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "multiple_choice",
+        "question": "At what pH level does reef erosion begin to exceed reef growth according to the lecture?",
+        "options": {
+          "A": "Below pH 8.1",
+          "B": "Below pH 8.0",
+          "C": "Below pH 7.9",
+          "D": "Below pH 7.8"
+        },
+        "answer": "D",
+        "explanation": "The lecturer states that 'below a pH of approximately 7.8 \u2014 projected under high-emissions scenarios by the end of this century \u2014 net reef erosion exceeds accretion'.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "multiple_choice",
+        "question": "What does the lecturer identify as the central challenge for environmental governance?",
+        "options": {
+          "A": "The difficulty of measuring ocean pH accurately at a global scale",
+          "B": "The lack of public awareness about ocean acidification compared to climate change",
+          "C": "The mismatch between human decision-making timescales and the ocean's slow response",
+          "D": "The inability of international organisations to agree on emissions targets"
+        },
+        "answer": "C",
+        "explanation": "The lecturer explicitly identifies 'the temporal disconnect between human decision-making timescales and oceanographic response timescales' as 'the central challenge for environmental governance in the twenty-first century'.",
+        "skill": "main_idea"
+      }
+    ]
+  },
+  {
+    "track_id": "listening_009",
+    "part": 1,
+    "title": "Booking a Sports Facility",
+    "context": "A student is calling a leisure centre to book a sports facility.",
+    "difficulty": "advanced",
+    "speakers": [
+      "Receptionist",
+      "Student"
+    ],
+    "script": "Receptionist: Good morning, Riverside Leisure Centre, this is Claire speaking. How can I help you?\n\nStudent: Hi, I'd like to book one of your squash courts for next Saturday if possible.\n\nReceptionist: Of course. Can I take your membership number first?\n\nStudent: Yes, it's RLC dash four seven two nine.\n\nReceptionist: Thank you. And your name?\n\nStudent: It's Priya Mehta. That's P-R-I-Y-A, Mehta, M-E-H-T-A.\n\nReceptionist: Thank you Priya. Now for squash court bookings on a Saturday, we have courts available in one-hour slots. What time were you thinking?\n\nStudent: Ideally around midday. Is twelve o'clock available?\n\nReceptionist: Let me check. Twelve o'clock on court two is available, but court one is already taken. Would court two work for you?\n\nStudent: Yes, that's fine. Court two at twelve.\n\nReceptionist: And how many players? Our courts allow a maximum of four.\n\nStudent: Just two of us.\n\nReceptionist: Perfect. Now, our standard court hire rate for members on weekends is nine pounds per hour. However, if you'd like to hire equipment \u2014 we have rackets available for two pounds fifty each \u2014 you're welcome to add that when you come in.\n\nStudent: We have our own rackets, so just the court hire.\n\nReceptionist: Great. Now there are a couple of things I should mention. Court bookings need to be paid in advance \u2014 you can do that online through your member account, or over the phone now by card if you prefer.\n\nStudent: I'll pay over the phone now. Is that debit or credit card?\n\nReceptionist: Either is fine. Could I take your long card number?\n\nStudent: Sure. It's four five seven three, nine eight two one, six six four zero, one one eight seven.\n\nReceptionist: Thank you. And the expiry date?\n\nStudent: August 2027.\n\nReceptionist: Brilliant. And finally, we do ask that players arrive at least ten minutes before their booking to collect their key card from reception \u2014 courts are locked and you'll need the key card to access them. If you're more than fifteen minutes late without calling ahead, we may release the court to other members.\n\nStudent: Understood. Is there parking available?\n\nReceptionist: Yes, there's free parking in our main car park directly behind the building. It can get busy on Saturday mornings so I'd suggest arriving a bit early.\n\nStudent: Great, thank you. So to confirm \u2014 court two, twelve o'clock on Saturday?\n\nReceptionist: That's correct. You'll receive a confirmation email within the next hour. Is there anything else I can help you with?\n\nStudent: No, that's everything. Thanks very much.\n\nReceptionist: Thank you Priya. Enjoy your game!",
+    "question_type_mix": [
+      "form_completion"
+    ],
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "form_completion",
+        "question": "Member's name:",
+        "answer": "Priya Mehta",
+        "acceptable_answers": [
+          "Priya Mehta",
+          "P Mehta",
+          "Priya"
+        ],
+        "explanation": "The student gives her name as Priya Mehta and even spells both names for the receptionist.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "form_completion",
+        "question": "Membership number:",
+        "answer": "RLC-4729",
+        "acceptable_answers": [
+          "RLC-4729",
+          "RLC 4729",
+          "RLC dash 4729",
+          "RLC4729"
+        ],
+        "explanation": "The student gives her membership number as RLC dash four seven two nine.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q3",
+        "question_type": "form_completion",
+        "question": "Court number booked:",
+        "answer": "Court 2",
+        "acceptable_answers": [
+          "2",
+          "court 2",
+          "court two",
+          "two"
+        ],
+        "explanation": "The receptionist says court one is taken and offers court two, which the student accepts.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q4",
+        "question_type": "form_completion",
+        "question": "Number of players:",
+        "answer": "2",
+        "acceptable_answers": [
+          "2",
+          "two",
+          "two players"
+        ],
+        "explanation": "The student says 'just two of us' when asked how many players.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q5",
+        "question_type": "form_completion",
+        "question": "Weekend member court hire rate per hour:",
+        "answer": "\u00a39",
+        "acceptable_answers": [
+          "\u00a39",
+          "9 pounds",
+          "nine pounds",
+          "\u00a39.00"
+        ],
+        "explanation": "The receptionist states the rate is 'nine pounds per hour' for members on weekends.",
+        "skill": "number_recognition"
+      },
+      {
+        "question_id": "q6",
+        "question_type": "form_completion",
+        "question": "Card expiry date:",
+        "answer": "August 2027",
+        "acceptable_answers": [
+          "August 2027",
+          "08/27",
+          "08/2027",
+          "August twenty-seven"
+        ],
+        "explanation": "The student gives the card expiry date as August 2027.",
+        "skill": "number_recognition"
+      },
+      {
+        "question_id": "q7",
+        "question_type": "form_completion",
+        "question": "Minimum arrival time before booking:",
+        "answer": "10 minutes",
+        "acceptable_answers": [
+          "10 minutes",
+          "ten minutes",
+          "at least 10 minutes"
+        ],
+        "explanation": "The receptionist asks players to arrive 'at least ten minutes before their booking' to collect the key card.",
+        "skill": "detail_accuracy"
+      },
+      {
+        "question_id": "q8",
+        "question_type": "form_completion",
+        "question": "Location of car park:",
+        "answer": "Behind the building",
+        "acceptable_answers": [
+          "behind the building",
+          "directly behind the building",
+          "main car park behind the building"
+        ],
+        "explanation": "The receptionist says parking is 'in our main car park directly behind the building'.",
+        "skill": "detail_accuracy"
       }
     ]
   }

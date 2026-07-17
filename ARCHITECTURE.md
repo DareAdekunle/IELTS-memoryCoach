@@ -1,346 +1,340 @@
 # IELTS MemoryCoach — Architecture
 
-## Overview
+## The Agent Loop
 
-IELTS MemoryCoach is a full-stack AI coaching web application built on
-Alibaba Cloud infrastructure. It combines persistent learner memory,
-deterministic skill ranking, and specialist AI tutors to deliver
-personalised IELTS coaching across all four exam sections.
+MemoryCoach implements a full **perceive → remember → reason → act**
+agent loop that runs after every practice session.
+
+```mermaid
+graph LR
+    A[PERCEIVE\nPractice attempt\nASR transcription\nImage extraction] -->
+    B[REMEMBER\nCoach Agent gathers evidence\nClassifies skills via tools\nExtracts + updates memories]
+    B --> C[REASON\nFind weakest skill\nBuild band-aware context\nCross-section insights]
+    C --> D[ACT\nTutor Agent opens session\nCalls tools mid-conversation\nDrills targeted weakness]
+    D --> A
+```
 
 ---
 
 ## System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        ALIBABA CLOUD                            │
-│                                                                 │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │                    ECS Instance                          │   │
-│  │                                                          │   │
-│  │  ┌─────────────┐    ┌──────────────────────────────┐     │   │
-│  │  │    Nginx    │    │        FastAPI Backend       │     │   │
-│  │  │  Port 80    │───▶│         Port 8000            │     │   │
-│  │  │             │    │                              │     │   │
-│  │  │  /* →       │    │  /auth    /writing /reading  │     │   │
-│  │  │  React      │    │  /speaking /listening /chat  │     │   │
-│  │  │  static     │    │  /progress /memory /skills   │     │   │
-│  │  │             │    │  /mcp-server (MCP endpoint)  │     │   │
-│  │  └─────────────┘    └──────────────┬───────────────┘     │   │
-│  │                                    │                     │   │
-│  │                     ┌──────────────▼───────────────┐     │   │
-│  │                     │      Python Services         │     │   │
-│  │                     │  scoring, memory, taxonomy,  │     │   │
-│  │                     │  chat_coach, tts, asr, mcp   │     │   │
-│  │                     └──────────────┬───────────────┘     │   │
-│  │                                    │                     │   │
-│  │                     ┌──────────────▼───────────────┐     │   │
-│  │                     │   SQLite (Docker volume)     │     │   │
-│  │                     │   Persists across restarts   │     │   │
-│  │                     └──────────────────────────────┘     │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│  ┌───────────────────────────┐  ┌──────────────────────────┐    │
-│  │   Model Studio            │  │   OSS (Audio Cache)      │    │
-│  │   Singapore workspace     │  │   TTS audio files        │    │
-│  │   qwen-plus (essays)      │  │   Listening tracks       │    │
-│  │   qwen-turbo (classify)   │  └──────────────────────────┘    │
-│  └───────────────────────────┘                                  │
-│                                                                 │
-│  ┌───────────────────────────┐                                  │
-│  │   DashScope API           │                                  │
-│  │   qwen3-asr-flash (ASR)   │                                  │
-│  │   qwen3-tts-flash (TTS)   │                                  │
-│  └───────────────────────────┘                                  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Browser["🌐 React Frontend\nVite + Tailwind CSS"] -->|JWT + REST + SSE| Nginx
 
-Browser (React + Vite + Tailwind)
-  ↕ HTTPS / HTTP (axios + JWT)
-Nginx reverse proxy
-  /api/* → FastAPI port 8000
-  /*     → React static files
+    subgraph ECS ["Alibaba Cloud ECS — Singapore"]
+        Nginx["Nginx\nPort 80\nSSE-aware proxy"] -->|/api/*| FastAPI
+        Nginx -->|/*| Static["React Static Files\n/var/www/html"]
+        FastAPI["FastAPI\nPort 8000\n2 uvicorn workers"] --> Services
+        Services["Python Services\ncoach, tutor, scoring,\nmemory, tts, asr, vision"]
+        Services --> SQLite["SQLite\nDocker Volume\nPersists across restarts"]
+    end
+
+    FastAPI -->|MCP protocol| MCP["MCP Server\n/mcp-server/mcp\n7 tools"]
+    MCP --> SQLite
+
+    Services -->|text + vision generation| ModelStudio["Alibaba Cloud\nModel Studio\nqwen-plus + qwen-turbo + qwen-vl-plus\nSingapore workspace"]
+    Services -->|speech-to-text| ASR["DashScope ASR\nqwen3-asr-flash"]
+    Services -->|text-to-speech| TTS["DashScope TTS\nqwen3-tts-flash\nCherry voice"]
+    TTS -->|audio upload| OSS["Alibaba Cloud OSS\nielts-memorycoach-audio\nSingapore"]
+    OSS -->|proxied stream| Browser
 ```
 
 ---
 
-## Request Flow
+## Coach / Tutor Agent Architecture
 
-### Essay Submission (Writing Coach)
+MemoryCoach implements two distinct AI agents with a clean boundary:
+the Coach writes learner data, the Tutor reads it.
 
+```mermaid
+graph TD
+    subgraph COACH ["Coach Agent (app/services/coach_service.py)"]
+        C1[get_skill_rank] -->|reads| DB
+        C2[get_learner_memories] -->|reads| DB
+        C3[get_recent_attempt] -->|reads| DB
+        C4[submit_classification] -->|triggers| ENGINE
+        C5[write_memory] -->|writes| DB
+        C6[update_memory] -->|writes| DB
+    end
+
+    subgraph ENGINE ["Deterministic Rank Engine"]
+        E1[clean_streak += 1\non strength]
+        E2[clean_streak = 0\non weakness]
+        E3[rank up when\nstreak >= 3]
+    end
+
+    subgraph TUTOR ["Tutor Agent (app/services/chat_coach_service.py)"]
+        T1[get_coaching_context] -->|reads| DB
+        T2[get_learner_weaknesses] -->|reads| DB
+        T3[get_recent_attempts] -->|reads| DB
+        T4[get_skill_ranks] -->|reads| DB
+    end
+
+    ENGINE --> DB[("SQLite\nlearner_skill_ranks\nlearner_memories")]
+
+    note1["Coach WRITES — evaluates\npractice, classifies skills,\nextracts memories"]
+    note2["Tutor READS — personalises\nteaching, runs drills,\nqueries live data mid-session"]
 ```
-React (WritingCoach.jsx)
-  │  POST /writing/submit { prompt, essay, task_type }
-  │  Authorization: Bearer <JWT>
-  ▼
-FastAPI (api/routes/writing.py)
-  │  1. Validate JWT → get User → get learner_id
-  │  2. Fetch active memories for context
-  ▼
-Call 1: evaluate_writing() — qwen-plus
-  │  System prompt: writing_evaluator_prompt.txt
-  │  Context: {prompt} + {essay} + {memories}
-  │  Returns: scores (5 criteria) + feedback + strengths/weaknesses
-  ▼
-save_attempt() → practice_attempts table
-  ▼
-Response returned to React immediately (< 3s)
-  ▼
-BackgroundTasks (run after response):
-  │
-  ├── Call 2: classify_writing_skills() — qwen-turbo
-  │     Fixed-list prompt → 13 skill_ids × 3-way classification
-  │     → apply_skill_classifications_batch()
-  │     → learner_skill_ranks table updated
-  │
-  └── Call 3: extract_and_save_memories() — qwen-plus
-        Memory extractor prompt → free-text observations
-        → update_memories() → learner_memories table
+
+**Tool definitions** live in `app/services/agent_tools.py` as
+OpenAI-compatible function schemas, executed by `execute_coach_tool()`
+and `execute_tutor_tool()`. Qwen's function calling API decides when
+to call each tool based on the conversation context.
+
+---
+
+## Memory Lifecycle
+
+```mermaid
+flowchart TD
+    A[Practice attempt submitted] --> B[Coach Agent gathers evidence\nvia tool calls]
+    B --> C[submit_classification tool\ntriggers deterministic engine]
+    C --> D[write_memory tool\nsaves new observation]
+    D --> E{Memory exists\nfor this skill?}
+
+    E -->|No| F[INSERT new memory\nconfidence 0.5-0.7]
+    E -->|Yes| G[update_memory tool]
+
+    G -->|Confirms| H[STRENGTHEN\nconfidence += 0.05-0.15]
+    G -->|Contradicts| I[WEAKEN\nconfidence -= 0.10-0.20]
+    G -->|Mastery detected| J[ARCHIVE\nstatus = archived]
+
+    F --> K[Memory active\nin coaching context]
+    H --> K
+    I --> L{confidence < 0.1?}
+    L -->|Yes| M[RETIRE memory]
+    L -->|No| K
+    J --> N[Archived — shown\nin Memory Timeline]
+
+    K --> O[Spaced repetition retrieval\nrecency × confidence weighted]
+    O --> P[Tutor Agent reads via\nget_learner_weaknesses tool]
 ```
 
-### Chat Coach Session
+**Spaced repetition weighting:** `get_relevant_memories()` scores each
+memory as `confidence × recency_weight` where recency decays from 1.0
+(updated within 7 days) to 0.4 (older than 90 days). Recent evidence
+outweighs stale evidence regardless of confidence level.
 
-```
-React (ChatCoach.jsx)
-  │  GET /chat/start?section=Writing
-  ▼
-FastAPI (api/routes/chat.py)
-  │  build_chat_coach_context(learner_id, section)
-  │    ├── get_weakest_skill() from learner_skill_ranks
-  │    ├── find_evidence_memory_for_skill() from learner_memories
-  │    └── find_recent_essay_excerpt() from practice_attempts
-  │
-  │  load specialist tutor prompt (writing_tutor_prompt.txt)
-  │  inject context_brief into system prompt
-  ▼
-call_qwen(opening_instruction, system_message=specialist_prompt)
-  │  Returns opening message with [STATE: introduction] tag
-  │  parse_state_tag() strips tag, returns (message, state)
-  ▼
-React renders message, caches session in sessionStorage
-  │
-  │  [subsequent turns]
-  │  POST /chat/continue { system_prompt, history, message }
-  ▼
-client.chat.completions.create(full_messages_with_history)
-  │  Returns reply with [STATE: xxx] tag
-  ▼
-React updates chat, updates sessionStorage cache
+---
+
+## Writing Submission — Coach Agent Pipeline
+
+The old three-call chain (evaluate → classify → extract) is now
+orchestrated by the Coach agent, which gathers evidence via tools
+before making classification and memory decisions.
+
+```mermaid
+sequenceDiagram
+    participant R as React
+    participant F as FastAPI
+    participant VL as qwen-vl-plus
+    participant Q1 as qwen-plus
+    participant CA as Coach Agent
+    participant DB as SQLite
+
+    Note over R,F: Option A — typed essay
+    R->>F: POST /writing/submit/stream
+    F->>Q1: SSE streaming evaluation
+    Q1-->>R: tokens stream (first token ~1-2s)
+    Q1-->>F: full response
+
+    Note over R,F: Option B — handwritten image
+    R->>F: POST /writing/submit/image (multipart)
+    F->>VL: extract_text_from_image()
+    VL-->>F: extracted essay text + confidence
+    F->>Q1: evaluate_writing(extracted_text)
+    Q1-->>F: scores + feedback
+
+    F->>DB: save_attempt()
+    F-->>R: result (+ extraction_confidence if image)
+
+    Note over F,DB: BackgroundTask — Coach Agent
+    F->>CA: coach_writing_submission()
+    CA->>DB: get_learner_memories [tool]
+    CA->>DB: get_recent_attempt [tool]
+    CA->>DB: submit_classification [tool] → rank engine
+    CA->>DB: write_memory [tool] × 1-3
 ```
 
 ---
 
-## Memory System
+## Adaptive Content Selection
 
-The MemoryAgent is the core innovation. It maintains a persistent,
-evolving model of each learner across all sessions.
+All four sections select content matched to the learner's
+current band level, avoiding content already seen.
 
-```
-MEMORY LIFECYCLE
-────────────────
-
-After each practice attempt:
-
-1. EXTRACT
-   Qwen reads the attempt result and generates free-text
-   observations per skill:
-   e.g. "Learner demonstrates clear thesis but fails to
-         maintain position in body paragraphs"
-
-2. COMPARE
-   New observation compared against existing memories
-   for the same learner + section + skill
-
-3. UPDATE (one of four outcomes):
-   STRENGTHEN  → confidence += 0.05 to 0.15
-                 (new evidence confirms existing pattern)
-   WEAKEN      → confidence -= 0.10 to 0.20
-                 (new evidence contradicts existing pattern)
-   ARCHIVE     → status = "archived"
-                 (mastery detected — weakness overcome)
-   NEW         → insert new memory record
-                 (first time this pattern observed)
-
-4. PERSIST
-   learner_memories table — survives sessions, logins,
-   device changes. Every coaching interaction reads
-   active memories as context before generating feedback.
+```mermaid
+flowchart TD
+    A[Learner requests content] --> B[get_adaptive_difficulty\nlearner_id + section]
+    B --> C[get_all_skill_ranks\nfor this section]
+    C --> D{Any skills\nassessed?}
+    D -->|No| E[Return 'intermediate'\ndefault]
+    D -->|Yes| F[Calculate average band\nfrom assessed skills]
+    F --> G{Band threshold}
+    G -->|< 5.5| H[beginner]
+    G -->|5.5 - 6.9| I[intermediate]
+    G -->|>= 7.0| J[advanced]
+    H --> K[_get_unseen_or_cycle\nfiltered by difficulty]
+    I --> K
+    J --> K
+    K --> L{Unseen items\navailable?}
+    L -->|Yes| M[Return random unseen item]
+    L -->|No — all seen| N[Reset cycle\nReturn any item]
+    M --> O[mark_content_seen\nlearner_seen_content table]
 ```
 
 ---
 
-## Skill Mastery System
+## Band Estimation System
 
-A deterministic rank engine layered on top of the memory system.
-All ranking decisions are made by code, not by AI.
+IELTS band estimates (4.0–8.5) replace the internal 1-5 rank
+for all learner-facing displays. The rank engine is unchanged —
+bands are derived at read time from rank + streak.
 
 ```
-TAXONOMY (per section)
-──────────────────────
-Writing   — 13 sub-skills across 4 IELTS criteria
-Reading   — 10 sub-skills across 4 reading skill areas
-Speaking  — 10 sub-skills across 4 IELTS speaking criteria
-Listening — 10 sub-skills across 4 listening skill areas
+Rank 1, streak 0 → Band 4.0   Rank 1, streak 1+ → Band 4.5
+Rank 2, streak 0 → Band 5.0   Rank 2, streak 1+ → Band 5.5
+Rank 3, streak 0 → Band 6.0   Rank 3, streak 1+ → Band 6.5
+Rank 4, streak 0 → Band 7.0   Rank 4, streak 1+ → Band 7.5
+Rank 5, streak 0 → Band 8.0   Rank 5, streak 1+ → Band 8.5
 
-Each skill has 5 rank levels with definitions grounded in
-the official IELTS Band Descriptors.
-
-RANK ENGINE (deterministic)
-────────────────────────────
-
-After each essay, a separate qwen-turbo call classifies
-every skill_id using a fixed-list prompt:
-
-  Input:  essay text + fixed list of skill_ids
-  Output: { skill_id: "demonstrated_strength" |
-                      "demonstrated_weakness"  |
-                      "not_applicable" }
-
-Rule engine (no AI involved):
-  "demonstrated_strength"  → clean_streak += 1
-  "demonstrated_weakness"  → clean_streak = 0  (full reset)
-  "not_applicable"         → no change
-
-  clean_streak reaches 3   → current_rank += 1
-                             clean_streak = 0
-                             (rank capped at 5, never decreases)
-
-This means rank changes are fully auditable — inspect
-learner_skill_ranks to see exactly why any rank moved.
-
-WHY TWO SEPARATE QWEN CALLS?
-─────────────────────────────
-Essay evaluation (qwen-plus) produces long, conversational
-feedback that frequently contains apostrophes in example
-text. These break JSON parsing. By keeping classification
-(qwen-turbo) as a short, strictly structured call, one
-call can fail gracefully without affecting the other.
+No band shown until total_evidence > 0 (first practice session)
+A weakness resets streak to 0, dropping band back to base within
+the rank — providing realistic downward movement without touching
+the underlying rank engine.
 ```
+
+Section band = average of all assessed skill bands for that section.
+Overall band = average of all section bands with any evidence.
+
+---
+
+## Specialist Tutor State Machine
+
+Each of the 4 specialist tutors follows the same state machine.
+The Tutor is now a tool-calling agent — it can query live learner
+data mid-conversation rather than relying solely on static context.
+
+```mermaid
+stateDiagram-v2
+    [*] --> introduction : startChat(section)
+
+    introduction --> explaining : Learner engages
+    explaining --> explaining : Follow-up questions\n[Tutor may call get_learner_weaknesses]
+    explaining --> drilling : Learner ready to practise
+
+    drilling --> drilling : More drills needed\n[Tutor may call get_recent_attempts\nor get_skill_ranks mid-drill]
+    drilling --> bridge_to_practice : Coach satisfied
+
+    bridge_to_practice --> [*] : extract_chat_memories()\nMicro-memories saved to DB
+
+    note right of introduction
+        Tutor opens by calling
+        get_coaching_context tool —
+        live data, not stale session cache
+    end note
+
+    note right of bridge_to_practice
+        Chat memories extracted and
+        saved — closes the agent loop
+        so tutoring feeds back into
+        the Coach's evidence base
+    end note
+```
+
+---
+
+## Cross-Section Insights
+
+```mermaid
+flowchart TD
+    A[GET /progress/insights] --> B[get_cross_section_insights\nlearner_id]
+    B --> C[Collect weakness memories\nfrom all 4 sections]
+    C --> D[Map skill labels to themes\ninference / vocabulary /\ngrammar / organization etc.]
+    D --> E{Theme appears\nin 2+ sections?}
+    E -->|Yes| F[Cross-section pattern\nseverity: high if 3+ sections]
+    E -->|No| G[Section-specific — skip]
+    F --> H[Generate targeted\nrecommendation per theme]
+    H --> I[Surface in Dashboard\nand Chat Coach context]
+```
+
+---
+
+## OSS Audio Architecture
+
+Listening track audio is generated once globally and
+proxied to the browser via FastAPI (direct redirect cannot
+be used because browsers reject cross-origin redirects
+when an Authorization header is present).
+
+```mermaid
+sequenceDiagram
+    participant U1 as User A (first ever)
+    participant F as FastAPI
+    participant TTS as DashScope TTS
+    participant OSS as Alibaba Cloud OSS
+    participant U2 as User B (all future)
+
+    U1->>F: GET /listening/audio/track_1 (with auth)
+    F->>OSS: Check if track_1.wav exists
+    OSS-->>F: 404 Not Found
+
+    F->>TTS: Generate WAV via HTTP POST\n/api/v1/multimodal-generation
+    TTS-->>F: audio bytes
+
+    F->>OSS: PUT track_1.wav
+    OSS-->>F: 200 OK
+
+    F->>OSS: GET signed URL (1 hour expiry)
+    OSS-->>F: signed URL
+    F->>OSS: Proxy GET (fetch bytes)
+    OSS-->>F: audio bytes
+    F-->>U1: StreamingResponse (wav)
+
+    Note over U2,OSS: All future requests — zero TTS cost
+
+    U2->>F: GET /listening/audio/track_1 (with auth)
+    F->>OSS: Check if track_1.wav exists
+    OSS-->>F: 200 OK (exists)
+    F->>OSS: GET signed URL + proxy bytes
+    F-->>U2: StreamingResponse (instant)
+```
+
+TTS quota consumed **once per track** for all users for all time.
+Currently 9 tracks = 9 TTS calls total regardless of user count.
 
 ---
 
 ## MCP Server
 
-The MemoryCoach memory layer is exposed as an MCP
-(Model Context Protocol) server at `/mcp-server/mcp`.
+The memory layer is exposed as an MCP server — any
+MCP-compatible agent can query learner coaching data.
+The Tutor agent also calls these tools internally via
+OpenAI function calling (not MCP protocol).
 
-Any MCP-compatible AI agent can query learner coaching
-data without direct database access.
+```mermaid
+graph LR
+    A["Tutor Agent\n(internal)"] -->|function calling| TOOLS
+    B["External tutoring\nplatform"] -->|MCP protocol| MCP
+    C["School dashboard\next. system"] -->|MCP protocol| MCP
+    D["Research tool"] -->|MCP protocol| MCP
 
-```
-Available tools:
-  get_learner_weaknesses(learner_id, section, limit)
-    → Active weakness memories with confidence scores
+    TOOLS["agent_tools.py\nOpenAI function schemas"]
+    MCP["MCP Server\n/mcp-server/mcp\nFastMCP 3.4.3"]
 
-  get_learner_strengths(learner_id, section, limit)
-    → Active strength memories with confidence scores
-
-  get_skill_ranks(learner_id, section)
-    → All skill ranks with streak data and rank definitions
-
-  get_weakest_skill_for_learner(learner_id, section)
-    → Single weakest skill with current/next rank definitions
-      and sessions_to_rank_up count
-
-  get_recent_attempts(learner_id, section, limit)
-    → Recent attempt history with score summaries
-
-  get_learner_memory_stats(learner_id)
-    → Statistical summary of the learner's memory profile
-
-  get_coaching_context(learner_id, section)
-    → Complete context bundle — weaknesses + strengths +
-      skill ranks + weakest skill + memory stats.
-      Primary tool for AI tutoring agents.
-
-Use cases:
-  - School dashboard querying student progress
-  - External AI tutor consuming learner history
-  - Analytics pipeline processing learning patterns
-  - The MemoryCoach Chat Coach itself uses this context
-    internally to open personalised sessions
+    TOOLS --> DB
+    MCP --> DB[("SQLite\nlearner_memories\nlearner_skill_ranks\npractice_attempts\nlearner_seen_content")]
 ```
 
----
-
-## Specialist AI Tutors
-
-Four specialist tutors, each with section-specific knowledge:
-
-```
-┌─────────────────┬────────────────────────────────────────────┐
-│ Tutor           │ Specialist Knowledge                        │
-├─────────────────┼────────────────────────────────────────────┤
-│ Writing Tutor   │ IELTS Band Descriptors, task types,         │
-│                 │ thesis structure, cohesion, register        │
-├─────────────────┼────────────────────────────────────────────┤
-│ Reading Tutor   │ T/F/NG strategy, skimming, scanning,        │
-│                 │ paraphrase recognition, question types      │
-├─────────────────┼────────────────────────────────────────────┤
-│ Speaking Tutor  │ Part 1/2/3 strategies, OREO structure,      │
-│                 │ discourse markers, circumlocution           │
-├─────────────────┼────────────────────────────────────────────┤
-│ Listening Tutor │ Prediction, distractor resistance,          │
-│                 │ form completion, note-taking strategies     │
-└─────────────────┴────────────────────────────────────────────┘
-
-Each tutor session:
-  1. Calls get_coaching_context() for the learner + section
-  2. Injects context into specialist system prompt
-  3. Opens with personalised message citing real evidence
-  4. Follows state machine: introduction → explaining →
-     drilling → bridge_to_practice
-  5. Emits hidden [STATE: xxx] tags for UI state tracking
-  6. Session cached in sessionStorage — no redundant API calls
-     on navigation away and back
-```
-
----
-
-## Authentication
-
-```
-Two methods supported:
-  1. Username + password (bcrypt, 72-byte truncation)
-  2. Google OAuth 2.0 (Authlib, Singapore-region redirect)
-
-JWT tokens:
-  - 7-day expiry (stay logged in across sessions)
-  - Stored in localStorage
-  - Attached via axios interceptor to every request
-  - 401 response → auto-clear token + redirect to /login
-
-User ↔ Learner separation:
-  users table      → authentication identity
-  learners table   → coaching profile
-  users.learner_id → foreign key linking them
-  Reason: OAuth users may not have a learner profile yet
-  (onboarding creates the learner profile post-login)
-```
-
----
-
-## Task-Tiered Model Routing
-
-```
-qwen-plus  (via Alibaba Cloud Model Studio, Singapore)
-  Used for:
-  - Essay evaluation (complex reasoning, rich feedback)
-  - Memory extraction (nuanced pattern recognition)
-  - Chat coaching (multi-turn conversation)
-  - Speaking evaluation (examiner-grade assessment)
-
-qwen-turbo (via Alibaba Cloud Model Studio, Singapore)
-  Used for:
-  - Skill classification (constrained 3-way output)
-  - JSON repair (self-healing fallback)
-  Reason: faster, cheaper, sufficient for structured output
-
-DashScope SDK (separate from Model Studio)
-  Used for:
-  - ASR: qwen3-asr-flash (speech-to-text)
-  - TTS: qwen3-tts-flash-2025-11-27 Cherry voice
-  Reason: ASR/TTS not available via OpenAI-compatible endpoint
-```
+**Available tools:**
+- `get_coaching_context` — full context bundle (primary tool for AI agents)
+- `get_learner_weaknesses` — active weakness memories with confidence
+- `get_learner_strengths` — active strength memories
+- `get_skill_ranks` — all skill ranks with band estimates and streak data
+- `get_weakest_skill_for_learner` — single weakest skill + rank definitions
+- `get_recent_attempts` — attempt history with score summaries
+- `get_learner_memory_stats` — memory profile statistics
 
 ---
 
@@ -361,63 +355,98 @@ practice_attempts
   prompt, learner_response, score_json
   feedback, created_at
 
-learner_memories
+learner_memories              ← The Coach Agent's core evidence store
   memory_id, learner_id, section, skill
   memory_type (weakness/strength)
   memory_text, confidence (0.0-1.0)
   evidence_count, status (active/archived)
   created_at, updated_at
+  ← Retrieval weighted by recency × confidence (spaced repetition)
 
-learner_skill_ranks
+learner_skill_ranks           ← Deterministic rank engine store
   rank_id, learner_id, section, skill_id
   current_rank (1-5), clean_streak (0-2)
   total_evidence, last_classification
   created_at, updated_at
+  ← Band (4.0-8.5) derived at read time from rank + streak
+
+learner_seen_content          ← Adaptive content deduplication
+  seen_id, learner_id, section
+  content_id (passage_id / prompt_id / track_id)
+  seen_at
+  ← Ensures adaptive selection serves unseen content first;
+    cycles back only when all items at current difficulty exhausted
 
 mastery_scores
-  section-level score history
+  Section-level score history
 
 session_summaries
-  session-level summaries
+  Session-level summaries
 ```
 
 ---
 
 ## Key Design Decisions
 
-### 1. No agent framework
-LangChain, LlamaIndex and similar frameworks were evaluated
-and rejected. All orchestration is hand-rolled Python.
-Rationale: every pipeline in this app is a fixed, known
-sequence — there is no dynamic tool selection or
-multi-agent routing. A framework would add abstraction
-cost (debugging, version coupling, breaking changes)
-without removing any actual complexity.
+### 1. Coach/Tutor separation
+Two agents with a clean boundary: **Coach writes, Tutor reads**.
+The Coach evaluates practice submissions, classifies skills via
+`submit_classification`, and writes memories via `write_memory`.
+The Tutor reads learner data via read-only tools and never writes
+ranks or memories directly. This boundary is enforced by separate
+tool schemas (`COACH_TOOL_SCHEMAS` vs `TUTOR_TOOL_SCHEMAS`).
 
-### 2. Deterministic rank engine
-Skill rank changes are never decided by AI. The AI
-classifies (strength/weakness/not_applicable); Python
-code counts and applies the rules. This means rank
-changes are auditable, reproducible and tamper-proof.
+### 2. Deterministic rank engine beneath the Coach agent
+The Coach agent makes AI judgements (classify this skill as
+strength/weakness), but rank changes are always decided by the
+deterministic engine (3 consecutive strengths = rank up). The AI
+judges the evidence; the engine enforces the rules. Rank changes
+are fully auditable — inspect `learner_skill_ranks` to see exactly
+why any rank moved.
 
-### 3. Background tasks for memory
-Memory extraction and skill classification run as FastAPI
-BackgroundTasks — after the response is sent. The learner
-sees feedback in ~3 seconds; the memory system updates
-in the background over the next 10-20 seconds. This
-separation means memory failures never block feedback.
+### 3. Three separate Qwen calls per Writing submission
+Isolation by design. Essay evaluation (qwen-plus), skill
+classification (qwen-turbo), and memory extraction (qwen-plus)
+are separate. Long feedback contains apostrophes that break JSON
+parsing; short classification responses are reliable. One failure
+cannot cascade.
 
-### 4. Session caching for Chat Coach
-Chat sessions are cached in sessionStorage keyed by
-section. Navigating away and back restores the
-conversation instantly without a new Qwen API call.
-sessionStorage clears on tab close — intentional, so
-stale conversations don't persist across days.
+### 4. Task-tiered model routing
+```
+qwen-plus     → complex reasoning (essay evaluation, memory
+                 extraction, Coach agent, Tutor agent)
+qwen-turbo    → structured output (skill classification,
+                 JSON repair) — faster, cheaper, sufficient
+qwen-vl-plus  → vision (handwritten essay image extraction)
+```
 
-### 5. Three separate Qwen calls per Writing submission
-Essay evaluation (qwen-plus), skill classification
-(qwen-turbo), and memory extraction (qwen-plus) are
-separate calls by design. Long essay feedback contains
-apostrophes that break JSON parsing. Short classification
-responses are reliable. Keeping them separate means
-one failure cannot cascade to the others.
+### 5. OSS for audio
+Listening track audio is generated once globally.
+Every learner gets it proxied from Alibaba Cloud OSS instantly.
+TTS quota consumed exactly once per track for all users for all time.
+
+### 6. MCP as the memory API
+The memory layer is infrastructure, not just an app feature.
+Any MCP-compatible agent can query learner coaching history via
+standard protocol. Internally, the Tutor agent uses the same
+functions via OpenAI function calling rather than MCP protocol —
+same data, two consumption patterns.
+
+### 7. SSE streaming for essay feedback
+The learner sees the first feedback token in ~1-2 seconds
+instead of waiting 15-20 seconds. FastAPI StreamingResponse
+with Nginx `proxy_buffering off` ensures tokens flow
+through to the browser without buffering.
+
+### 8. Adaptive content with seen-content deduplication
+All four sections select content matched to the learner's average
+band. `learner_seen_content` tracks which items have been served
+so the same passage/prompt/track is never repeated until all
+items at the current difficulty level have been exhausted.
+
+### 9. Spaced repetition in memory retrieval
+`get_relevant_memories()` weights memories by `confidence ×
+recency_weight`. A memory updated last week outranks a
+higher-confidence memory from three months ago — matching
+the spaced repetition principle that recent evidence is more
+predictive of current ability.

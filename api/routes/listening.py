@@ -16,13 +16,14 @@ from app.services.listening_service import (
     get_random_track,
     evaluate_listening_attempt
 )
+from app.services.listening_service import get_adaptive_track
 from app.services.tts_service import generate_listening_audio
 from app.services.memory_service import (
     get_relevant_memories,
-    save_listening_attempt,
-    extract_listening_memories,
-    update_memories
+    save_listening_attempt
 )
+from app.services.practice_service import mark_content_seen
+from app.services.coach_service import coach_listening_submission
 from app.utils.logger import get_logger
 
 logger = get_logger("api.routes.listening")
@@ -45,6 +46,24 @@ async def get_tracks(
     return {"tracks": tracks}
 
 
+@router.get("/track/random")
+async def get_random_listening_track(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Returns a listening track adapted to the learner's current band level.
+    Avoids tracks already seen — cycles back only when all at the level
+    have been completed.
+    """
+    try:
+        if current_user.learner_id:
+            track = get_adaptive_track(current_user.learner_id)
+        else:
+            track = get_random_track()
+        return {"track": track}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/track/{track_id}")
 async def get_track(
     track_id: str,
@@ -55,6 +74,8 @@ async def get_track(
     if not track:
         raise HTTPException(status_code=404, detail="Track not found")
     return {"track": track}
+
+
 
 
 @router.get("/memories")
@@ -79,19 +100,9 @@ async def get_track_audio(
 ):
     """
     Generates or retrieves TTS audio for a listening track.
-
-    If OSS is configured:
-        - First request: generates audio, uploads to OSS,
-          redirects to signed OSS URL
-        - Subsequent requests: redirects to signed OSS URL instantly
-          (audio served from Alibaba Cloud OSS, not from ECS)
-
-    If OSS is not configured:
-        - Falls back to disk cache, streams bytes directly
-
-    This approach means audio for Listening tracks is served
-    from Alibaba Cloud OSS infrastructure after first generation,
-    reducing ECS bandwidth and demonstrating OSS integration.
+    First request: generates, uploads to OSS, redirects to signed URL.
+    Subsequent requests: redirects to OSS instantly (zero TTS cost).
+    Fallback: streams from disk cache if OSS not configured.
     """
     track = get_track_by_id(track_id)
     if not track:
@@ -105,21 +116,29 @@ async def get_track_audio(
             detail=f"Audio generation failed: {result.get('error', 'Unknown error')}"
         )
 
-    # If OSS URL available — redirect React to fetch directly from OSS
-    # This is the key architectural benefit: audio served from OSS CDN
     if result.get("audio_url"):
         logger.info(
             f"Serving track {track_id} from OSS "
             f"(storage={result.get('storage')}, "
             f"from_cache={result.get('from_cache')})"
         )
+        # Proxy the OSS audio instead of redirecting.
+        # Browsers cannot follow cross-origin 307 redirects when an
+        # Authorization header is present — the auth header gets sent
+        # to OSS which rejects it. Proxying through FastAPI avoids this.
+        import requests as _requests
+        oss_response = _requests.get(result["audio_url"], timeout=30, stream=True)
+        if oss_response.status_code == 200:
+            return StreamingResponse(
+                oss_response.iter_content(chunk_size=8192),
+                media_type="audio/wav",
+                headers={"Content-Disposition": f"inline; filename=track_{track_id}.wav"}
+            )
+        # Fallback: redirect anyway (better than nothing)
         return RedirectResponse(url=result["audio_url"])
 
-    # Fallback: stream bytes from disk cache
     if result.get("audio_bytes"):
-        logger.info(
-            f"Streaming track {track_id} from disk cache"
-        )
+        logger.info(f"Streaming track {track_id} from disk cache")
         return StreamingResponse(
             io.BytesIO(result["audio_bytes"]),
             media_type="audio/wav",
@@ -142,7 +161,11 @@ async def submit_listening(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user)
 ):
-    """Submits listening answers for evaluation."""
+    """
+    Submits listening answers for evaluation.
+    Returns results immediately.
+    Coach agent runs in background.
+    """
     if not current_user.learner_id:
         raise HTTPException(
             status_code=400,
@@ -174,6 +197,9 @@ async def submit_listening(
     except Exception as e:
         logger.warning(f"Could not save listening attempt: {e}")
 
+    # Track track as seen
+    mark_content_seen(learner_id, "Listening", request.track_id)
+
     background_tasks.add_task(
         _listening_post_tasks,
         learner_id=learner_id,
@@ -193,40 +219,21 @@ async def submit_listening(
 
 
 async def _listening_post_tasks(learner_id: str, results: dict):
-    """Background memory tasks after listening submission."""
+    """Coach agent evaluates Listening submission in background."""
     try:
-        extract_listening_memories(
+        coach_result = coach_listening_submission(
             learner_id=learner_id,
             attempt_result=results
         )
-    except Exception as e:
-        logger.warning(f"Listening memory extraction failed: {e}")
-
-    try:
-        skill_accuracy = results.get("skill_accuracy", {})
-        update_memories(
-            learner_id=learner_id,
-            section="Listening",
-            score_result={
-                "scores": {
-                    skill: acc / 20
-                    for skill, acc in skill_accuracy.items()
-                },
-                "strengths": [
-                    f"{skill}: {acc}%"
-                    for skill, acc in skill_accuracy.items()
-                    if acc >= 80
-                ],
-                "weaknesses": [
-                    f"{skill}: {acc}%"
-                    for skill, acc in skill_accuracy.items()
-                    if acc < 60
-                ],
-                "overall_feedback": (
-                    f"Score: {results['total_score']} / "
-                    f"{results['max_score']} ({results['percentage']}%)"
-                )
-            }
+        if coach_result.get("rank_ups"):
+            logger.info(
+                f"Listening rank-ups for {learner_id}: "
+                f"{[r['skill_id'] for r in coach_result['rank_ups']]}"
+            )
+        logger.info(
+            f"Listening Coach complete: "
+            f"{coach_result.get('memories_written', 0)} memories written, "
+            f"{len(coach_result.get('rank_ups', []))} rank-ups"
         )
     except Exception as e:
-        logger.warning(f"Listening memory update failed: {e}")
+        logger.error(f"Listening Coach agent failed: {e}", exc_info=True)

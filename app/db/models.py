@@ -111,3 +111,20 @@ class LearnerSkillRank(Base):
     last_classification = Column(String, nullable=True)  # last result: weakness/strength/not_applicable
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+class LearnerSeenContent(Base):
+    """
+    Tracks which content items a learner has already seen.
+    Used to ensure adaptive selection avoids serving the same
+    passage, prompt or track twice — cycling back only when
+    all items at the current difficulty level have been seen.
+
+    One row per (learner_id, section, content_id).
+    """
+    __tablename__ = "learner_seen_content"
+
+    seen_id = Column(String, primary_key=True, index=True)
+    learner_id = Column(String, nullable=False, index=True)
+    section = Column(String, nullable=False)      # Writing / Reading / Speaking / Listening
+    content_id = Column(String, nullable=False)   # passage_id / prompt_id / track_id
+    seen_at = Column(DateTime, default=func.now())

@@ -10,18 +10,17 @@ from api.dependencies import get_current_user
 from api.auth.models import User
 from app.services.reading_service import (
     get_random_passage,
+    get_adaptive_passage,
     get_all_passages_summary,
     get_passage_by_id,
     evaluate_reading_attempt
 )
 from app.services.memory_service import (
     get_relevant_memories,
-    save_reading_attempt,
-    extract_reading_memories,
-    update_memories,
-    apply_skill_classifications_batch
+    save_reading_attempt
 )
-from app.services.skill_classifier_service import classify_reading_skills
+from app.services.practice_service import mark_content_seen
+from app.services.coach_service import coach_reading_submission
 from app.utils.logger import get_logger
 
 logger = get_logger("api.routes.reading")
@@ -54,9 +53,17 @@ async def get_random_reading_passage(
     difficulty: Optional[str] = None,
     current_user: User = Depends(get_current_user)
 ):
-    """Returns a random full reading passage."""
+    """
+    Returns a reading passage adapted to the learner's current band.
+    Difficulty param overrides adaptive selection if provided.
+    """
     try:
-        passage = get_random_passage(difficulty=difficulty)
+        if difficulty:
+            passage = get_random_passage(difficulty=difficulty)
+        elif current_user.learner_id:
+            passage = get_adaptive_passage(current_user.learner_id)
+        else:
+            passage = get_random_passage()
         return {"passage": passage}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -98,7 +105,7 @@ async def submit_reading(
     """
     Submits reading answers for evaluation.
     Returns results immediately.
-    Memory extraction + skill classification run in background.
+    Coach agent runs in background.
     """
     if not current_user.learner_id:
         raise HTTPException(
@@ -130,6 +137,9 @@ async def submit_reading(
     except Exception as e:
         logger.warning(f"Could not save reading attempt: {e}")
 
+    # Track this passage as seen so adaptive selection avoids repeats
+    mark_content_seen(learner_id, "Reading", request.passage_id)
+
     background_tasks.add_task(
         _reading_post_tasks,
         learner_id=learner_id,
@@ -148,69 +158,21 @@ async def submit_reading(
 
 
 async def _reading_post_tasks(learner_id: str, results: dict):
-    """
-    Background tasks after reading submission.
-    Runs memory extraction AND skill classification.
-    Both are non-blocking — errors logged but never surface to learner.
-    """
-    # Memory extraction (existing)
+    """Coach agent evaluates Reading submission in background."""
     try:
-        extract_reading_memories(
+        coach_result = coach_reading_submission(
             learner_id=learner_id,
             attempt_result=results
         )
-    except Exception as e:
-        logger.warning(f"Reading memory extraction failed: {e}")
-
-    try:
-        skill_accuracy = results.get("skill_accuracy", {})
-        update_memories(
-            learner_id=learner_id,
-            section="Reading",
-            score_result={
-                "scores": {
-                    skill: acc / 20
-                    for skill, acc in skill_accuracy.items()
-                },
-                "strengths": [
-                    f"{skill}: {acc}%"
-                    for skill, acc in skill_accuracy.items()
-                    if acc >= 80
-                ],
-                "weaknesses": [
-                    f"{skill}: {acc}%"
-                    for skill, acc in skill_accuracy.items()
-                    if acc < 60
-                ],
-                "overall_feedback": (
-                    f"Score: {results['total_score']} / "
-                    f"{results['max_score']} ({results['percentage']}%)"
-                )
-            }
-        )
-    except Exception as e:
-        logger.warning(f"Reading memory update failed: {e}")
-
-    # Skill classification (NEW — updates learner_skill_ranks)
-    try:
-        classifications = classify_reading_skills(
-            passage_title=results.get("passage_title", ""),
-            question_results=results.get("question_results", []),
-            skill_accuracy=results.get("skill_accuracy", {}),
-            total_score=results.get("total_score", 0),
-            max_score=results.get("max_score", 1),
-            percentage=results.get("percentage", 0)
-        )
-        rank_results = apply_skill_classifications_batch(
-            learner_id=learner_id,
-            section="Reading",
-            classifications=classifications
-        )
-        ranked_up = [r for r in rank_results if r.get("ranked_up")]
-        if ranked_up:
+        if coach_result.get("rank_ups"):
             logger.info(
                 f"Reading rank-ups for {learner_id}: "
-                f"{[r['skill_id'] for r in ranked_up]}"
+                f"{[r['skill_id'] for r in coach_result['rank_ups']]}"
             )
+        logger.info(
+            f"Reading Coach complete: "
+            f"{coach_result.get('memories_written', 0)} memories written, "
+            f"{len(coach_result.get('rank_ups', []))} rank-ups"
+        )
     except Exception as e:
-        logger.warning(f"Reading skill classification failed: {e}")
+        logger.error(f"Reading Coach agent failed: {e}", exc_info=True)

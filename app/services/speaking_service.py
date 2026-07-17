@@ -9,35 +9,36 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 
 
 def load_speaking_prompts() -> list:
-    """
-    Loads all speaking prompt sets from the JSON file.
-    """
     path = os.path.join(DATA_DIR, "speaking_prompts.json")
     with open(path, "r") as f:
         return json.load(f)
 
 
 def get_random_prompt_set(difficulty: str = None) -> dict:
-    """
-    Returns a random speaking prompt set.
-    Optionally filtered by difficulty level.
-    """
+    """Returns a random speaking prompt set, optionally filtered by difficulty."""
     prompts = load_speaking_prompts()
-
     if difficulty:
         prompts = [p for p in prompts if p["difficulty"] == difficulty]
-
     if not prompts:
         raise ValueError(f"No prompt sets found for difficulty: {difficulty}")
-
     return random.choice(prompts)
 
 
+def get_adaptive_prompt_set(learner_id: str) -> dict:
+    """
+    Returns an unseen speaking prompt set matched to the learner's band level.
+    Cycles back through seen prompts only when all at the level are exhausted.
+    """
+    from app.services.practice_service import get_adaptive_difficulty, _get_unseen_or_cycle
+    difficulty = get_adaptive_difficulty(learner_id, "Speaking")
+    prompts = load_speaking_prompts()
+    filtered = [p for p in prompts if p["difficulty"] == difficulty]
+    if not filtered:
+        filtered = prompts
+    return _get_unseen_or_cycle(filtered, learner_id, "Speaking", "prompt_set_id")
+
+
 def get_prompt_set_by_id(prompt_set_id: str) -> dict | None:
-    """
-    Returns a specific prompt set by ID.
-    Used to reload the same set without changing it on refresh.
-    """
     prompts = load_speaking_prompts()
     for p in prompts:
         if p["prompt_set_id"] == prompt_set_id:
@@ -46,10 +47,6 @@ def get_prompt_set_by_id(prompt_set_id: str) -> dict | None:
 
 
 def get_all_prompt_sets_summary() -> list:
-    """
-    Returns a lightweight summary of all prompt sets.
-    Used on the selection screen.
-    """
     prompts = load_speaking_prompts()
     return [
         {
@@ -65,32 +62,15 @@ def get_all_prompt_sets_summary() -> list:
 
 
 def get_prompts_by_difficulty(difficulty: str) -> list:
-    """
-    Returns all prompt sets for a given difficulty.
-    """
     prompts = load_speaking_prompts()
     return [p for p in prompts if p["difficulty"] == difficulty]
 
 
 def format_part2_cue_card(prompt_set: dict) -> str:
-    """
-    Returns the Part 2 cue card text formatted for display.
-    """
     return prompt_set["part2"]["cue_card"]
 
 
 def get_session_structure(prompt_set: dict) -> dict:
-    """
-    Returns the full session structure for a prompt set.
-    This is what the Speaking Coach page uses to render
-    all three parts in order.
-
-    Returns:
-    - part1: list of questions
-    - part2: cue card text + timing
-    - part3: list of questions
-    - topic and difficulty metadata
-    """
     return {
         "prompt_set_id": prompt_set["prompt_set_id"],
         "topic": prompt_set["topic"],

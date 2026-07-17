@@ -2,25 +2,37 @@ import os
 import sys
 import hashlib
 import requests
-import tempfile
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-import dashscope
-from dashscope.audio.tts_v2 import SpeechSynthesizer
 from dotenv import load_dotenv
-
 load_dotenv()
 
-dashscope.api_key = os.getenv("DASHSCOPE_API_KEY")
-dashscope.base_http_api_url = os.getenv(
-    "DASHSCOPE_BASE_URL",
-    "https://ws-65ggehps6g6aqox2.ap-southeast-1.maas.aliyuncs.com/api/v1"
-)
 
 # ─── TTS Model Configuration ──────────────────────────────────────────────────
 TTS_MODEL = "qwen3-tts-flash-2025-11-27"
 TTS_VOICE = "Cherry"
+
+# ─── HTTP Endpoint Configuration ──────────────────────────────────────────────
+# Use Model Studio workspace DashScope-native endpoint (HTTP).
+# The old SpeechSynthesizer used WebSocket, which rejects sk-ws- keys.
+# MultiModalConversation.call() is the correct HTTP path for TTS.
+#
+# IMPORTANT: the DashScope native endpoint is /api/v1, NOT /compatible-mode/v1.
+# /compatible-mode/v1 is for OpenAI-format calls (text generation).
+# /api/v1 is for DashScope-native calls (TTS, ASR, multimodal).
+TTS_API_KEY = os.getenv("DASHSCOPE_API_KEY")
+
+# Build workspace DashScope-native URL from MODEL_STUDIO_ENDPOINT
+_model_studio = os.getenv(
+    "MODEL_STUDIO_ENDPOINT",
+    "https://ws-65ggehps6g6aqox2.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
+)
+# Strip /compatible-mode/v1 to get workspace base, then add /api/v1
+_workspace_base = _model_studio.replace("/compatible-mode/v1", "")
+TTS_URL = f"{_workspace_base}/api/v1/services/aigc/multimodal-generation/generation"
+
+print(f"TTS configured: {TTS_MODEL} via {TTS_URL}")
 
 # ─── OSS Configuration ────────────────────────────────────────────────────────
 OSS_ACCESS_KEY_ID     = os.getenv("OSS_ACCESS_KEY_ID")
@@ -30,7 +42,6 @@ OSS_ENDPOINT          = os.getenv("OSS_ENDPOINT", "oss-ap-southeast-1.aliyuncs.c
 
 # OSS available flag — gracefully degrade to disk cache if OSS not configured
 _OSS_AVAILABLE = all([OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET])
-
 if _OSS_AVAILABLE:
     try:
         import oss2
@@ -65,8 +76,6 @@ def _get_signed_url(oss_key: str, expires: int = 3600) -> str:
     """
     Returns a pre-signed URL for the OSS object.
     Valid for `expires` seconds (default 1 hour).
-    The React frontend uses this URL directly to play audio —
-    audio is served from Alibaba Cloud OSS CDN, not from ECS.
     """
     return _oss_bucket.sign_url('GET', oss_key, expires)
 
@@ -108,26 +117,67 @@ def _save_to_disk(cache_key: str, audio_bytes: bytes) -> None:
 
 def _call_tts_api(text: str) -> dict:
     """
-    Makes the actual DashScope TTS API call.
-    DashScope TTS returns a URL to the generated WAV file —
-    the audio field in the response is always empty.
+    Makes TTS API call via HTTP POST to the DashScope-native
+    multimodal-generation endpoint on Model Studio workspace.
+
+    Uses the same MultiModalConversation format as the official docs:
+    https://www.alibabacloud.com/help/en/model-studio/qwen-tts
+
+    This replaces the old WebSocket-based SpeechSynthesizer which
+    fails with sk-ws- workspace keys (401 on WebSocket handshake).
     """
     try:
-        synthesizer = SpeechSynthesizer(model=TTS_MODEL, voice=TTS_VOICE)
-        response = synthesizer.call(text)
+        headers = {
+            "Authorization": f"Bearer {TTS_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": TTS_MODEL,
+            "input": {
+                "text": text,
+                "voice": TTS_VOICE,
+            }
+        }
 
-        if response is None:
-            return {"success": False, "audio_bytes": None, "error": "TTS API returned None"}
+        print(f"TTS HTTP request → {TTS_URL} "
+              f"(model={TTS_MODEL}, voice={TTS_VOICE}, text={len(text)} chars)")
 
+        response = requests.post(TTS_URL, json=payload, headers=headers, timeout=120)
+
+        if response.status_code != 200:
+            error_detail = response.text[:500]
+            print(f"TTS HTTP error {response.status_code}: {error_detail}")
+            return {
+                "success": False,
+                "audio_bytes": None,
+                "error": f"TTS HTTP error {response.status_code}: {error_detail}"
+            }
+
+        data = response.json()
+
+        # Extract audio URL from DashScope response:
+        # {"output": {"audio": {"url": "https://..."}}}
         audio_url = None
-        if hasattr(response, 'output') and response.output:
-            audio_data = response.output.get("audio", {})
-            audio_url = audio_data.get("url")
+        output = data.get("output", {})
+
+        # Handle both dict and object-style responses
+        if isinstance(output, dict):
+            audio_data = output.get("audio", {})
+            if isinstance(audio_data, dict):
+                audio_url = audio_data.get("url")
 
         if not audio_url:
-            return {"success": False, "audio_bytes": None, "error": "No audio URL in TTS response"}
+            print(f"TTS: no audio URL in response: {str(data)[:500]}")
+            return {
+                "success": False,
+                "audio_bytes": None,
+                "error": f"No audio URL in TTS response: {str(data)[:500]}"
+            }
 
+        # Download the WAV file from the returned URL
+        print(f"TTS: downloading audio from URL...")
         wav_response = requests.get(audio_url, timeout=30)
+
         if wav_response.status_code != 200:
             return {
                 "success": False,
@@ -135,8 +185,15 @@ def _call_tts_api(text: str) -> dict:
                 "error": f"Failed to download audio: HTTP {wav_response.status_code}"
             }
 
+        print(f"TTS success: {len(wav_response.content)} bytes downloaded")
         return {"success": True, "audio_bytes": wav_response.content, "error": None}
 
+    except requests.exceptions.Timeout:
+        return {
+            "success": False,
+            "audio_bytes": None,
+            "error": "TTS request timed out (120s)"
+        }
     except Exception as e:
         return {"success": False, "audio_bytes": None, "error": str(e)}
 
@@ -156,8 +213,8 @@ def examiner_speak(text: str, use_cache: bool = False) -> dict:
     Returns:
         {
             "success": bool,
-            "audio_bytes": bytes | None,   # for streaming to client
-            "audio_url": str | None,        # OSS signed URL (when cached)
+            "audio_bytes": bytes | None,
+            "audio_url": str | None,
             "from_cache": bool,
             "storage": "oss" | "disk" | "generated",
             "error": str | None
@@ -194,6 +251,7 @@ def examiner_speak(text: str, use_cache: bool = False) -> dict:
 
     # Generate fresh audio
     result = _call_tts_api(text)
+
     if not result["success"] or not result["audio_bytes"]:
         return {
             "success": False,
@@ -239,15 +297,12 @@ def examiner_speak(text: str, use_cache: bool = False) -> dict:
 def generate_listening_audio(track: dict) -> dict:
     """
     Generates TTS audio for a listening track script.
-    Always uses cache — Listening track scripts never change.
 
+    Always uses cache — Listening track scripts never change.
     On first call: generates via DashScope, uploads to OSS,
                    returns signed URL
     On subsequent calls: returns signed OSS URL instantly
                          (zero DashScope API cost)
-
-    Audio is served directly from Alibaba Cloud OSS,
-    not from ECS — reducing ECS bandwidth usage.
     """
     script = track.get("script", "")
     if not script:
@@ -259,4 +314,5 @@ def generate_listening_audio(track: dict) -> dict:
             "storage": None,
             "error": "Track has no script"
         }
+
     return examiner_speak(script, use_cache=True)

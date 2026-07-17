@@ -396,3 +396,21 @@ def evaluate_listening_attempt(
         "skill_accuracy": skill_accuracy,
         "question_results": results
     }
+
+def get_adaptive_track(learner_id: str) -> dict:
+    """
+    Returns an unseen listening track matched to the learner's band level.
+    Cycles back through seen tracks only when all at the level are exhausted.
+
+    Band → difficulty mapping (same as all other sections):
+      avg band < 5.5  → beginner
+      avg band 5.5-6.9 → intermediate
+      avg band 7.0+    → advanced
+    """
+    from app.services.practice_service import get_adaptive_difficulty, _get_unseen_or_cycle
+    difficulty = get_adaptive_difficulty(learner_id, "Listening")
+    tracks = load_listening_tracks()
+    filtered = [t for t in tracks if t["difficulty"] == difficulty]
+    if not filtered:
+        filtered = tracks
+    return _get_unseen_or_cycle(filtered, learner_id, "Listening", "track_id")

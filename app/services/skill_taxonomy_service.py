@@ -14,21 +14,106 @@ RANK_NAMES = {
     5: "Advanced"
 }
 
+# ─── Band mapping ─────────────────────────────────────────────────────────────
+# Maps rank (1-5) to the BASE IELTS band for that level.
+# The 0.5 increment comes from clean_streak within the rank:
+#   streak 0   → base band          (e.g. rank 2, streak 0 = Band 5.0)
+#   streak 1+  → base band + 0.5   (e.g. rank 2, streak 1 = Band 5.5)
+# Bands can fall back within a rank when weakness resets streak to 0.
+# No band is shown until the learner has at least one attempt (evidence > 0).
+#
+# Band philosophy:
+#   Rank 1 → Band 4.0  — emerging, first evidence of skill awareness
+#   Rank 2 → Band 5.0  — developing, inconsistent but present
+#   Rank 3 → Band 6.0  — competent, reliable under normal conditions
+#   Rank 4 → Band 7.0  — proficient, consistent and accurate
+#   Rank 5 → Band 8.0  — advanced, flexible and precise
+
+RANK_TO_BASE_BAND = {
+    1: 4.0,
+    2: 5.0,
+    3: 6.0,
+    4: 7.0,
+    5: 8.0,
+}
+
+
+def get_band_estimate(
+    current_rank: int,
+    clean_streak: int,
+    total_evidence: int
+) -> float | None:
+    """
+    Returns an estimated IELTS band (0.5 precision) for a skill
+    based on its current rank and clean streak.
+
+    Returns None if the learner has no evidence yet — no band
+    is shown until at least one practice attempt exists.
+
+    Band movement:
+      streak 0   → base band for this rank
+      streak 1+  → base band + 0.5 (building toward next rank)
+
+    This means:
+      - A weakness (streak reset to 0) drops the band back to base
+      - Consistent strength (streak 1+) lifts the band by 0.5
+      - Ranking up lifts the base band by a full point
+    """
+    if total_evidence == 0:
+        return None
+
+    base = RANK_TO_BASE_BAND.get(current_rank, 4.0)
+    bonus = 0.5 if clean_streak >= 1 else 0.0
+    return base + bonus
+
+
+def format_band(band: float | None) -> str:
+    """
+    Formats a band float for display.
+    None → "No band yet"
+    5.0  → "Band 5.0"
+    6.5  → "Band 6.5"
+    """
+    if band is None:
+        return "No band yet"
+    return f"Band {band:.1f}"
+
+
+def get_band_label(band: float | None) -> str:
+    """
+    Returns a descriptive label for a band estimate.
+    Used in the UI alongside the band number.
+    """
+    if band is None:
+        return "Complete a practice session to see your band"
+
+    if band < 4.5:
+        return "Emerging"
+    elif band < 5.5:
+        return "Developing"
+    elif band < 6.5:
+        return "Competent"
+    elif band < 7.5:
+        return "Proficient"
+    elif band < 8.5:
+        return "Advanced"
+    else:
+        return "Expert"
+
+
+# ─── Taxonomy loading ─────────────────────────────────────────────────────────
 
 def load_taxonomy(section: str = "Writing") -> dict:
     """
     Loads the skill taxonomy for a given section.
-    Currently only 'Writing' has a taxonomy file.
     """
     filename = f"skill_taxonomy_{section.lower()}.json"
     path = os.path.join(DATA_DIR, filename)
-
     if not os.path.exists(path):
         raise FileNotFoundError(
             f"No skill taxonomy found for section '{section}' "
             f"at {path}"
         )
-
     with open(path, "r") as f:
         return json.load(f)
 
@@ -36,7 +121,7 @@ def load_taxonomy(section: str = "Writing") -> dict:
 def get_all_skill_ids(section: str = "Writing") -> list:
     """
     Returns a flat list of every skill_id in the taxonomy.
-    Used when building the fixed-list prompt for Qwen in Phase C —
+    Used when building the fixed-list prompt for Qwen —
     Qwen must select from exactly these IDs, nothing else.
     """
     taxonomy = load_taxonomy(section)
@@ -56,7 +141,6 @@ def get_skill_by_id(skill_id: str, section: str = "Writing") -> dict | None:
     for category in taxonomy["categories"]:
         for skill in category["skills"]:
             if skill["skill_id"] == skill_id:
-                # Attach category info for convenience
                 return {
                     **skill,
                     "category_id": category["category_id"],
@@ -67,9 +151,7 @@ def get_skill_by_id(skill_id: str, section: str = "Writing") -> dict | None:
 
 def get_skills_flat(section: str = "Writing") -> list:
     """
-    Returns every skill as a flat list (with category info attached),
-    rather than nested under categories. Easier to iterate over
-    when building prompts or tables.
+    Returns every skill as a flat list with category info attached.
     """
     taxonomy = load_taxonomy(section)
     flat = []
@@ -86,6 +168,7 @@ def get_skills_flat(section: str = "Writing") -> list:
 def get_rank_name(rank: int) -> str:
     """
     Converts a numeric rank (1-5) to its display name.
+    Kept for backward compatibility with Coach agent and MCP server.
     """
     return RANK_NAMES.get(rank, "Unknown")
 
@@ -93,14 +176,12 @@ def get_rank_name(rank: int) -> str:
 def format_skill_list_for_prompt(section: str = "Writing") -> str:
     """
     Builds a formatted text block listing every skill_id and its
-    description. This is injected into the Qwen evaluator prompt
-    in Phase C so Qwen can only choose from this fixed list —
-    it cannot invent a new skill_id.
+    description. Injected into Qwen prompts so Qwen can only
+    choose from this fixed list.
     """
     skills = get_skills_flat(section)
     lines = []
     current_category = None
-
     for skill in skills:
         if skill["category_name"] != current_category:
             current_category = skill["category_name"]
@@ -109,32 +190,26 @@ def format_skill_list_for_prompt(section: str = "Writing") -> str:
             f"  - {skill['skill_id']}: {skill['skill_name']} — "
             f"{skill['description']}"
         )
-
     return "\n".join(lines)
 
 
 def get_rank_definition(skill_id: str, rank: int, section: str = "Writing") -> str:
     """
     Returns the specific rank definition text for a skill at a
-    given rank. Used when generating teaching content in Phase D —
-    the lesson needs to explain what THIS rank and the NEXT rank
-    look like.
+    given rank. Used when generating teaching content in the
+    Chat Coach — the lesson explains what THIS rank and the
+    NEXT rank look like.
     """
     skill = get_skill_by_id(skill_id, section)
     if not skill:
         return ""
     return skill["ranks"].get(str(rank), "")
 
+
 # ─── BRIDGING TO THE FREE-TEXT MEMORY SYSTEM ──────────────────────────────────
 
-# learner_memories.skill is free text Qwen chose itself (e.g. "Thesis
-# Clarity", "Conclusion"). learner_skill_ranks.skill_id is a fixed taxonomy
-# key (e.g. "tr_conclusion_synthesis"). This map lets us find the most
-# likely matching free-text memories for a given fixed skill_id, so the
-# Chat Coach can quote a learner's ACTUAL essay observation rather than
-# just stating a rank number.
 SKILL_ID_TO_MEMORY_LABELS = {
-    # Writing (existing)
+    # Writing
     "tr_full_coverage":          ["Task Response", "Idea Development"],
     "tr_position_clarity":       ["Thesis Clarity"],
     "tr_idea_development":       ["Idea Development"],
@@ -148,8 +223,7 @@ SKILL_ID_TO_MEMORY_LABELS = {
     "gra_sentence_variety":      ["Grammar"],
     "gra_accuracy":              ["Grammar"],
     "gra_punctuation":           ["Grammar"],
-
-    # Reading (new)
+    # Reading
     "ri_detail_retrieval":       ["Detail Retrieval"],
     "ri_skimming":               ["Main Idea", "Skimming"],
     "ri_scanning":               ["Detail Retrieval", "Scanning"],
@@ -160,8 +234,7 @@ SKILL_ID_TO_MEMORY_LABELS = {
     "rv_context_meaning":        ["Vocabulary in Context"],
     "rv_paraphrase":             ["Vocabulary in Context"],
     "rt_paragraph_purpose":      ["Main Idea", "Organization"],
-
-    # Speaking (new)
+    # Speaking
     "sf_fluency":                ["Fluency"],
     "sf_coherence":              ["Organization", "Fluency"],
     "sf_extension":              ["Idea Development", "Fluency"],
@@ -171,8 +244,7 @@ SKILL_ID_TO_MEMORY_LABELS = {
     "sg_grammar_accuracy":       ["Grammar", "Grammatical Range"],
     "sp_intelligibility":        ["Pronunciation"],
     "sp_features":               ["Pronunciation"],
-
-    # Listening (new)
+    # Listening
     "ld_detail_accuracy":        ["Detail Retrieval", "Accuracy"],
     "ld_form_completion":        ["Detail Retrieval", "Form Completion"],
     "ld_number_recognition":     ["Detail Retrieval"],
@@ -187,7 +259,6 @@ SKILL_ID_TO_MEMORY_LABELS = {
 def get_memory_labels_for_skill(skill_id: str) -> list:
     """
     Returns the free-text memory 'skill' labels most likely to
-    correspond to a given fixed skill_id. Used to search
-    learner_memories for relevant evidence to quote.
+    correspond to a given fixed skill_id.
     """
     return SKILL_ID_TO_MEMORY_LABELS.get(skill_id, [])

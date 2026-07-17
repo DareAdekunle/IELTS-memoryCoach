@@ -4,8 +4,7 @@ export const getSpeakingPrompts = (difficulty) =>
   client.get('/speaking/prompts', { params: difficulty ? { difficulty } : {} })
 
 export const getRandomSpeakingPrompt = (difficulty) =>
-  client.get('/speaking/prompt/random',
-    { params: difficulty ? { difficulty } : {} })
+  client.get('/speaking/prompt/random', { params: difficulty ? { difficulty } : {} })
 
 export const getSpeakingPromptById = (id) =>
   client.get(`/speaking/prompt/${id}`)

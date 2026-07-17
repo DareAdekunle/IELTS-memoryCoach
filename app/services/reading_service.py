@@ -12,40 +12,37 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 PROMPTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts")
 
 
-# ─── LOAD PASSAGES ────────────────────────────────────────────────────────────
-
 def load_reading_passages() -> list:
-    """
-    Loads all reading passages from the JSON file.
-    """
     path = os.path.join(DATA_DIR, "reading_passages.json")
     with open(path, "r") as f:
         return json.load(f)
 
 
 def get_random_passage(difficulty: str = None) -> dict:
-    """
-    Returns a random reading passage.
-    If difficulty is provided, filters to that level only.
-
-    difficulty options: 'beginner', 'intermediate', 'advanced'
-    """
+    """Returns a random reading passage, optionally filtered by difficulty."""
     passages = load_reading_passages()
-
     if difficulty:
         passages = [p for p in passages if p["difficulty"] == difficulty]
-
     if not passages:
         raise ValueError(f"No passages found for difficulty: {difficulty}")
-
     return random.choice(passages)
 
 
+def get_adaptive_passage(learner_id: str) -> dict:
+    """
+    Returns an unseen reading passage matched to the learner's band level.
+    Cycles back through seen passages only when all at the level are exhausted.
+    """
+    from app.services.practice_service import get_adaptive_difficulty, _get_unseen_or_cycle
+    difficulty = get_adaptive_difficulty(learner_id, "Reading")
+    passages = load_reading_passages()
+    filtered = [p for p in passages if p["difficulty"] == difficulty]
+    if not filtered:
+        filtered = passages
+    return _get_unseen_or_cycle(filtered, learner_id, "Reading", "passage_id")
+
+
 def get_passage_by_id(passage_id: str) -> dict | None:
-    """
-    Returns a specific passage by its ID.
-    Used to reload a passage without changing it on page refresh.
-    """
     passages = load_reading_passages()
     for p in passages:
         if p["passage_id"] == passage_id:
@@ -54,10 +51,6 @@ def get_passage_by_id(passage_id: str) -> dict | None:
 
 
 def get_all_passages_summary() -> list:
-    """
-    Returns a lightweight summary of all passages.
-    Used to let the learner choose a passage by difficulty.
-    """
     passages = load_reading_passages()
     return [
         {
@@ -70,50 +63,21 @@ def get_all_passages_summary() -> list:
     ]
 
 
-# ─── CHECK OBJECTIVE ANSWERS ──────────────────────────────────────────────────
-
 def check_multiple_choice(learner_answer: str, correct_answer: str) -> bool:
-    """
-    Checks a multiple choice answer.
-    Both answers are stripped and uppercased before comparison
-    so 'a', 'A', ' A ' all match correctly.
-    """
     return learner_answer.strip().upper() == correct_answer.strip().upper()
 
 
 def check_true_false_ng(learner_answer: str, correct_answer: str) -> bool:
-    """
-    Checks a True/False/Not Given answer.
-    Handles common variations like 'not given', 'NG', 'Not Given'.
-    """
-    # Normalise both answers to lowercase for comparison
     learner = learner_answer.strip().lower()
     correct = correct_answer.strip().lower()
-
-    # Handle Not Given variations
     ng_variations = ["not given", "ng", "not-given", "notgiven"]
-
     if correct in ng_variations:
         return learner in ng_variations
-
     return learner == correct
 
 
-# ─── EVALUATE SHORT ANSWERS WITH QWEN ────────────────────────────────────────
-
 def evaluate_short_answer(question: str, model_answer: str,
-                           learner_answer: str, explanation: str) -> dict:
-    """
-    Sends a short answer question to Qwen for evaluation.
-
-    Returns a dict with:
-    - is_correct (bool)
-    - partial_credit (bool)
-    - score (0, 1 or 2)
-    - feedback (string)
-    - skill_demonstrated (string)
-    """
-    # Load the prompt template
+                          learner_answer: str, explanation: str) -> dict:
     path = os.path.join(PROMPTS_DIR, "reading_evaluator_prompt.txt")
     with open(path, "r") as f:
         template = f.read()
@@ -133,41 +97,22 @@ def evaluate_short_answer(question: str, model_answer: str,
         try:
             result = extract_json_from_text(raw_response)
         except ValueError:
-            # If Qwen fails to return valid JSON, give 0 with a note
             return {
                 "is_correct": False,
                 "partial_credit": False,
                 "score": 0,
-                "feedback": "Could not evaluate this answer automatically. Please review manually.",
+                "feedback": "Could not evaluate this answer automatically.",
                 "skill_demonstrated": "unknown"
             }
 
     return result
 
 
-# ─── EVALUATE A FULL ATTEMPT ──────────────────────────────────────────────────
-
 def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
-    """
-    Evaluates a complete reading attempt.
-
-    learner_answers is a dict mapping question_id to the learner's answer string:
-    {
-        "q1": "B",
-        "q2": "C",
-        "q4": "True",
-        "q8": "Carnegie believed libraries helped poor people educate themselves"
-    }
-
-    Returns a structured result with scores and feedback for every question.
-    """
     questions = passage["questions"]
     results = []
-
     total_score = 0
     max_score = 0
-
-    # Track skill performance for memory extraction
     skill_scores = {}
 
     for question in questions:
@@ -182,7 +127,6 @@ def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
             is_correct = check_multiple_choice(learner_answer, correct_answer)
             score = 1 if is_correct else 0
             total_score += score
-
             results.append({
                 "question_id": qid,
                 "question_type": qtype,
@@ -201,7 +145,6 @@ def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
             is_correct = check_true_false_ng(learner_answer, correct_answer)
             score = 1 if is_correct else 0
             total_score += score
-
             results.append({
                 "question_id": qid,
                 "question_type": qtype,
@@ -217,9 +160,7 @@ def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
 
         elif qtype == "short_answer":
             max_score += 2
-
             if not learner_answer:
-                # Learner left it blank
                 results.append({
                     "question_id": qid,
                     "question_type": qtype,
@@ -233,17 +174,14 @@ def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
                     "skill": skill
                 })
             else:
-                # Send to Qwen for evaluation
                 eval_result = evaluate_short_answer(
                     question=question["question"],
                     model_answer=correct_answer,
                     learner_answer=learner_answer,
                     explanation=question["explanation"]
                 )
-
                 score = eval_result.get("score", 0)
                 total_score += score
-
                 results.append({
                     "question_id": qid,
                     "question_type": qtype,
@@ -258,18 +196,14 @@ def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
                     "skill": skill
                 })
 
-        # Track skill performance
         if skill not in skill_scores:
             skill_scores[skill] = {"earned": 0, "possible": 0}
-
         q_result = results[-1]
         skill_scores[skill]["earned"] += q_result["score"]
         skill_scores[skill]["possible"] += q_result["max_score"]
 
-    # Calculate percentage score
     percentage = round((total_score / max_score) * 100) if max_score > 0 else 0
 
-    # Build skill accuracy summary
     skill_accuracy = {}
     for skill, data in skill_scores.items():
         if data["possible"] > 0:

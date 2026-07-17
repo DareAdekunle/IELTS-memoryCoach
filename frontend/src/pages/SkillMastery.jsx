@@ -1,19 +1,34 @@
 import { useState, useEffect } from 'react'
 import { getSkillRanks } from '../api/progress'
-import { Trophy, Loader2, Zap, ChevronRight } from 'lucide-react'
+import { Trophy, Loader2, Zap, ChevronRight, TrendingUp } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-const RANK_NAMES = {
-  1: 'Beginner', 2: 'Developing', 3: 'Intermediate',
-  4: 'Proficient', 5: 'Advanced'
+// Band → colour mapping (replaces rank-based colours)
+// Anchored to IELTS band ranges learners actually recognise
+const BAND_COLORS = {
+  4.0: { bg: 'bg-red-500/10',    border: 'border-red-500/30',    text: 'text-red-400',    bar: 'bg-red-500' },
+  4.5: { bg: 'bg-red-500/10',    border: 'border-red-500/30',    text: 'text-red-400',    bar: 'bg-red-500' },
+  5.0: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400', bar: 'bg-orange-500' },
+  5.5: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400', bar: 'bg-orange-500' },
+  6.0: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400', bar: 'bg-yellow-500' },
+  6.5: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400', bar: 'bg-yellow-500' },
+  7.0: { bg: 'bg-blue-500/10',   border: 'border-blue-500/30',   text: 'text-blue-400',   bar: 'bg-blue-500' },
+  7.5: { bg: 'bg-blue-500/10',   border: 'border-blue-500/30',   text: 'text-blue-400',   bar: 'bg-blue-500' },
+  8.0: { bg: 'bg-green-500/10',  border: 'border-green-500/30',  text: 'text-green-400',  bar: 'bg-green-500' },
+  8.5: { bg: 'bg-green-500/10',  border: 'border-green-500/30',  text: 'text-green-400',  bar: 'bg-green-500' },
 }
 
-const RANK_COLORS = {
-  1: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400', bar: 'bg-red-500' },
-  2: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400', bar: 'bg-orange-500' },
-  3: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400', bar: 'bg-yellow-500' },
-  4: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400', bar: 'bg-blue-500' },
-  5: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-400', bar: 'bg-green-500' }
+function getBandColors(band) {
+  if (band === null || band === undefined) {
+    return { bg: 'bg-gray-800', border: 'border-gray-700', text: 'text-gray-500', bar: 'bg-gray-700' }
+  }
+  return BAND_COLORS[band] || BAND_COLORS[4.0]
+}
+
+// Progress bar fills from 4.0 (min shown) to 9.0 (IELTS max)
+function bandToPercent(band) {
+  if (band === null || band === undefined) return 0
+  return Math.min(100, Math.max(0, ((band - 4.0) / 5.0) * 100))
 }
 
 const SECTION_CONFIG = {
@@ -25,11 +40,14 @@ const SECTION_CONFIG = {
 
 const SECTIONS = ['Writing', 'Reading', 'Speaking', 'Listening']
 
-function RankBadge({ rank }) {
-  const colors = RANK_COLORS[rank] || RANK_COLORS[1]
+function BandBadge({ band, bandLabel }) {
+  const colors = getBandColors(band)
   return (
-    <span className={'text-xs font-semibold px-2.5 py-1 rounded-lg ' + colors.bg + ' ' + colors.text}>
-      {RANK_NAMES[rank]}
+    <span className={
+      'text-xs font-semibold px-2.5 py-1 rounded-lg whitespace-nowrap ' +
+      colors.bg + ' ' + colors.text
+    }>
+      {band !== null && band !== undefined ? `Band ${band.toFixed(1)}` : 'No band yet'}
     </span>
   )
 }
@@ -38,22 +56,36 @@ function StreakDots({ streak, threshold = 3 }) {
   return (
     <div className="flex items-center gap-1">
       {[...Array(threshold)].map((_, i) => (
-        <div key={i} className={'w-2.5 h-2.5 rounded-full ' + (i < streak ? 'bg-brand-500' : 'bg-gray-700')} />
+        <div
+          key={i}
+          className={'w-2.5 h-2.5 rounded-full ' + (i < streak ? 'bg-brand-500' : 'bg-gray-700')}
+        />
       ))}
     </div>
   )
 }
 
 function SkillCard({ skill, isWeakest }) {
-  const rank = skill.current_rank || 1
-  const colors = RANK_COLORS[rank] || RANK_COLORS[1]
-  const pct = (rank / 5) * 100
+  const band = skill.band ?? null
+  const bandLabel = skill.band_label || ''
+  const colors = getBandColors(band)
+  const pct = bandToPercent(band)
   const hasEvidence = skill.total_evidence > 0
   const streak = skill.clean_streak || 0
-  const toRankUp = Math.max(0, 3 - streak)
+  const toNextBand = Math.max(0, 3 - streak)
+
+  // Next band display
+  const nextBand = band !== null ? Math.min(8.5, band + (streak >= 1 ? 0.5 : 0.5)) : null
+  const nextBandDisplay = nextBand !== null ? `Band ${nextBand.toFixed(1)}` : null
 
   return (
-    <div className={'rounded-2xl p-4 border transition-all ' + (isWeakest ? 'border-brand-500/50 bg-brand-500/5' : 'border-gray-800 bg-gray-900 hover:border-gray-700')}>
+    <div className={
+      'rounded-2xl p-4 border transition-all ' +
+      (isWeakest
+        ? 'border-brand-500/50 bg-brand-500/5'
+        : 'border-gray-800 bg-gray-900 hover:border-gray-700')
+    }>
+      {/* Header row */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
@@ -66,31 +98,52 @@ function SkillCard({ skill, isWeakest }) {
           </div>
           <p className="text-gray-500 text-xs">{skill.category_name}</p>
         </div>
-        <RankBadge rank={rank} />
+        <BandBadge band={band} bandLabel={bandLabel} />
       </div>
 
+      {/* Band progress bar */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-gray-600 text-xs">Rank {rank}/5</span>
-          {rank < 5 && <span className="text-gray-600 text-xs">→ {RANK_NAMES[rank + 1]}</span>}
+          <span className="text-gray-600 text-xs">
+            {hasEvidence ? (bandLabel || 'Assessed') : 'Not assessed'}
+          </span>
+          {hasEvidence && band !== null && band < 8.5 && nextBandDisplay && (
+            <span className="text-gray-600 text-xs">→ {nextBandDisplay}</span>
+          )}
         </div>
         <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-          <div className={'h-full rounded-full transition-all ' + colors.bar} style={{ width: pct + '%' }} />
+          <div
+            className={'h-full rounded-full transition-all ' + colors.bar}
+            style={{ width: pct + '%' }}
+          />
+        </div>
+        {/* Band scale labels */}
+        <div className="flex justify-between mt-1">
+          <span className="text-gray-700 text-xs">4.0</span>
+          <span className="text-gray-700 text-xs">6.5</span>
+          <span className="text-gray-700 text-xs">9.0</span>
         </div>
       </div>
 
+      {/* Footer */}
       {hasEvidence ? (
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-500 text-xs mb-1">
-              {rank < 5 ? `${toRankUp} more to rank up` : 'Maximum rank!'}
+              {band !== null && band < 8.5
+                ? `${toNextBand} more to Band ${(band + 0.5).toFixed(1)}`
+                : band !== null
+                ? 'Peak band reached!'
+                : ''}
             </p>
-            {rank < 5 && <StreakDots streak={streak} threshold={3} />}
+            {band !== null && band < 8.5 && (
+              <StreakDots streak={streak} threshold={3} />
+            )}
           </div>
           <span className="text-gray-600 text-xs">{skill.total_evidence} assessments</span>
         </div>
       ) : (
-        <p className="text-gray-600 text-xs">Not yet assessed</p>
+        <p className="text-gray-600 text-xs">Submit a practice session to get your band</p>
       )}
     </div>
   )
@@ -136,31 +189,42 @@ export default function SkillMastery() {
   const currentSummary = summariesBySection[activeSection] || {}
   const sectionConfig = SECTION_CONFIG[activeSection]
 
-  const weakest = currentSkills.length
-    ? [...currentSkills].sort((a, b) => {
-        if (a.current_rank !== b.current_rank) return a.current_rank - b.current_rank
+  // Weakest = lowest band among assessed skills, then least evidence
+  const assessedSkills = currentSkills.filter(s => s.total_evidence > 0)
+  const weakest = assessedSkills.length
+    ? [...assessedSkills].sort((a, b) => {
+        const bandA = a.band ?? 0
+        const bandB = b.band ?? 0
+        if (bandA !== bandB) return bandA - bandB
         return a.total_evidence - b.total_evidence
       })[0]
     : null
 
-  const hasAnyData = currentSkills.some(s => s.total_evidence > 0)
+  const hasAnyData = assessedSkills.length > 0
 
   // Overall stats across all sections
   const totalSkills = Object.values(skillsBySection).reduce((sum, skills) => sum + skills.length, 0)
-  const totalAdvanced = Object.values(skillsBySection).reduce(
-    (sum, skills) => sum + skills.filter(s => s.current_rank === 5).length, 0
-  )
   const totalAssessed = Object.values(skillsBySection).reduce(
     (sum, skills) => sum + skills.filter(s => s.total_evidence > 0).length, 0
   )
-  const allRanks = Object.values(skillsBySection).flatMap(skills => skills.map(s => s.current_rank || 1))
-  const overallAvg = allRanks.length
-    ? (allRanks.reduce((a, b) => a + b, 0) / allRanks.length).toFixed(1)
-    : '—'
+
+  // Overall band across all assessed skills
+  const allBands = Object.values(skillsBySection)
+    .flatMap(skills => skills.map(s => s.band))
+    .filter(b => b !== null && b !== undefined)
+
+  const overallBand = allBands.length
+    ? Math.round((allBands.reduce((a, b) => a + b, 0) / allBands.length) * 2) / 2
+    : null
+
+  const overallBandDisplay = overallBand !== null ? `Band ${overallBand.toFixed(1)}` : '—'
+
+  const totalAdvanced = Object.values(skillsBySection).reduce(
+    (sum, skills) => sum + skills.filter(s => s.band !== null && s.band >= 8.0).length, 0
+  )
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -169,12 +233,15 @@ export default function SkillMastery() {
             Skill Mastery
           </h1>
           <p className="text-gray-400 mt-1">
-            Your mastery level across all IELTS skills
+            Your IELTS band estimates across all skills
           </p>
         </div>
         <Link
           to={sectionConfig.practiceLink}
-          className={'flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-xl transition-colors ' + sectionConfig.bg + ' ' + sectionConfig.color}
+          className={
+            'flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-xl transition-colors ' +
+            sectionConfig.bg + ' ' + sectionConfig.color
+          }
         >
           Practice {activeSection}
           <ChevronRight className="w-4 h-4" />
@@ -184,10 +251,10 @@ export default function SkillMastery() {
       {/* Overall stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total skills', value: totalSkills },
-          { label: 'Overall avg rank', value: overallAvg + '/5' },
-          { label: 'Advanced skills', value: totalAdvanced },
-          { label: 'Skills assessed', value: totalAssessed + '/' + totalSkills },
+          { label: 'Overall band', value: overallBandDisplay },
+          { label: 'Skills assessed', value: `${totalAssessed}/${totalSkills}` },
+          { label: 'Band 8.0+ skills', value: totalAdvanced },
+          { label: 'Active section', value: activeSection },
         ].map(({ label, value }) => (
           <div key={label} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
             <p className="text-xl font-bold text-white">{value}</p>
@@ -203,37 +270,45 @@ export default function SkillMastery() {
           const sectionSkills = skillsBySection[section] || []
           const assessed = sectionSkills.filter(s => s.total_evidence > 0).length
           const isActive = activeSection === section
+          // Section band
+          const sectionBands = sectionSkills.map(s => s.band).filter(b => b !== null && b !== undefined)
+          const sectionBand = sectionBands.length
+            ? (Math.round((sectionBands.reduce((a, b) => a + b, 0) / sectionBands.length) * 2) / 2).toFixed(1)
+            : null
           return (
             <button
               key={section}
               onClick={() => setActiveSection(section)}
               className={
                 'px-4 py-2 rounded-xl text-sm font-medium transition-colors ' +
-                (isActive ? cfg.bg + ' ' + cfg.color + ' ' + cfg.border + ' border' : 'bg-gray-800 text-gray-400 hover:text-white')
+                (isActive
+                  ? cfg.bg + ' ' + cfg.color + ' ' + cfg.border + ' border'
+                  : 'bg-gray-800 text-gray-400 hover:text-white')
               }
             >
               {section}
               <span className="ml-1.5 text-xs opacity-60">
-                {assessed}/{sectionSkills.length}
+                {sectionBand ? `B${sectionBand}` : `${assessed}/${sectionSkills.length}`}
               </span>
             </button>
           )
         })}
       </div>
 
-      {/* No data state */}
+      {/* No data nudge */}
       {!hasAnyData && (
         <div className={'rounded-2xl p-6 mb-6 border ' + sectionConfig.bg + ' ' + sectionConfig.border}>
           <div className="flex items-start gap-4">
-            <Zap className={'w-6 h-6 flex-shrink-0 mt-0.5 ' + sectionConfig.color} />
+            <TrendingUp className={'w-6 h-6 flex-shrink-0 mt-0.5 ' + sectionConfig.color} />
             <div>
               <p className="text-white font-medium mb-1">
-                Submit {activeSection} practice to unlock your skill profile
+                Submit a {activeSection} practice session to unlock your band estimates
               </p>
               <p className="text-gray-400 text-sm">
-                After each {activeSection} Coach session, the AI classifies your
-                performance against {currentSkills.length} skills. You need 3
-                consecutive strong performances on a skill to rank up.
+                After each session, the Coach classifies your performance across{' '}
+                {currentSkills.length} {activeSection} skills and assigns an estimated
+                IELTS band (4.0–8.5) per skill. Three consecutive strong performances
+                lift a skill's band by 0.5.
               </p>
             </div>
           </div>
@@ -247,10 +322,22 @@ export default function SkillMastery() {
           <p className="text-sm font-medium text-gray-400 mb-3">{activeSection} overview</p>
           <div className="space-y-2">
             {[
-              { label: 'Skills', value: currentSkills.length },
-              { label: 'Avg rank', value: currentSummary.average_rank ? Number(currentSummary.average_rank).toFixed(1) + '/5' : '—' },
-              { label: 'Advanced', value: currentSummary.skills_at_max || 0 },
-              { label: 'Not assessed', value: currentSummary.skills_untouched ?? currentSkills.length },
+              {
+                label: 'Section band',
+                value: currentSummary.section_band_display || 'No band yet'
+              },
+              {
+                label: 'Band label',
+                value: currentSummary.section_band_label || '—'
+              },
+              {
+                label: 'Skills assessed',
+                value: `${assessedSkills.length}/${currentSkills.length}`
+              },
+              {
+                label: 'Band 8.0+',
+                value: currentSkills.filter(s => s.band !== null && s.band >= 8.0).length
+              },
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between">
                 <span className="text-gray-500 text-sm">{label}</span>
@@ -261,7 +348,7 @@ export default function SkillMastery() {
         </div>
 
         {/* Coach recommendation */}
-        {weakest && weakest.total_evidence > 0 && (
+        {weakest && (
           <div className={'lg:col-span-2 rounded-2xl p-4 border ' + sectionConfig.bg + ' ' + sectionConfig.border}>
             <div className="flex items-center gap-2 mb-2">
               <Zap className={'w-4 h-4 ' + sectionConfig.color} />
@@ -269,10 +356,13 @@ export default function SkillMastery() {
             </div>
             <p className="text-white font-semibold mb-1">{weakest.skill_name}</p>
             <p className="text-gray-400 text-sm mb-3">
-              {weakest.category_name} · Currently {RANK_NAMES[weakest.current_rank || 1]}
+              {weakest.category_name}
+              {weakest.band !== null && (
+                <span className="ml-2">· Currently {weakest.band_display}</span>
+              )}
               {(weakest.clean_streak || 0) > 0 && (
                 <span className="text-brand-400 ml-2">
-                  · {3 - (weakest.clean_streak || 0)} more to rank up
+                  · {3 - (weakest.clean_streak || 0)} more to {weakest.band !== null ? `Band ${(weakest.band + 0.5).toFixed(1)}` : 'next band'}
                 </span>
               )}
             </p>
@@ -286,29 +376,29 @@ export default function SkillMastery() {
         )}
       </div>
 
-      {/* How it works */}
+      {/* How bands work */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-6">
-        <h3 className="text-sm font-semibold text-gray-300 mb-3">How the rank engine works</h3>
+        <h3 className="text-sm font-semibold text-gray-300 mb-3">How band estimates work</h3>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <p className="text-2xl mb-1">✍️</p>
             <p className="text-white text-xs font-medium">Complete a session</p>
             <p className="text-gray-500 text-xs mt-1">
-              AI classifies each skill as strength, weakness, or not applicable
+              The Coach classifies each skill as strength, weakness, or not applicable
             </p>
           </div>
           <div>
             <p className="text-2xl mb-1">🔥</p>
             <p className="text-white text-xs font-medium">Build a streak</p>
             <p className="text-gray-500 text-xs mt-1">
-              3 consecutive strengths = rank up. Any weakness resets streak to 0
+              3 consecutive strengths lifts your band by 0.5. Any weakness resets streak to 0
             </p>
           </div>
           <div>
             <p className="text-2xl mb-1">🏆</p>
-            <p className="text-white text-xs font-medium">Reach Advanced</p>
+            <p className="text-white text-xs font-medium">Reach Band 8.5</p>
             <p className="text-gray-500 text-xs mt-1">
-              Rank 5 is the ceiling. Ranks never decrease — only forward
+              Bands range 4.0–8.5 per skill. Your overall band is the average across all assessed skills
             </p>
           </div>
         </div>
@@ -325,16 +415,24 @@ export default function SkillMastery() {
         ))}
       </div>
 
-      {/* Rank legend */}
+      {/* Band legend */}
       <div className="mt-6 bg-gray-900 border border-gray-800 rounded-2xl p-4">
-        <p className="text-gray-500 text-xs mb-3 font-medium">Rank levels</p>
+        <p className="text-gray-500 text-xs mb-3 font-medium">Band scale</p>
         <div className="flex flex-wrap gap-3">
-          {Object.entries(RANK_NAMES).map(([rank, name]) => {
-            const colors = RANK_COLORS[Number(rank)]
+          {[
+            { band: 4.0, label: 'Emerging' },
+            { band: 5.0, label: 'Developing' },
+            { band: 6.0, label: 'Competent' },
+            { band: 7.0, label: 'Proficient' },
+            { band: 8.0, label: 'Advanced' },
+          ].map(({ band, label }) => {
+            const colors = getBandColors(band)
             return (
-              <div key={rank} className="flex items-center gap-2">
+              <div key={band} className="flex items-center gap-2">
                 <div className={'w-3 h-3 rounded-full ' + colors.bar} />
-                <span className="text-gray-400 text-xs">{rank} — {name}</span>
+                <span className="text-gray-400 text-xs">
+                  {band.toFixed(1)}–{(band + 0.5).toFixed(1)} — {label}
+                </span>
               </div>
             )
           })}

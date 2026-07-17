@@ -7,3 +7,4 @@ export const getSkillRanks = (section = 'Writing') =>
   client.get('/progress/skills', { params: { section } })
 export const createProfile = (data) => client.post('/progress/profile', data)
 export const getProfile = () => client.get('/progress/profile')
+export const getInsights = () => client.get('/progress/insights')

@@ -14,6 +14,7 @@ from app.services.speaking_service import (
     get_all_prompt_sets_summary,
     get_prompt_set_by_id,
     get_random_prompt_set,
+    get_adaptive_prompt_set,
     get_session_structure
 )
 from app.services.asr_service import transcribe_audio_bytes
@@ -21,12 +22,10 @@ from app.services.tts_service import examiner_speak
 from app.services.speaking_evaluator_service import evaluate_speaking_attempt
 from app.services.memory_service import (
     get_relevant_memories,
-    save_speaking_attempt,
-    extract_speaking_memories,
-    update_memories,
-    apply_skill_classifications_batch
+    save_speaking_attempt
 )
-from app.services.skill_classifier_service import classify_speaking_skills
+from app.services.practice_service import mark_content_seen
+from app.services.coach_service import coach_speaking_submission
 from app.utils.logger import get_logger
 
 logger = get_logger("api.routes.speaking")
@@ -54,11 +53,17 @@ async def get_random_prompt(
     difficulty: Optional[str] = None,
     current_user: User = Depends(get_current_user)
 ):
-    """Returns a random speaking prompt set."""
+    """
+    Returns a speaking prompt set adapted to the learner's current band.
+    Difficulty param overrides adaptive selection if provided.
+    """
     try:
-        prompt = get_random_prompt_set(
-            difficulty=difficulty if difficulty else None
-        )
+        if difficulty:
+            prompt = get_random_prompt_set(difficulty=difficulty)
+        elif current_user.learner_id:
+            prompt = get_adaptive_prompt_set(current_user.learner_id)
+        else:
+            prompt = get_random_prompt_set()
         return {"prompt": get_session_structure(prompt)}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -144,7 +149,7 @@ async def evaluate_speaking(
     """
     Evaluates a complete 3-part speaking session.
     Returns feedback immediately.
-    Memory extraction + skill classification in background.
+    Coach agent runs in background.
     """
     if not current_user.learner_id:
         raise HTTPException(
@@ -181,11 +186,13 @@ async def evaluate_speaking(
             detail=results.get("error", "Evaluation failed")
         )
 
+    # Track prompt as seen
+    mark_content_seen(learner_id, "Speaking", request.prompt_set_id)
+
     background_tasks.add_task(
         _speaking_post_tasks,
         learner_id=learner_id,
-        results=results,
-        request=request
+        results=results
     )
 
     return {
@@ -197,12 +204,9 @@ async def evaluate_speaking(
     }
 
 
-async def _speaking_post_tasks(
-    learner_id: str,
-    results: dict,
-    request: EvaluateSpeakingRequest
-):
-    """Background tasks after speaking evaluation."""
+async def _speaking_post_tasks(learner_id: str, results: dict):
+    """Coach agent evaluates Speaking submission in background."""
+    # Save attempt first — always runs regardless of Coach outcome
     try:
         save_speaking_attempt(
             learner_id=learner_id,
@@ -212,56 +216,22 @@ async def _speaking_post_tasks(
         logger.warning(f"Speaking save failed: {e}")
 
     try:
-        extract_speaking_memories(
+        coach_result = coach_speaking_submission(
             learner_id=learner_id,
             attempt_result=results
         )
-    except Exception as e:
-        logger.warning(f"Speaking memory extraction failed: {e}")
-
-    try:
-        scores = results.get("scores", {})
-        update_memories(
-            learner_id=learner_id,
-            section="Speaking",
-            score_result={
-                "scores": {
-                    "fluency_coherence": scores.get("fluency_coherence", 0),
-                    "lexical_resource": scores.get("lexical_resource", 0),
-                    "grammatical_range": scores.get("grammatical_range", 0),
-                    "pronunciation_clarity": scores.get("pronunciation_clarity", 0),
-                },
-                "strengths": [],
-                "weaknesses": [],
-                "overall_feedback": results.get("feedback_text", "")
-            }
-        )
-    except Exception as e:
-        logger.warning(f"Speaking memory update failed: {e}")
-
-    # Skill classification (NEW)
-    try:
-        classifications = classify_speaking_skills(
-            topic=results.get("topic", ""),
-            part1_responses=request.part1_responses,
-            part2_response=request.part2_response,
-            part3_responses=request.part3_responses,
-            feedback_text=results.get("feedback_text", ""),
-            scores=results.get("scores", {})
-        )
-        rank_results = apply_skill_classifications_batch(
-            learner_id=learner_id,
-            section="Speaking",
-            classifications=classifications
-        )
-        ranked_up = [r for r in rank_results if r.get("ranked_up")]
-        if ranked_up:
+        if coach_result.get("rank_ups"):
             logger.info(
                 f"Speaking rank-ups for {learner_id}: "
-                f"{[r['skill_id'] for r in ranked_up]}"
+                f"{[r['skill_id'] for r in coach_result['rank_ups']]}"
             )
+        logger.info(
+            f"Speaking Coach complete: "
+            f"{coach_result.get('memories_written', 0)} memories written, "
+            f"{len(coach_result.get('rank_ups', []))} rank-ups"
+        )
     except Exception as e:
-        logger.warning(f"Speaking skill classification failed: {e}")
+        logger.error(f"Speaking Coach agent failed: {e}", exc_info=True)
 
 
 class TTSRequest(BaseModel):

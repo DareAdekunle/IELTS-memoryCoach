@@ -66,6 +66,7 @@ async def get_chat_context(
             "rank_name": weakest.get("rank_name", "Beginner"),
             "sessions_to_rank_up": max(0, 3 - weakest.get("clean_streak", 0))
         }
+
     except Exception as e:
         logger.warning(f"Context fetch failed: {e}")
         return {"has_history": False, "section": section}
@@ -78,6 +79,7 @@ async def start_chat(
 ):
     """
     Starts a new specialist tutor session for the given IELTS section.
+
     Each section activates a different specialist tutor with
     section-specific knowledge, strategies and system prompt.
     """
@@ -96,6 +98,7 @@ async def start_chat(
             learner_id=current_user.learner_id,
             section=section
         )
+
         return {
             "success": True,
             "message": result["message"],
@@ -104,6 +107,7 @@ async def start_chat(
             "section": result["section"],
             "system_prompt": result.get("system_prompt", "")
         }
+
     except Exception as e:
         logger.error(f"Chat start failed: {e}")
         raise HTTPException(
@@ -117,18 +121,29 @@ async def continue_chat(
     request: ContinueChatRequest,
     current_user: User = Depends(get_current_user)
 ):
-    """Continues an existing tutor session with a new learner message."""
+    """
+    Continues an existing tutor session with a new learner message.
+
+    Passes learner_id and section so that when the tutor reaches
+    bridge_to_practice, micro-memories are extracted from the
+    drilling conversation and saved to the learner's memory profile.
+    """
     try:
         result = continue_chat_session(
             system_prompt=request.system_prompt,
             conversation_history=request.history,
-            learner_message=request.message
+            learner_message=request.message,
+            learner_id=current_user.learner_id,
+            section=request.section
         )
+
         return {
             "success": True,
             "message": result["message"],
-            "state": result["state"]
+            "state": result["state"],
+            "memories_extracted": result.get("memories_extracted", 0)
         }
+
     except Exception as e:
         logger.error(f"Chat continue failed: {e}")
         raise HTTPException(

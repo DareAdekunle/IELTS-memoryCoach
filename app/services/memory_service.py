@@ -5,6 +5,7 @@ import json
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from datetime import datetime, timezone
 from app.db.database import SessionLocal
 from app.db.models import PracticeAttempt, LearnerMemory, MasteryScore
 from app.services.qwen_service import call_qwen_for_json
@@ -186,11 +187,26 @@ def extract_and_save_memories(learner_id: str, section: str,
 
 def get_relevant_memories(learner_id: str, section: str, limit: int = 5) -> list:
     """
-    Retrieves the most relevant active memories for a learner.
-    Ordered by confidence so the strongest memories come first.
+    Retrieves the most relevant active memories for a learner,
+    ranked by a spaced repetition score that combines confidence
+    and recency.
 
-    This is what gets shown to the learner at the start of each session
-    and passed to Qwen as context when scoring.
+    Spaced repetition weighting:
+      score = confidence × recency_weight
+
+    recency_weight:
+      Updated within 7 days  → 1.0  (full weight)
+      Updated within 30 days → 0.8
+      Updated within 90 days → 0.6
+      Older than 90 days     → 0.4  (fading — needs reinforcement)
+
+    This means a high-confidence memory from 6 months ago ranks
+    BELOW a medium-confidence memory updated last week — matching
+    the spaced repetition principle that recent evidence is more
+    predictive of current ability than old evidence.
+
+    Weaknesses are prioritised over strengths at equal score
+    since they are more actionable for coaching.
     """
     db = SessionLocal()
 
@@ -199,9 +215,44 @@ def get_relevant_memories(learner_id: str, section: str, limit: int = 5) -> list
             LearnerMemory.learner_id == learner_id,
             LearnerMemory.section == section,
             LearnerMemory.status == "active"
-        ).order_by(
-            LearnerMemory.confidence.desc()
-        ).limit(limit).all()
+        ).all()
+
+        now = datetime.now(timezone.utc)
+
+        def spaced_repetition_score(m) -> float:
+            confidence = m.confidence or 0.5
+
+            # Calculate days since last update
+            updated = m.updated_at
+            if updated is None:
+                days_old = 999
+            else:
+                # Handle both naive and aware datetimes
+                if hasattr(updated, 'tzinfo') and updated.tzinfo is None:
+                    updated = updated.replace(tzinfo=timezone.utc)
+                days_old = max(0, (now - updated).days)
+
+            # Recency weight — decays with age
+            if days_old <= 7:
+                recency = 1.0
+            elif days_old <= 30:
+                recency = 0.8
+            elif days_old <= 90:
+                recency = 0.6
+            else:
+                recency = 0.4
+
+            # Weakness gets a small boost — more actionable for coaching
+            type_boost = 0.05 if m.memory_type == "weakness" else 0.0
+
+            return (confidence * recency) + type_boost
+
+        # Sort by spaced repetition score descending
+        sorted_memories = sorted(
+            memories,
+            key=spaced_repetition_score,
+            reverse=True
+        )
 
         return [
             {
@@ -214,7 +265,7 @@ def get_relevant_memories(learner_id: str, section: str, limit: int = 5) -> list
                 "evidence_count": m.evidence_count,
                 "status": m.status
             }
-            for m in memories
+            for m in sorted_memories[:limit]
         ]
 
     finally:
@@ -262,6 +313,7 @@ def get_all_memories(learner_id: str) -> dict:
 
 
 # ─── UPDATE AND FORGET MEMORIES ───────────────────────────────────────────────
+
 def update_memories(learner_id: str, section: str, score_result: dict) -> dict:
     """
     Reviews existing memories against new attempt results and updates them.
@@ -273,7 +325,6 @@ def update_memories(learner_id: str, section: str, score_result: dict) -> dict:
 
     Returns a summary of what changed.
     """
-
     # Step 1: Get existing active memories
     existing_memories = get_relevant_memories(learner_id, section=section, limit=10)
 
@@ -354,17 +405,14 @@ def update_memories(learner_id: str, section: str, score_result: dict) -> dict:
                 memory.status = "archived"
                 memory.confidence = new_confidence
                 summary["archived"] += 1
-
             elif action == "strengthen":
                 memory.confidence = min(new_confidence, 0.95)
                 memory.evidence_count += 1
                 summary["strengthened"] += 1
-
             elif action == "weaken":
                 memory.confidence = max(new_confidence, 0.1)
                 memory.evidence_count += 1
                 summary["weakened"] += 1
-
             elif action == "keep":
                 # No change needed but we still count it
                 pass
@@ -398,6 +446,7 @@ def get_memory_stats(learner_id: str) -> dict:
 
         active = [m for m in all_memories if m.status == "active"]
         archived = [m for m in all_memories if m.status == "archived"]
+
         weaknesses = [m for m in active if m.memory_type == "weakness"]
         strengths = [m for m in active if m.memory_type == "strength"]
 
@@ -415,9 +464,11 @@ def get_memory_stats(learner_id: str) -> dict:
     finally:
         db.close()
 
+
 def get_progress_data(learner_id: str, section: str = "Writing") -> dict:
     """
     Pulls together all progress data for a learner in one place.
+
     Handles both Writing and Reading sections correctly since
     they store scores in different formats.
 
@@ -444,25 +495,24 @@ def get_progress_data(learner_id: str, section: str = "Writing") -> dict:
             }
 
         attempt_data = []
-
         for i, a in enumerate(attempts):
             raw = json.loads(a.score_json) if a.score_json else {}
 
             if section == "Writing":
                 # Writing stores scores directly in score_json
                 actual_scores = raw.get("scores", {})
-
             elif section == "Reading":
                 # Reading stores full attempt result in score_json
                 # skill_accuracy contains percentage scores per skill
                 skill_accuracy = raw.get("skill_accuracy", {})
-
                 # Convert percentage accuracy to a score out of 5
                 # so both sections use the same scale on the dashboard
                 actual_scores = {
                     skill: round((acc / 100) * 5, 1)
                     for skill, acc in skill_accuracy.items()
                 }
+            else:
+                actual_scores = raw.get("scores", {})
 
             attempt_data.append({
                 "attempt_number": i + 1,
@@ -521,10 +571,10 @@ def get_progress_data(learner_id: str, section: str = "Writing") -> dict:
     finally:
         db.close()
 
+
 def extract_reading_memories(learner_id: str, attempt_result: dict) -> list:
     """
     Extracts coaching memories from a completed reading attempt.
-
     Works the same as extract_and_save_memories but uses the
     reading-specific prompt and formats reading results correctly.
     """
@@ -590,7 +640,6 @@ def extract_reading_memories(learner_id: str, attempt_result: dict) -> list:
                 continue
 
             memory_id = str(uuid.uuid4())[:12]
-
             memory = LearnerMemory(
                 memory_id=memory_id,
                 learner_id=learner_id,
@@ -617,6 +666,7 @@ def extract_reading_memories(learner_id: str, attempt_result: dict) -> list:
         db.close()
 
     return saved_memories
+
 
 def save_reading_attempt(learner_id: str, attempt_result: dict) -> str:
     """
@@ -645,7 +695,6 @@ def save_reading_attempt(learner_id: str, attempt_result: dict) -> str:
 
         db.add(attempt)
         db.commit()
-
         print(f"Reading attempt saved: {attempt_id}")
         return attempt_id
 
@@ -660,7 +709,6 @@ def save_reading_attempt(learner_id: str, attempt_result: dict) -> str:
 def extract_speaking_memories(learner_id: str, attempt_result: dict) -> list:
     """
     Extracts coaching memories from a completed speaking attempt.
-
     Uses the speaking-specific memory extractor prompt and formats
     speaking evaluation results correctly for memory extraction.
     """
@@ -721,7 +769,6 @@ def extract_speaking_memories(learner_id: str, attempt_result: dict) -> list:
                 continue
 
             memory_id = str(uuid.uuid4())[:12]
-
             memory = LearnerMemory(
                 memory_id=memory_id,
                 learner_id=learner_id,
@@ -797,7 +844,6 @@ def save_speaking_attempt(learner_id: str, attempt_result: dict) -> str:
 
         db.add(attempt)
         db.commit()
-
         print(f"Speaking attempt saved: {attempt_id}")
         return attempt_id
 
@@ -905,10 +951,10 @@ def get_speaking_progress_data(learner_id: str) -> dict:
     finally:
         db.close()
 
+
 def extract_listening_memories(learner_id: str, attempt_result: dict) -> list:
     """
     Extracts coaching memories from a completed listening attempt.
-
     Uses the listening-specific memory extractor prompt and formats
     listening results correctly for memory extraction.
     """
@@ -972,7 +1018,6 @@ def extract_listening_memories(learner_id: str, attempt_result: dict) -> list:
                 continue
 
             memory_id = str(uuid.uuid4())[:12]
-
             memory = LearnerMemory(
                 memory_id=memory_id,
                 learner_id=learner_id,
@@ -1035,7 +1080,6 @@ def save_listening_attempt(learner_id: str, attempt_result: dict) -> str:
 
         db.add(attempt)
         db.commit()
-
         print(f"Listening attempt saved: {attempt_id}")
         return attempt_id
 
@@ -1135,6 +1179,109 @@ def get_listening_progress_data(learner_id: str) -> dict:
     finally:
         db.close()
 
+
+# ─── CHAT COACH MEMORY EXTRACTION ─────────────────────────────────────────────
+
+def extract_chat_memories(learner_id: str, section: str,
+                          conversation_history: list) -> list:
+    """
+    Extracts coaching memories from a Chat Coach drilling session.
+
+    Unlike practice-based memory extraction (which uses scores and
+    feedback), this extracts observations from the tutor's interaction
+    with the learner — capturing understanding gaps, breakthroughs,
+    and drill performance that only surface in conversation.
+
+    These micro-memories complete the agent loop: the tutor teaches,
+    observes the learner's responses during drills, and records what
+    it learned back into the memory system for future sessions.
+    """
+    # Build a condensed transcript of the conversation
+    transcript_lines = []
+    for msg in conversation_history[-10:]:  # Last 10 exchanges max
+        role = "Tutor" if msg["role"] == "assistant" else "Learner"
+        content = msg["content"][:500]  # Truncate long messages
+        transcript_lines.append(f"{role}: {content}")
+    transcript = "\n\n".join(transcript_lines)
+
+    prompt = f"""You are a coaching memory extractor for an IELTS {section} tutoring session.
+
+Below is a conversation between a specialist {section} tutor and a learner.
+The tutor was drilling the learner on specific skills.
+
+Extract 1-3 coaching observations that should be remembered for future sessions.
+Focus on what the LEARNER demonstrated during drilling:
+- Did they grasp the concept? Partially? Not at all?
+- Did they make specific types of errors during drills?
+- Did they show unexpected strengths?
+- What should the next session focus on?
+
+Return a JSON array. Each item must have:
+- "memory_type": "weakness" or "strength"
+- "section": "{section}"
+- "skill": a short label for the skill area (e.g. "cohesive devices", "inference skills")
+- "memory_text": a specific, evidence-based observation (1-2 sentences)
+- "confidence": 0.5 to 0.7 (these are initial observations from drilling, not scored practice)
+
+Return ONLY the JSON array, no other text.
+
+CONVERSATION:
+{transcript}"""
+
+    raw_response = call_qwen_for_json(prompt)
+
+    try:
+        memories = safe_parse_json(raw_response)
+    except ValueError:
+        try:
+            memories = extract_json_from_text(raw_response)
+        except ValueError as e:
+            print(f"Could not extract chat memories: {e}")
+            return []
+
+    if not isinstance(memories, list):
+        print("Chat memory extraction did not return a list")
+        return []
+
+    saved_memories = []
+    db = SessionLocal()
+
+    try:
+        for mem in memories:
+            if not all(k in mem for k in [
+                "memory_type", "section", "skill", "memory_text"
+            ]):
+                continue
+
+            memory_id = str(uuid.uuid4())[:12]
+            memory = LearnerMemory(
+                memory_id=memory_id,
+                learner_id=learner_id,
+                section=mem["section"],
+                skill=mem["skill"],
+                memory_type=mem["memory_type"],
+                memory_text=mem["memory_text"],
+                confidence=float(mem.get("confidence", 0.55)),
+                evidence_count=1,
+                status="active"
+            )
+            db.add(memory)
+            saved_memories.append(mem)
+
+        db.commit()
+        print(
+            f"✅ Saved {len(saved_memories)} chat memories "
+            f"for learner {learner_id} ({section})"
+        )
+    except Exception as e:
+        db.rollback()
+        print(f"⚠️ Error saving chat memories: {e}")
+    finally:
+        db.close()
+
+    return saved_memories
+
+
 # ─── SKILL RANKING SYSTEM ─────────────────────────────────────────────────────
 
 from app.db.models import LearnerSkillRank
@@ -1142,7 +1289,10 @@ from app.services.skill_taxonomy_service import (
     get_all_skill_ids,
     get_skill_by_id,
     get_rank_name,
-    get_skills_flat
+    get_skills_flat,
+    get_band_estimate,
+    format_band,
+    get_band_label
 )
 
 RANK_UP_THRESHOLD = 3  # consecutive clean attempts needed to rank up
@@ -1153,6 +1303,7 @@ MIN_RANK = 1
 def get_skill_rank(learner_id: str, section: str, skill_id: str) -> dict:
     """
     Returns the learner's current rank record for one skill.
+
     If no record exists yet, returns a default starting state
     (rank 1, no evidence) WITHOUT creating a database row —
     the row is only created on the first actual classification.
@@ -1173,16 +1324,27 @@ def get_skill_rank(learner_id: str, section: str, skill_id: str) -> dict:
                 "clean_streak": 0,
                 "total_evidence": 0,
                 "last_classification": None,
-                "exists": False
+                "exists": False,
+                "band": None,
+                "band_display": "No band yet",
+                "band_label": "Complete a practice session to see your band"
             }
 
+        band = get_band_estimate(
+            current_rank=record.current_rank,
+            clean_streak=record.clean_streak,
+            total_evidence=record.total_evidence
+        )
         return {
             "skill_id": record.skill_id,
             "current_rank": record.current_rank,
             "clean_streak": record.clean_streak,
             "total_evidence": record.total_evidence,
             "last_classification": record.last_classification,
-            "exists": True
+            "exists": True,
+            "band": band,
+            "band_display": format_band(band),
+            "band_label": get_band_label(band)
         }
 
     finally:
@@ -1206,11 +1368,19 @@ def get_all_skill_ranks(learner_id: str, section: str = "Writing") -> list:
         rank_data = get_skill_rank(
             learner_id, section, skill["skill_id"]
         )
+        band = get_band_estimate(
+            current_rank=rank_data["current_rank"],
+            clean_streak=rank_data["clean_streak"],
+            total_evidence=rank_data["total_evidence"]
+        )
         results.append({
             **rank_data,
             "skill_name": skill["skill_name"],
             "category_name": skill["category_name"],
-            "rank_name": get_rank_name(rank_data["current_rank"])
+            "rank_name": get_rank_name(rank_data["current_rank"]),
+            "band": band,
+            "band_display": format_band(band),
+            "band_label": get_band_label(band)
         })
 
     return results
@@ -1287,7 +1457,6 @@ def apply_skill_classification(
 
         if classification == "demonstrated_strength":
             record.clean_streak += 1
-
             if (record.clean_streak >= RANK_UP_THRESHOLD
                     and record.current_rank < MAX_RANK):
                 record.current_rank += 1
@@ -1420,9 +1589,14 @@ def get_skill_progress_summary(learner_id: str, section: str = "Writing") -> dic
         "weakest_skill": weakest
     }
 
+
 # ─── CHAT COACH CONTEXT BUILDER ────────────────────────────────────────────────
 
-def find_evidence_memory_for_skill(learner_id: str, skill_id: str) -> dict | None:
+def find_evidence_memory_for_skill(
+    learner_id: str,
+    skill_id: str,
+    section: str = "Writing"
+) -> dict | None:
     """
     Finds the single most relevant existing memory that gives
     concrete evidence of a learner's standing on a given skill_id.
@@ -1434,6 +1608,9 @@ def find_evidence_memory_for_skill(learner_id: str, skill_id: str) -> dict | Non
 
     Returns None if no matching memory exists yet -- this is
     expected for a learner who hasn't been assessed on this skill.
+
+    BUG FIX: Previously hardcoded to section="Writing", now
+    accepts section parameter so Chat Coach works for all sections.
     """
     from app.services.skill_taxonomy_service import get_memory_labels_for_skill
 
@@ -1447,7 +1624,7 @@ def find_evidence_memory_for_skill(learner_id: str, skill_id: str) -> dict | Non
         # Prefer an active weakness first
         memory = db.query(LearnerMemory).filter(
             LearnerMemory.learner_id == learner_id,
-            LearnerMemory.section == "Writing",
+            LearnerMemory.section == section,
             LearnerMemory.skill.in_(labels),
             LearnerMemory.memory_type == "weakness",
             LearnerMemory.status == "active"
@@ -1460,7 +1637,7 @@ def find_evidence_memory_for_skill(learner_id: str, skill_id: str) -> dict | Non
         if memory is None:
             memory = db.query(LearnerMemory).filter(
                 LearnerMemory.learner_id == learner_id,
-                LearnerMemory.section == "Writing",
+                LearnerMemory.section == section,
                 LearnerMemory.skill.in_(labels)
             ).order_by(
                 LearnerMemory.updated_at.desc()
@@ -1554,7 +1731,7 @@ def build_chat_coach_context(learner_id: str, section: str = "Writing") -> dict:
     evidence = None
     if weakest is not None:
         evidence = find_evidence_memory_for_skill(
-            learner_id, weakest["skill_id"]
+            learner_id, weakest["skill_id"], section
         )
 
     # No history at all: the weakest skill has never been assessed

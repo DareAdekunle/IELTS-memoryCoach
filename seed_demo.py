@@ -40,7 +40,7 @@ from api.auth.utils import hash_password, generate_user_id
 
 DEFAULT_EMAIL = "demo@ieltscoach.com"
 DEFAULT_PASSWORD = "demo1234"
-DEFAULT_NAME = "Alex Chen"
+DEFAULT_NAME = "Dare Demo"
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 

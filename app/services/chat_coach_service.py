@@ -1,27 +1,48 @@
 """
 app/services/chat_coach_service.py
 
-Specialist AI tutor service supporting all four IELTS sections.
+Specialist AI Tutor service — upgraded to a true agent loop.
 
-Each section has a dedicated tutor with section-specific:
-  - System prompt (specialist knowledge, teaching strategies)
-  - Skill taxonomy (for context building)
-  - Memory context (from learner's actual practice history)
+The Tutor is now a tool-calling agent that can query live learner
+data mid-conversation rather than relying solely on static context
+injected at session start.
 
-The tutor uses the MCP-style context builder to fetch the
-learner's weakest skill and relevant memories before opening
-the session — ensuring every conversation is grounded in
-real evidence from the learner's own practice.
+Architecture:
+  TUTOR AGENT (read-only tools)
+    get_coaching_context   — full context bundle
+    get_learner_weaknesses — live weakness memories
+    get_recent_attempts    — actual learner work to reference
+    get_skill_ranks        — progress check during drilling
+
+  Coach/Tutor boundary:
+    Tutor READS learner data → personalises teaching
+    Coach WRITES learner data → updates ranks and memories
+    Tutor never calls submit_classification, write_memory, update_memory
+
+When the Tutor reaches bridge_to_practice, extract_chat_memories()
+is called to capture what was observed during drilling — these
+micro-memories feed back into the Coach's evidence base.
 """
 
 import os
 import sys
 import re
+import json
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from app.services.qwen_service import call_qwen, client, QWEN_MODEL
-from app.services.memory_service import build_chat_coach_context
+from app.services.qwen_service import client, QWEN_MODEL
+from app.services.memory_service import (
+    build_chat_coach_context,
+    extract_chat_memories
+)
+from app.services.agent_tools import (
+    TUTOR_TOOL_SCHEMAS,
+    execute_tutor_tool
+)
+from app.utils.logger import get_logger
+
+logger = get_logger("services.chat_coach")
 
 PROMPTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts")
 
@@ -43,12 +64,10 @@ SECTION_LABELS = {
     "Listening": "IELTS Listening",
 }
 
-# ─── Welcome prompt (used when learner has no history) ───────────────────────
-
 WELCOME_PROMPT_TEMPLATE = """You are an expert {section_label} tutor.
 
-The learner has not yet submitted enough {section_label} practice to have a 
-personalised skill profile. Warmly welcome them and encourage them to complete 
+The learner has not yet submitted enough {section_label} practice to have a
+personalised skill profile. Warmly welcome them and encourage them to complete
 a {section_label} practice session first so you can personalise your coaching.
 
 Keep this short, warm and encouraging — 2-3 sentences maximum.
@@ -132,38 +151,42 @@ def start_chat_session(
     """
     Starts a new specialist tutor session for the given section.
 
-    Selects the appropriate specialist tutor prompt, builds
-    personalised context from the learner's practice history,
-    and generates the tutor's opening message.
+    Builds learner context from practice history and generates
+    the tutor's opening message.
 
     Returns:
         message:       The tutor's opening text (state tag stripped)
-        state:         Current state ("introduction" etc.)
+        state:         Current state
         has_history:   Whether this learner has practice data
         section:       Which section this session is for
         system_prompt: Full system prompt for subsequent turns
+        learner_id:    Passed through for agent loop turns
     """
-    # Validate section
     if section not in TUTOR_PROMPTS:
         section = "Writing"
 
-    # Build learner context
     context = build_chat_coach_context(learner_id, section)
 
-    # No history — use welcome message
+    # No history — welcome message only
     if not context["has_history"]:
         welcome = WELCOME_PROMPT_TEMPLATE.format(
             section_label=SECTION_LABELS[section]
         )
-        raw_response = call_qwen(prompt=welcome, temperature=0.6)
-        clean_text, state = parse_state_tag(raw_response)
+        response = client.chat.completions.create(
+            model=QWEN_MODEL,
+            messages=[{"role": "user", "content": welcome}],
+            temperature=0.6
+        )
+        raw = response.choices[0].message.content
+        clean_text, state = parse_state_tag(raw)
 
         return {
             "message": clean_text,
             "state": state,
             "has_history": False,
             "section": section,
-            "system_prompt": ""
+            "system_prompt": "",
+            "learner_id": learner_id
         }
 
     # Build specialist system prompt
@@ -171,18 +194,67 @@ def start_chat_session(
     template = load_prompt_template(TUTOR_PROMPTS[section])
     system_prompt = template.format(context_brief=context_brief)
 
-    # Generate opening message
+    # Append tool awareness to system prompt
+    system_prompt += (
+        "\n\n## Your Tools\n"
+        "You have access to live learner data tools. Use them when you need "
+        "to reference specific evidence mid-conversation:\n"
+        "- get_learner_weaknesses: fetch current weakness memories\n"
+        "- get_recent_attempts: pull actual learner work to quote\n"
+        "- get_skill_ranks: check progress and tell learner how close they "
+        "are to ranking up\n"
+        "- get_coaching_context: full refresh if you need a complete picture\n\n"
+        "Always include [STATE: xxx] at the end of every response."
+    )
+
     opening_instruction = (
         f"Begin the {SECTION_LABELS[section]} tutoring session now "
         f"with the INTRODUCTION step as described in your instructions."
     )
 
-    raw_response = call_qwen(
-        prompt=opening_instruction,
-        system_message=system_prompt,
+    response = client.chat.completions.create(
+        model=QWEN_MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": opening_instruction}
+        ],
+        tools=TUTOR_TOOL_SCHEMAS,
+        tool_choice="auto",
         temperature=0.6
     )
-    clean_text, state = parse_state_tag(raw_response)
+
+    # Handle tool calls at session start (unlikely but possible)
+    message = response.choices[0].message
+    final_content = message.content or ""
+
+    if message.tool_calls:
+        # Execute any tool calls and get final response
+        final_content = _resolve_tool_calls(
+            system_prompt=system_prompt,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": opening_instruction},
+                {
+                    "role": "assistant",
+                    "content": message.content or "",
+                    "tool_calls": [
+                        {
+                            "id": tc.id,
+                            "type": "function",
+                            "function": {
+                                "name": tc.function.name,
+                                "arguments": tc.function.arguments
+                            }
+                        }
+                        for tc in message.tool_calls
+                    ]
+                }
+            ],
+            tool_calls=message.tool_calls,
+            learner_id=learner_id
+        )
+
+    clean_text, state = parse_state_tag(final_content)
 
     return {
         "message": clean_text,
@@ -190,6 +262,7 @@ def start_chat_session(
         "has_history": True,
         "section": section,
         "system_prompt": system_prompt,
+        "learner_id": learner_id,
         "context": context
     }
 
@@ -197,35 +270,160 @@ def start_chat_session(
 def continue_chat_session(
     system_prompt: str,
     conversation_history: list,
-    learner_message: str
+    learner_message: str,
+    learner_id: str = None,
+    section: str = "Writing"
 ) -> dict:
     """
     Continues an existing tutor session with a new learner message.
 
-    conversation_history is the full conversation so far, NOT
-    including the new learner_message (which is appended here).
+    The Tutor is now a tool-calling agent — it can query live learner
+    data mid-conversation when it needs to reference specific evidence.
+
+    When the Tutor reaches bridge_to_practice, micro-memories are
+    extracted from the drilling conversation and saved — closing the
+    agent loop so Chat Coach sessions feed back into the Coach's
+    evidence base.
 
     Returns:
-        message: The tutor's reply (state tag stripped)
-        state:   The new conversation state
+        message:            The tutor's reply (state tag stripped)
+        state:              The new conversation state
+        memories_extracted: Number of memories saved (0 if not triggered)
+        tools_called:       Which tools the Tutor called this turn
     """
-    messages = conversation_history + [
+    messages = [
+        {"role": "system", "content": system_prompt}
+    ] + conversation_history + [
         {"role": "user", "content": learner_message}
     ]
 
-    full_messages = [
-        {"role": "system", "content": system_prompt}
-    ] + messages
-
     response = client.chat.completions.create(
         model=QWEN_MODEL,
-        messages=full_messages,
+        messages=messages,
+        tools=TUTOR_TOOL_SCHEMAS,
+        tool_choice="auto",
         temperature=0.6
     )
-    raw_response = response.choices[0].message.content
-    clean_text, state = parse_state_tag(raw_response)
+
+    message = response.choices[0].message
+    tools_called = []
+    final_content = message.content or ""
+
+    # Handle tool calls
+    if message.tool_calls:
+        tools_called = [tc.function.name for tc in message.tool_calls]
+        logger.info(f"Tutor calling tools: {tools_called}")
+
+        # Add assistant message with tool calls to history
+        messages.append({
+            "role": "assistant",
+            "content": message.content or "",
+            "tool_calls": [
+                {
+                    "id": tc.id,
+                    "type": "function",
+                    "function": {
+                        "name": tc.function.name,
+                        "arguments": tc.function.arguments
+                    }
+                }
+                for tc in message.tool_calls
+            ]
+        })
+
+        # Execute tools and add results
+        for tool_call in message.tool_calls:
+            try:
+                args = json.loads(tool_call.function.arguments)
+            except json.JSONDecodeError:
+                args = {}
+
+            # Inject learner_id if not provided by model
+            if "learner_id" not in args and learner_id:
+                args["learner_id"] = learner_id
+            if "section" not in args:
+                args["section"] = section
+
+            tool_result = execute_tutor_tool(tool_call.function.name, args)
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": tool_result
+            })
+
+        # Get final response after tool results
+        follow_up = client.chat.completions.create(
+            model=QWEN_MODEL,
+            messages=messages,
+            tools=TUTOR_TOOL_SCHEMAS,
+            tool_choice="none",  # No more tool calls in follow-up
+            temperature=0.6
+        )
+        final_content = follow_up.choices[0].message.content or ""
+
+    clean_text, state = parse_state_tag(final_content)
+
+    # Extract memories when tutor concludes drilling
+    memories_extracted = 0
+    if state == "bridge_to_practice" and learner_id:
+        try:
+            # Build conversation for memory extraction
+            drill_history = conversation_history + [
+                {"role": "user", "content": learner_message},
+                {"role": "assistant", "content": final_content}
+            ]
+            memories = extract_chat_memories(
+                learner_id=learner_id,
+                section=section,
+                conversation_history=drill_history
+            )
+            memories_extracted = len(memories)
+            logger.info(
+                f"Tutor extracted {memories_extracted} memories "
+                f"for {learner_id} ({section})"
+            )
+        except Exception as e:
+            logger.warning(f"Chat memory extraction failed: {e}")
 
     return {
         "message": clean_text,
-        "state": state
+        "state": state,
+        "memories_extracted": memories_extracted,
+        "tools_called": tools_called
     }
+
+
+def _resolve_tool_calls(
+    system_prompt: str,
+    messages: list,
+    tool_calls: list,
+    learner_id: str
+) -> str:
+    """
+    Executes tool calls and gets the Tutor's final response.
+    Used when tool calls happen at session start.
+    """
+    for tool_call in tool_calls:
+        try:
+            args = json.loads(tool_call.function.arguments)
+        except json.JSONDecodeError:
+            args = {}
+
+        if "learner_id" not in args and learner_id:
+            args["learner_id"] = learner_id
+
+        tool_result = execute_tutor_tool(tool_call.function.name, args)
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": tool_result
+        })
+
+    response = client.chat.completions.create(
+        model=QWEN_MODEL,
+        messages=messages,
+        tools=TUTOR_TOOL_SCHEMAS,
+        tool_choice="none",
+        temperature=0.6
+    )
+    return response.choices[0].message.content or ""
