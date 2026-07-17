@@ -72,14 +72,10 @@ export default function ListeningCoach() {
     setGeneratingAudio(true)
     try {
       const token = localStorage.getItem('token')
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-      const audioEndpoint = `${baseUrl}/listening/audio/${trackId}`
+      // Use relative /api/ path so it works on both HTTP and HTTPS
+      // without hardcoding the base URL
+      const audioEndpoint = `/api/listening/audio/${trackId}`
 
-      // Fetch with auth to trigger generation.
-      // If the track is OSS-cached, backend returns 307 → OSS signed URL.
-      // fetch() follows redirects by default and will receive the OSS audio bytes.
-      // We collect them as a blob and create a local object URL.
-      // This works for both disk-cached (direct stream) and OSS (redirect) tracks.
       const response = await fetch(audioEndpoint, {
         headers: { Authorization: 'Bearer ' + token }
       })
