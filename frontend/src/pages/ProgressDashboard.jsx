@@ -71,11 +71,11 @@ export default function ProgressDashboard() {
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <TrendingUp className="w-6 h-6 text-green-400" />
           Progress Dashboard
         </h1>
-        <p className="text-gray-400 mt-1">
+        <p className="text-gray-500 mt-1">
           Track your improvement across all IELTS skills
         </p>
       </div>
@@ -94,8 +94,8 @@ export default function ProgressDashboard() {
           },
         ].map(({ label, value }) => (
           <div key={label}
-               className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-            <p className="text-2xl font-bold text-white">{value}</p>
+               className="bg-white border border-gray-200 rounded-2xl p-5">
+            <p className="text-2xl font-bold text-gray-900">{value}</p>
             <p className="text-gray-500 text-sm mt-1">{label}</p>
           </div>
         ))}
@@ -114,8 +114,8 @@ export default function ProgressDashboard() {
             className={`px-4 py-2 rounded-xl text-sm font-medium
                         transition-colors ${
               tab === t.id
-                ? 'bg-brand-500 text-white'
-                : 'bg-gray-800 text-gray-400 hover:text-white'
+                ? 'bg-brand-500 text-gray-900'
+                : 'bg-gray-100 text-gray-500 hover:text-gray-900'
             }`}
           >
             {t.label}
@@ -127,15 +127,15 @@ export default function ProgressDashboard() {
       {tab === 'writing' && (
         <div className="space-y-6">
           {writingChartData.length < 2 ? (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl
+            <div className="bg-white border border-gray-200 rounded-2xl
                             p-12 text-center">
               <p className="text-gray-500">
                 Submit at least 2 essays to see your score trends
               </p>
             </div>
           ) : (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-white mb-4">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-4">
                 Writing Score Trends
               </h2>
               <ResponsiveContainer width="100%" height={300}>
@@ -168,8 +168,8 @@ export default function ProgressDashboard() {
           )}
 
           {/* Writing attempt history */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-            <h2 className="text-base font-semibold text-white mb-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <h2 className="text-base font-semibold text-gray-900 mb-4">
               Attempt History
             </h2>
             {(writingData?.attempts || []).length === 0 ? (
@@ -179,9 +179,9 @@ export default function ProgressDashboard() {
                 {[...(writingData?.attempts || [])].reverse().map((a, i) => (
                   <div key={a.attempt_id}
                        className="flex items-center justify-between
-                                  py-3 border-b border-gray-800 last:border-0">
+                                  py-3 border-b border-gray-200 last:border-0">
                     <div>
-                      <p className="text-gray-300 text-sm font-medium">
+                      <p className="text-gray-600 text-sm font-medium">
                         Attempt #{writingData.attempts.length - i}
                       </p>
                       <p className="text-gray-500 text-xs mt-0.5">
@@ -213,15 +213,15 @@ export default function ProgressDashboard() {
       {tab === 'reading' && (
         <div className="space-y-6">
           {readingChartData.length < 2 ? (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl
+            <div className="bg-white border border-gray-200 rounded-2xl
                             p-12 text-center">
               <p className="text-gray-500">
                 Complete at least 2 passages to see your score trends
               </p>
             </div>
           ) : (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-white mb-4">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-4">
                 Reading Score Trends
               </h2>
               <ResponsiveContainer width="100%" height={300}>
@@ -249,8 +249,8 @@ export default function ProgressDashboard() {
           )}
 
           {/* Reading attempt history */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-            <h2 className="text-base font-semibold text-white mb-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <h2 className="text-base font-semibold text-gray-900 mb-4">
               Attempt History
             </h2>
             {(readingData?.attempts || []).length === 0 ? (
@@ -260,9 +260,9 @@ export default function ProgressDashboard() {
                 {[...(readingData?.attempts || [])].reverse().map((a, i) => (
                   <div key={a.attempt_id}
                        className="flex items-center justify-between
-                                  py-3 border-b border-gray-800 last:border-0">
+                                  py-3 border-b border-gray-200 last:border-0">
                     <div>
-                      <p className="text-gray-300 text-sm font-medium">
+                      <p className="text-gray-600 text-sm font-medium">
                         {a.passage_title || `Attempt #${i + 1}`}
                       </p>
                       <p className="text-gray-500 text-xs mt-0.5">
@@ -287,12 +287,12 @@ export default function ProgressDashboard() {
       {/* Skills tab */}
       {tab === 'skills' && (
         <div className="space-y-4">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-500 text-sm">
             Your mastery level on each of the 13 IELTS Writing sub-skills,
             based on your essay submissions.
           </p>
           {skills.length === 0 ? (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl
+            <div className="bg-white border border-gray-200 rounded-2xl
                             p-12 text-center">
               <p className="text-gray-500">
                 Submit a writing essay to see your skill profile
@@ -302,11 +302,11 @@ export default function ProgressDashboard() {
             <div className="grid md:grid-cols-2 gap-4">
               {skills.map(skill => (
                 <div key={skill.skill_id}
-                     className="bg-gray-900 border border-gray-800
+                     className="bg-white border border-gray-200
                                 rounded-2xl p-4">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">
+                      <p className="text-gray-900 text-sm font-medium truncate">
                         {skill.skill_name}
                       </p>
                       <p className="text-gray-500 text-xs mt-0.5">
@@ -320,7 +320,7 @@ export default function ProgressDashboard() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2 bg-gray-800 rounded-full
+                    <div className="flex-1 h-2 bg-gray-100 rounded-full
                                     overflow-hidden">
                       <div
                         className="h-full bg-brand-500 rounded-full"

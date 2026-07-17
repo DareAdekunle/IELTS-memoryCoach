@@ -39,7 +39,7 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4
-                    bg-gray-950">
+                    bg-slate-50">
       <div className="w-full max-w-lg">
 
         <div className="text-center mb-8">
@@ -47,15 +47,15 @@ export default function Onboarding() {
                           justify-center mx-auto mb-4">
             <Target className="w-8 h-8 text-brand-500" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Set up your coaching profile
           </h1>
-          <p className="text-gray-400">
+          <p className="text-gray-500">
             Help your coach personalise your IELTS preparation journey
           </p>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
+        <div className="bg-white rounded-2xl border border-gray-200 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="bg-red-500/10 border border-red-500/30
@@ -65,15 +65,15 @@ export default function Onboarding() {
             )}
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">
+              <label className="block text-sm text-gray-500 mb-1.5">
                 Your name
               </label>
               <input
                 value={form.name}
                 onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                 required
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl
-                           px-4 py-3 text-white placeholder-gray-500
+                className="w-full bg-gray-100 border border-gray-200 rounded-xl
+                           px-4 py-3 text-gray-900 placeholder-gray-400
                            focus:outline-none focus:border-brand-500
                            transition-colors"
                 placeholder="e.g. Amina"
@@ -81,7 +81,7 @@ export default function Onboarding() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">
+              <label className="block text-sm text-gray-500 mb-1.5">
                 Target IELTS band score
               </label>
               <select
@@ -89,8 +89,8 @@ export default function Onboarding() {
                 onChange={e => setForm(p => ({
                   ...p, target_score: parseFloat(e.target.value)
                 }))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl
-                           px-4 py-3 text-white focus:outline-none
+                className="w-full bg-gray-100 border border-gray-200 rounded-xl
+                           px-4 py-3 text-gray-900 focus:outline-none
                            focus:border-brand-500 transition-colors"
               >
                 {[5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9].map(score => (
@@ -100,7 +100,7 @@ export default function Onboarding() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">
+              <label className="block text-sm text-gray-500 mb-1.5">
                 Target test date (optional)
               </label>
               <input
@@ -109,14 +109,14 @@ export default function Onboarding() {
                 onChange={e => setForm(p => ({
                   ...p, test_date: e.target.value
                 }))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl
-                           px-4 py-3 text-white focus:outline-none
+                className="w-full bg-gray-100 border border-gray-200 rounded-xl
+                           px-4 py-3 text-gray-900 focus:outline-none
                            focus:border-brand-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">
+              <label className="block text-sm text-gray-500 mb-1.5">
                 Where do you want to start?
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -130,8 +130,8 @@ export default function Onboarding() {
                     className={`py-3 px-4 rounded-xl border text-sm font-medium
                                 transition-colors
                       ${form.current_focus === option
-                        ? 'border-brand-500 bg-brand-500/15 text-brand-400'
-                        : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                        ? 'border-brand-500 bg-brand-500/15 text-brand-600'
+                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
                       }`}
                   >
                     {option}
@@ -144,7 +144,7 @@ export default function Onboarding() {
               type="submit"
               disabled={loading || !form.name}
               className="w-full bg-brand-500 hover:bg-brand-600
-                         disabled:opacity-50 text-white font-semibold
+                         disabled:opacity-50 text-gray-900 font-semibold
                          py-3 px-4 rounded-xl transition-colors mt-2"
             >
               {loading ? 'Setting up...' : 'Start my coaching journey →'}

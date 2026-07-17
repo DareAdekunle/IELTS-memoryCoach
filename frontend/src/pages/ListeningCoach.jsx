@@ -72,9 +72,8 @@ export default function ListeningCoach() {
     setGeneratingAudio(true)
     try {
       const token = localStorage.getItem('token')
-      // Use relative /api/ path so it works on both HTTP and HTTPS
-      // without hardcoding the base URL
-      const audioEndpoint = `/api/listening/audio/${trackId}`
+      const apiBase = import.meta.env.VITE_API_URL || '/api'
+      const audioEndpoint = `${apiBase}/listening/audio/${trackId}`
 
       const response = await fetch(audioEndpoint, {
         headers: { Authorization: 'Bearer ' + token }
@@ -119,7 +118,7 @@ export default function ListeningCoach() {
     <div className="flex items-center justify-center h-96">
       <div className="text-center">
         <Loader2 className="w-8 h-8 text-brand-500 animate-spin mx-auto mb-3" />
-        <p className="text-gray-400">Loading your listening session...</p>
+        <p className="text-gray-500">Loading your listening session...</p>
       </div>
     </div>
   )
@@ -130,17 +129,17 @@ export default function ListeningCoach() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Headphones className="w-6 h-6 text-yellow-400" />
             Listening Coach
           </h1>
-          <p className="text-gray-400 mt-1">Preview the questions, then listen once and answer</p>
+          <p className="text-gray-500 mt-1">Preview the questions, then listen once and answer</p>
         </div>
         {phase !== 'loading' && (
           <button
             onClick={loadTrack}
             disabled={fetching}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-gray-300 rounded-xl text-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-600 rounded-xl text-sm transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${fetching ? 'animate-spin' : ''}`} />
             New track
@@ -150,13 +149,13 @@ export default function ListeningCoach() {
 
       {/* Memory panel */}
       {memories.length > 0 && phase === 'preview' && (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-6">
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Brain className="w-4 h-4 text-green-400" />
-            <span className="text-sm font-medium text-gray-300">Coach remembers</span>
+            <span className="text-sm font-medium text-gray-600">Coach remembers</span>
           </div>
           {memories.map((mem, i) => (
-            <p key={i} className="text-gray-400 text-sm">
+            <p key={i} className="text-gray-500 text-sm">
               {mem.memory_type === 'weakness' ? '⚠️' : '✅'} {mem.skill}: {mem.memory_text}
             </p>
           ))}
@@ -174,7 +173,7 @@ export default function ListeningCoach() {
         <div className="grid lg:grid-cols-2 gap-6">
           <div className="space-y-4">
             {/* Track info */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-medium px-2 py-0.5 rounded-lg bg-yellow-500/15 text-yellow-400">
                   Part {track.part}
@@ -183,14 +182,14 @@ export default function ListeningCoach() {
                   {track.difficulty}
                 </span>
               </div>
-              <h2 className="text-white font-semibold mb-1">{track.title}</h2>
-              <p className="text-gray-400 text-sm">{track.context}</p>
+              <h2 className="text-gray-900 font-semibold mb-1">{track.title}</h2>
+              <p className="text-gray-500 text-sm">{track.context}</p>
               <p className="text-gray-600 text-xs mt-2">{PART_DESC[track.part]}</p>
             </div>
 
             {/* Strategy */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <p className="text-sm font-medium text-gray-300 mb-2">📝 IELTS Strategy</p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <p className="text-sm font-medium text-gray-600 mb-2">📝 IELTS Strategy</p>
               <ul className="text-gray-500 text-xs space-y-1">
                 <li>• Read ALL questions carefully before listening</li>
                 <li>• Underline key words in each question</li>
@@ -201,10 +200,10 @@ export default function ListeningCoach() {
             </div>
 
             {/* Audio status */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <p className="text-sm font-medium text-gray-300 mb-3">Audio Status</p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <p className="text-sm font-medium text-gray-600 mb-3">Audio Status</p>
               {generatingAudio ? (
-                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <div className="flex items-center gap-2 text-gray-500 text-sm">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Preparing audio...
                 </div>
@@ -221,20 +220,20 @@ export default function ListeningCoach() {
             <button
               onClick={() => setPhase('listening')}
               disabled={!audioReady}
-              className="w-full py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
+              className="w-full py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed text-gray-900 font-semibold rounded-xl transition-colors"
             >
               {audioReady ? '▶️ Start Listening' : 'Preparing audio...'}
             </button>
           </div>
 
           {/* Questions preview */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-            <h3 className="text-base font-semibold text-white mb-4">📝 Read the Questions First</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <h3 className="text-base font-semibold text-gray-900 mb-4">📝 Read the Questions First</h3>
             <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
               {track.questions.map((q, i) => (
-                <div key={q.question_id} className="border-b border-gray-800 pb-3 last:border-0">
+                <div key={q.question_id} className="border-b border-gray-200 pb-3 last:border-0">
                   <p className="text-xs text-gray-600 mb-1">{TYPE_LABELS[q.question_type]}</p>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-gray-600 text-sm">
                     <span className="text-gray-500 mr-1">Q{i + 1}.</span>{q.question}
                   </p>
                   {q.question_type === 'multiple_choice' && q.options && (
@@ -260,22 +259,22 @@ export default function ListeningCoach() {
             </p>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-            <p className="text-white font-medium mb-3">🔊 Recording — Play Once</p>
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <p className="text-gray-900 font-medium mb-3">🔊 Recording — Play Once</p>
             <audio controls className="w-full" src={audioUrl}>Your browser does not support audio.</audio>
             <p className="text-gray-500 text-xs mt-2">Press play now and answer the questions below as you listen.</p>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-white">✏️ Answer While Listening</h2>
+              <h2 className="text-base font-semibold text-gray-900">✏️ Answer While Listening</h2>
               <span className="text-sm text-gray-500">{answeredCount} / {totalQuestions} answered</span>
             </div>
 
             <div className="space-y-5">
               {track.questions.map((q, i) => (
-                <div key={q.question_id} className="border-b border-gray-800 pb-4 last:border-0">
-                  <p className="text-gray-300 text-sm mb-2">
+                <div key={q.question_id} className="border-b border-gray-200 pb-4 last:border-0">
+                  <p className="text-gray-600 text-sm mb-2">
                     <span className="text-gray-500 mr-1">Q{i + 1}.</span>{q.question}
                   </p>
                   <p className="text-xs text-gray-600 mb-2">{TYPE_LABELS[q.question_type]}</p>
@@ -289,7 +288,7 @@ export default function ListeningCoach() {
                             onChange={() => handleAnswer(q.question_id, k)}
                             className="accent-brand-500"
                           />
-                          <span className="text-gray-400 text-sm">{k}: {v}</span>
+                          <span className="text-gray-500 text-sm">{k}: {v}</span>
                         </label>
                       ))}
                     </div>
@@ -300,7 +299,7 @@ export default function ListeningCoach() {
                       value={answers[q.question_id] || ''}
                       onChange={e => handleAnswer(q.question_id, e.target.value)}
                       placeholder={q.question_type === 'form_completion' ? 'Fill in the missing information...' : 'Your answer...'}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-brand-500 transition-colors"
+                      className="w-full bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-brand-500 transition-colors"
                     />
                   )}
                 </div>
@@ -310,7 +309,7 @@ export default function ListeningCoach() {
             <button
               onClick={handleSubmit}
               disabled={submitting || answeredCount < totalQuestions}
-              className="w-full mt-4 flex items-center justify-center gap-2 py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
+              className="w-full mt-4 flex items-center justify-center gap-2 py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed text-gray-900 font-semibold rounded-xl transition-colors"
             >
               {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Checking answers...</> : <>Submit Answers ✅</>}
             </button>
@@ -327,8 +326,8 @@ export default function ListeningCoach() {
             'bg-red-500/10 border-red-500/30'
           }`}>
             <div>
-              <p className="text-white font-bold text-2xl">{results.total_score} / {results.max_score}</p>
-              <p className="text-gray-400 mt-1">{results.track_title}</p>
+              <p className="text-gray-900 font-bold text-2xl">{results.total_score} / {results.max_score}</p>
+              <p className="text-gray-500 mt-1">{results.track_title}</p>
             </div>
             <div className={`text-4xl font-bold ${
               results.percentage >= 80 ? 'text-green-400' :
@@ -339,16 +338,16 @@ export default function ListeningCoach() {
           </div>
 
           {Object.keys(results.skill_accuracy || {}).length > 0 && (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <h2 className="text-base font-semibold text-white mb-4">Skill Breakdown</h2>
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h2 className="text-base font-semibold text-gray-900 mb-4">Skill Breakdown</h2>
               <div className="space-y-3">
                 {Object.entries(results.skill_accuracy).map(([skill, acc]) => (
                   <div key={skill}>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-400 capitalize">{skill.replace(/_/g, ' ')}</span>
+                      <span className="text-gray-500 capitalize">{skill.replace(/_/g, ' ')}</span>
                       <span className={acc >= 80 ? 'text-green-400' : acc >= 50 ? 'text-yellow-400' : 'text-red-400'}>{acc}%</span>
                     </div>
-                    <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full ${acc >= 80 ? 'bg-green-500' : acc >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${acc}%` }} />
                     </div>
                   </div>
@@ -358,14 +357,14 @@ export default function ListeningCoach() {
           )}
 
           <div className="space-y-3">
-            <h2 className="text-base font-semibold text-white">Question Review</h2>
+            <h2 className="text-base font-semibold text-gray-900">Question Review</h2>
             {(results.question_results || []).map((q, i) => (
               <div key={q.question_id} className={`rounded-xl p-4 border ${q.is_correct ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
                 <div className="flex items-start gap-3">
                   <span className="text-lg flex-shrink-0">{q.is_correct ? '✅' : '❌'}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-gray-300 text-sm font-medium">Q{i + 1}: {q.question}</p>
-                    <p className="text-gray-500 text-xs mt-1">Your answer: <span className="text-gray-400">{q.learner_answer || 'No answer'}</span></p>
+                    <p className="text-gray-600 text-sm font-medium">Q{i + 1}: {q.question}</p>
+                    <p className="text-gray-500 text-xs mt-1">Your answer: <span className="text-gray-500">{q.learner_answer || 'No answer'}</span></p>
                     {!q.is_correct && (
                       <>
                         <p className="text-gray-500 text-xs">Correct: <span className="text-green-400">{q.correct_answer}</span></p>
@@ -381,7 +380,7 @@ export default function ListeningCoach() {
 
           <button
             onClick={loadTrack}
-            className="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl transition-colors"
+            className="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition-colors"
           >
             Next track →
           </button>

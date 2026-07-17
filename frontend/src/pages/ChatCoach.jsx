@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { startChat, continueChat, getChatContext } from '../api/chat'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -234,11 +235,11 @@ export default function ChatCoach() {
     return (
       <div className="p-6 max-w-3xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-brand-400" />
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <MessageSquare className="w-6 h-6 text-brand-600" />
             IELTS Tutor
           </h1>
-          <p className="text-gray-400 mt-1">
+          <p className="text-gray-500 mt-1">
             Choose your specialist — each tutor knows your history and targets your weaknesses
           </p>
         </div>
@@ -258,11 +259,11 @@ export default function ChatCoach() {
                   <Icon className={'w-5 h-5 ' + color} />
                 </div>
                 <div>
-                  <p className="text-white font-semibold">{label} Tutor</p>
+                  <p className="text-gray-900 font-semibold">{label} Tutor</p>
                   <p className={'text-xs ' + color}>Specialist AI coach</p>
                 </div>
               </div>
-              <p className="text-gray-400 text-sm">{description}</p>
+              <p className="text-gray-500 text-sm">{description}</p>
             </button>
           ))}
         </div>
@@ -279,7 +280,7 @@ export default function ChatCoach() {
     <div className="flex flex-col h-[calc(100vh-0px)] max-h-screen">
 
       {/* Header */}
-      <div className="flex-shrink-0 px-6 py-4 border-b border-gray-800 bg-gray-950">
+      <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200 bg-slate-50">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             {currentSection && (
@@ -288,7 +289,7 @@ export default function ChatCoach() {
               </div>
             )}
             <div>
-              <h1 className="text-white font-semibold">{selectedSection} Tutor</h1>
+              <h1 className="text-gray-900 font-semibold">{selectedSection} Tutor</h1>
               <p className="text-gray-500 text-xs">Specialist AI coach</p>
             </div>
           </div>
@@ -301,7 +302,7 @@ export default function ChatCoach() {
             )}
             <button
               onClick={resetSession}
-              className="text-xs text-gray-500 hover:text-gray-300 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+              className="text-xs text-gray-500 hover:text-gray-600 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
               Change section
             </button>
@@ -315,17 +316,17 @@ export default function ChatCoach() {
 
           {/* Context preview card — shown instantly while AI loads */}
           {loading && tutorContext?.has_history && (
-            <div className="bg-gray-900 border border-brand-500/30 rounded-2xl p-4">
+            <div className="bg-white border border-brand-500/30 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Loader2 className="w-4 h-4 animate-spin text-brand-500" />
-                <span className="text-gray-400 text-sm">
+                <span className="text-gray-500 text-sm">
                   Your {selectedSection} Tutor is preparing your session...
                 </span>
               </div>
               <div className="flex items-center gap-2 mt-2">
-                <Zap className="w-4 h-4 text-brand-400 flex-shrink-0" />
+                <Zap className="w-4 h-4 text-brand-600 flex-shrink-0" />
                 <div>
-                  <p className="text-white text-sm font-medium">
+                  <p className="text-gray-900 text-sm font-medium">
                     Focusing on: {tutorContext.weakest_skill_name}
                   </p>
                   <p className="text-gray-500 text-xs mt-0.5">
@@ -341,7 +342,7 @@ export default function ChatCoach() {
 
           {/* No history loading state */}
           {loading && !tutorContext?.has_history && (
-            <div className="flex items-center gap-3 text-gray-400">
+            <div className="flex items-center gap-3 text-gray-500">
               <Loader2 className="w-5 h-5 animate-spin text-brand-500" />
               <span className="text-sm">
                 Your {selectedSection} tutor is preparing...
@@ -369,19 +370,32 @@ export default function ChatCoach() {
               <div className={
                 'max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ' +
                 (msg.role === 'user'
-                  ? 'bg-brand-500 text-white rounded-br-sm'
-                  : 'bg-gray-900 border border-gray-800 text-gray-300 rounded-bl-sm')
+                  ? 'bg-brand-600 text-white rounded-br-sm'
+                  : 'bg-white border border-gray-200 text-gray-600 rounded-bl-sm')
               }>
-                {msg.content.split('\n').map((line, j) => (
-                  <span key={j}>
-                    {line}
-                    {j < msg.content.split('\n').length - 1 && <br />}
-                  </span>
-                ))}
+                {msg.role === 'user' ? (
+                  msg.content
+                ) : (
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                      ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
+                      li: ({ children }) => <li className="text-sm">{children}</li>,
+                      code: ({ children }) => <code className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs font-mono">{children}</code>,
+                      blockquote: ({ children }) => <blockquote className="border-l-2 border-brand-300 pl-3 text-gray-500 italic my-2">{children}</blockquote>,
+                      h3: ({ children }) => <h3 className="font-semibold text-gray-900 mt-3 mb-1">{children}</h3>,
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                )}
               </div>
 
               {msg.role === 'user' && (
-                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0 mt-1 text-sm font-bold text-gray-300">
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 mt-1 text-sm font-bold text-gray-600">
                   {firstName[0].toUpperCase()}
                 </div>
               )}
@@ -395,7 +409,7 @@ export default function ChatCoach() {
                   <currentSection.icon className={'w-4 h-4 ' + currentSection.color} />
                 </div>
               )}
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl rounded-bl-sm px-4 py-3">
+              <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-4 py-3">
                 <div className="flex gap-1">
                   {[0, 150, 300].map(delay => (
                     <div
@@ -414,7 +428,7 @@ export default function ChatCoach() {
             <div className="flex justify-center py-2">
               <Link
                 to={PRACTICE_LINKS[selectedSection]}
-                className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl transition-colors"
+                className="flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition-colors"
               >
                 {currentSection && <currentSection.icon className="w-4 h-4" />}
                 Go to {selectedSection} Coach to practise →
@@ -427,10 +441,10 @@ export default function ChatCoach() {
       </div>
 
       {/* Input */}
-      <div className="flex-shrink-0 px-6 py-4 border-t border-gray-800 bg-gray-950">
+      <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-slate-50">
         <div className="max-w-3xl mx-auto">
           <div className="flex gap-3 items-end">
-            <div className="flex-1 bg-gray-900 border border-gray-800 rounded-2xl px-4 py-3 focus-within:border-brand-500 transition-colors">
+            <div className="flex-1 bg-white border border-gray-200 rounded-2xl px-4 py-3 focus-within:border-brand-500 transition-colors">
               <textarea
                 ref={inputRef}
                 value={input}
@@ -439,7 +453,7 @@ export default function ChatCoach() {
                 placeholder={loading ? 'Waiting for your tutor...' : 'Type your message... (Enter to send)'}
                 disabled={loading || sending}
                 rows={1}
-                className="w-full bg-transparent text-white placeholder-gray-600 text-sm resize-none focus:outline-none disabled:opacity-50"
+                className="w-full bg-transparent text-gray-900 placeholder-gray-400 text-sm resize-none focus:outline-none disabled:opacity-50"
                 style={{ maxHeight: '120px' }}
                 onInput={e => {
                   e.target.style.height = 'auto'
@@ -450,7 +464,7 @@ export default function ChatCoach() {
             <button
               onClick={handleSend}
               disabled={!input.trim() || loading || sending}
-              className="w-12 h-12 flex items-center justify-center bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl transition-colors flex-shrink-0"
+              className="w-12 h-12 flex items-center justify-center bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed text-gray-900 rounded-2xl transition-colors flex-shrink-0"
             >
               {sending
                 ? <Loader2 className="w-5 h-5 animate-spin" />

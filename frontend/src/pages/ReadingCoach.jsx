@@ -76,7 +76,7 @@ export default function ReadingCoach() {
     <div className="flex items-center justify-center h-96">
       <div className="text-center">
         <Loader2 className="w-8 h-8 text-brand-500 animate-spin mx-auto mb-3" />
-        <p className="text-gray-400">Loading your reading session...</p>
+        <p className="text-gray-500">Loading your reading session...</p>
       </div>
     </div>
   )
@@ -87,18 +87,18 @@ export default function ReadingCoach() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <BookOpen className="w-6 h-6 text-blue-400" />
             Reading Coach
           </h1>
-          <p className="text-gray-400 mt-1">
+          <p className="text-gray-500 mt-1">
             Passage adapted to your current band level
           </p>
         </div>
         <button
           onClick={loadPassage}
           disabled={fetching}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-gray-300 rounded-xl text-sm transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-600 rounded-xl text-sm transition-colors"
         >
           <RefreshCw className={`w-4 h-4 ${fetching ? 'animate-spin' : ''}`} />
           New passage
@@ -107,15 +107,15 @@ export default function ReadingCoach() {
 
       {/* Memory panel */}
       {memories.length > 0 && phase !== 'results' && (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-6">
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Brain className="w-4 h-4 text-green-400" />
-            <span className="text-sm font-medium text-gray-300">What your coach remembers</span>
+            <span className="text-sm font-medium text-gray-600">What your coach remembers</span>
           </div>
           {memories.map((mem, i) => (
-            <p key={i} className="text-gray-400 text-sm mb-1">
+            <p key={i} className="text-gray-500 text-sm mb-1">
               {mem.memory_type === 'weakness' ? '⚠️' : '✅'}{' '}
-              <span className="text-gray-300">{mem.skill}:</span>{' '}
+              <span className="text-gray-600">{mem.skill}:</span>{' '}
               {mem.memory_text}
             </p>
           ))}
@@ -133,16 +133,16 @@ export default function ReadingCoach() {
         <div className="grid lg:grid-cols-2 gap-6">
 
           {/* Passage */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-base font-semibold text-white flex-1">{passage.title}</h2>
+              <h2 className="text-base font-semibold text-gray-900 flex-1">{passage.title}</h2>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-lg flex-shrink-0 ${DIFF_COLORS[passage.difficulty]}`}>
                 {passage.difficulty}
               </span>
             </div>
             <p className="text-gray-500 text-xs mb-3">{passage.topic}</p>
             <div className="h-[480px] overflow-y-auto pr-2">
-              <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
                 {passage.passage}
               </p>
             </div>
@@ -151,14 +151,14 @@ export default function ReadingCoach() {
           {/* Questions */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-white">Questions</h2>
+              <h2 className="text-base font-semibold text-gray-900">Questions</h2>
               <span className="text-sm text-gray-500">{answeredCount} / {totalQuestions} answered</span>
             </div>
 
             <div className="space-y-4 max-h-[480px] overflow-y-auto pr-1">
               {passage.questions.map((q, i) => (
-                <div key={q.question_id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                  <p className="text-gray-300 text-sm mb-1">
+                <div key={q.question_id} className="bg-white border border-gray-200 rounded-xl p-4">
+                  <p className="text-gray-600 text-sm mb-1">
                     <span className="text-gray-500 mr-1">Q{i + 1}.</span>{q.question}
                   </p>
                   <span className="text-xs text-gray-600 mb-3 block">{TYPE_LABELS[q.question_type]}</span>
@@ -175,7 +175,7 @@ export default function ReadingCoach() {
                             onChange={() => handleAnswer(q.question_id, k)}
                             className="accent-brand-500"
                           />
-                          <span className="text-gray-400 text-sm group-hover:text-gray-300">{k}: {v}</span>
+                          <span className="text-gray-500 text-sm group-hover:text-gray-600">{k}: {v}</span>
                         </label>
                       ))}
                     </div>
@@ -189,8 +189,8 @@ export default function ReadingCoach() {
                           onClick={() => handleAnswer(q.question_id, opt)}
                           className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                             answers[q.question_id] === opt
-                              ? 'bg-brand-500 text-white'
-                              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                              ? 'bg-brand-600 text-white'
+                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                           }`}
                         >
                           {opt}
@@ -205,7 +205,7 @@ export default function ReadingCoach() {
                       value={answers[q.question_id] || ''}
                       onChange={e => handleAnswer(q.question_id, e.target.value)}
                       placeholder="Your answer..."
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-brand-500 transition-colors"
+                      className="w-full bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-brand-500 transition-colors"
                     />
                   )}
                 </div>
@@ -215,7 +215,7 @@ export default function ReadingCoach() {
             <button
               onClick={handleSubmit}
               disabled={submitting || answeredCount < totalQuestions}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 font-semibold rounded-xl transition-colors"
             >
               {submitting
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Checking answers...</>
@@ -237,8 +237,8 @@ export default function ReadingCoach() {
           }`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white font-bold text-2xl">{results.total_score} / {results.max_score}</p>
-                <p className="text-gray-400 mt-1">{results.passage_title}</p>
+                <p className="text-gray-900 font-bold text-2xl">{results.total_score} / {results.max_score}</p>
+                <p className="text-gray-500 mt-1">{results.passage_title}</p>
               </div>
               <div className={`text-4xl font-bold ${
                 results.percentage >= 80 ? 'text-green-400' :
@@ -250,16 +250,16 @@ export default function ReadingCoach() {
           </div>
 
           {Object.keys(results.skill_accuracy || {}).length > 0 && (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-white mb-4">Skill Breakdown</h2>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-4">Skill Breakdown</h2>
               <div className="space-y-3">
                 {Object.entries(results.skill_accuracy).map(([skill, acc]) => (
                   <div key={skill}>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-400 capitalize">{skill.replace(/_/g, ' ')}</span>
+                      <span className="text-gray-500 capitalize">{skill.replace(/_/g, ' ')}</span>
                       <span className={acc >= 80 ? 'text-green-400' : acc >= 50 ? 'text-yellow-400' : 'text-red-400'}>{acc}%</span>
                     </div>
-                    <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full ${acc >= 80 ? 'bg-green-500' : acc >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${acc}%` }} />
                     </div>
                   </div>
@@ -269,14 +269,14 @@ export default function ReadingCoach() {
           )}
 
           <div className="space-y-3">
-            <h2 className="text-base font-semibold text-white">Question Review</h2>
+            <h2 className="text-base font-semibold text-gray-900">Question Review</h2>
             {(results.question_results || []).map((q, i) => (
               <div key={q.question_id} className={`rounded-xl p-4 border ${q.is_correct ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
                 <div className="flex items-start gap-3">
                   <span className="text-lg flex-shrink-0">{q.is_correct ? '✅' : '❌'}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-gray-300 text-sm font-medium">Q{i + 1}: {q.question}</p>
-                    <p className="text-gray-500 text-xs mt-1">Your answer: <span className="text-gray-400">{q.learner_answer || 'No answer'}</span></p>
+                    <p className="text-gray-600 text-sm font-medium">Q{i + 1}: {q.question}</p>
+                    <p className="text-gray-500 text-xs mt-1">Your answer: <span className="text-gray-500">{q.learner_answer || 'No answer'}</span></p>
                     {!q.is_correct && (
                       <>
                         <p className="text-gray-500 text-xs">Correct: <span className="text-green-400">{q.correct_answer}</span></p>
@@ -293,7 +293,7 @@ export default function ReadingCoach() {
           <div className="flex gap-4">
             <button
               onClick={loadPassage}
-              className="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl transition-colors"
+              className="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition-colors"
             >
               Next passage →
             </button>

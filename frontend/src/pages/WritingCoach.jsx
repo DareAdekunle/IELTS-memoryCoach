@@ -138,7 +138,7 @@ export default function WritingCoach() {
     <div className="flex items-center justify-center h-96">
       <div className="text-center">
         <Loader2 className="w-8 h-8 text-brand-500 animate-spin mx-auto mb-3" />
-        <p className="text-gray-400">Loading your writing session...</p>
+        <p className="text-gray-500">Loading your writing session...</p>
       </div>
     </div>
   )
@@ -149,15 +149,15 @@ export default function WritingCoach() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <PenLine className="w-6 h-6 text-purple-400" />
             Writing Coach
           </h1>
-          <p className="text-gray-400 mt-1">Practice IELTS writing and get personalised AI feedback</p>
+          <p className="text-gray-500 mt-1">Practice IELTS writing and get personalised AI feedback</p>
         </div>
         <button
           onClick={loadPromptAndMemories}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-sm transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-sm transition-colors"
         >
           <RefreshCw className="w-4 h-4" />New prompt
         </button>
@@ -165,17 +165,17 @@ export default function WritingCoach() {
 
       {/* Memory panel */}
       {memories.length > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-6">
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Brain className="w-4 h-4 text-green-400" />
-            <span className="text-sm font-medium text-gray-300">What your coach remembers</span>
+            <span className="text-sm font-medium text-gray-600">What your coach remembers</span>
           </div>
           <div className="space-y-2">
             {memories.map((mem, i) => (
               <div key={i} className="flex items-start gap-2">
                 <span className="text-sm mt-0.5">{mem.memory_type === 'weakness' ? '⚠️' : '✅'}</span>
-                <p className="text-gray-400 text-sm">
-                  <span className="text-gray-300 font-medium">{mem.skill}:</span> {mem.memory_text}
+                <p className="text-gray-500 text-sm">
+                  <span className="text-gray-600 font-medium">{mem.skill}:</span> {mem.memory_text}
                 </p>
               </div>
             ))}
@@ -188,17 +188,17 @@ export default function WritingCoach() {
         <>
           {/* Prompt card */}
           {prompt && (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-purple-500/15 text-purple-400">
                   {prompt.task_type}
                 </span>
-                <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-gray-800 text-gray-400">
+                <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-gray-100 text-gray-500">
                   {DIFFICULTY_LABELS[prompt.difficulty] || prompt.difficulty}
                 </span>
                 <span className="text-xs text-gray-600 ml-auto">Adapted to your level</span>
               </div>
-              <p className="text-white leading-relaxed">{prompt.prompt}</p>
+              <p className="text-gray-900 leading-relaxed">{prompt.prompt}</p>
             </div>
           )}
 
@@ -209,7 +209,7 @@ export default function WritingCoach() {
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 inputMode === 'text'
                   ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30'
-                  : 'bg-gray-800 text-gray-400 hover:text-white'
+                  : 'bg-gray-100 text-gray-500 hover:text-gray-900'
               }`}
             >
               ✍️ Type essay
@@ -219,7 +219,7 @@ export default function WritingCoach() {
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 inputMode === 'image'
                   ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30'
-                  : 'bg-gray-800 text-gray-400 hover:text-white'
+                  : 'bg-gray-100 text-gray-500 hover:text-gray-900'
               }`}
             >
               <span className="flex items-center gap-1.5">
@@ -230,9 +230,9 @@ export default function WritingCoach() {
 
           {/* Text input */}
           {inputMode === 'text' && (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-gray-300">Your response</label>
+                <label className="text-sm font-medium text-gray-600">Your response</label>
                 <span className={`text-sm ${wordCount >= 250 ? 'text-green-400' : wordCount > 0 ? 'text-yellow-400' : 'text-gray-500'}`}>
                   {wordCount} / 250 words minimum
                 </span>
@@ -241,7 +241,7 @@ export default function WritingCoach() {
                 value={essay}
                 onChange={e => setEssay(e.target.value)}
                 placeholder="Write your essay here. Aim for at least 250 words..."
-                className="w-full h-72 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-brand-500 transition-colors resize-none text-sm leading-relaxed"
+                className="w-full h-72 bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 transition-colors resize-none text-sm leading-relaxed"
               />
               {error && (
                 <div className="mt-3 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
@@ -260,7 +260,7 @@ export default function WritingCoach() {
                 <button
                   onClick={handleSubmit}
                   disabled={submitting || wordCount < 50}
-                  className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 font-semibold rounded-xl transition-colors"
                 >
                   {submitting
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Evaluating...</>
@@ -273,8 +273,8 @@ export default function WritingCoach() {
 
           {/* Image upload */}
           {inputMode === 'image' && (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <p className="text-gray-400 text-sm mb-4">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <p className="text-gray-500 text-sm mb-4">
                 Photograph your handwritten essay and upload it. qwen-vl will extract the text
                 and evaluate it using the same AI pipeline as typed essays.
               </p>
@@ -282,10 +282,10 @@ export default function WritingCoach() {
               {!imagePreview ? (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-gray-700 rounded-xl p-12 text-center cursor-pointer hover:border-gray-500 transition-colors"
+                  className="border-2 border-dashed border-gray-200 rounded-xl p-12 text-center cursor-pointer hover:border-gray-500 transition-colors"
                 >
                   <Upload className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400 font-medium mb-1">Click to upload image</p>
+                  <p className="text-gray-500 font-medium mb-1">Click to upload image</p>
                   <p className="text-gray-600 text-sm">JPEG, PNG or WebP — make sure the text is clearly legible</p>
                   <input
                     ref={fileInputRef}
@@ -301,13 +301,13 @@ export default function WritingCoach() {
                     <img
                       src={imagePreview}
                       alt="Essay preview"
-                      className="w-full max-h-80 object-contain rounded-xl border border-gray-700"
+                      className="w-full max-h-80 object-contain rounded-xl border border-gray-200"
                     />
                     <button
                       onClick={clearImage}
-                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center hover:bg-gray-800 transition-colors"
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors"
                     >
-                      <X className="w-4 h-4 text-gray-400" />
+                      <X className="w-4 h-4 text-gray-500" />
                     </button>
                   </div>
 
@@ -321,7 +321,7 @@ export default function WritingCoach() {
                     <button
                       onClick={handleSubmitImage}
                       disabled={submitting}
-                      className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
+                      className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 font-semibold rounded-xl transition-colors"
                     >
                       {submitting
                         ? <><Loader2 className="w-4 h-4 animate-spin" /> Extracting & evaluating...</>
@@ -338,12 +338,12 @@ export default function WritingCoach() {
 
       {/* Streaming preview */}
       {isStreaming && (
-        <div className="bg-gray-900 border border-brand-500/30 rounded-2xl p-6">
+        <div className="bg-white border border-brand-500/30 rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
-            <span className="text-brand-400 text-sm font-medium">Your coach is writing feedback...</span>
+            <span className="text-brand-600 text-sm font-medium">Your coach is writing feedback...</span>
           </div>
-          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap min-h-[60px]">
+          <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap min-h-[60px]">
             {streamingText}
             <span className="inline-block w-0.5 h-4 bg-brand-500 animate-pulse ml-0.5 align-middle" />
           </p>
@@ -369,10 +369,10 @@ export default function WritingCoach() {
               )}
               {extractedText && (
                 <details className="mt-2">
-                  <summary className="text-gray-500 text-xs cursor-pointer hover:text-gray-400">
+                  <summary className="text-gray-500 text-xs cursor-pointer hover:text-gray-500">
                     View extracted text
                   </summary>
-                  <p className="text-gray-400 text-xs mt-2 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-gray-500 text-xs mt-2 leading-relaxed whitespace-pre-wrap">
                     {extractedText}
                   </p>
                 </details>
@@ -381,14 +381,14 @@ export default function WritingCoach() {
           )}
 
           {/* Overall feedback */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-white mb-3">📊 Overall Feedback</h2>
-            <p className="text-gray-300 leading-relaxed">{feedback.overall_feedback}</p>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">📊 Overall Feedback</h2>
+            <p className="text-gray-600 leading-relaxed">{feedback.overall_feedback}</p>
           </div>
 
           {/* Scores */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Skill Scores</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Skill Scores</h2>
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               {Object.entries(feedback.scores || {}).map(([key, score]) => (
                 <div key={key} className="text-center">
@@ -403,21 +403,21 @@ export default function WritingCoach() {
 
           {/* Strengths and weaknesses */}
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
               <h2 className="text-base font-semibold text-green-400 mb-3">✅ Strengths</h2>
               <ul className="space-y-2">
                 {(feedback.strengths || []).map((s, i) => (
-                  <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
+                  <li key={i} className="text-gray-600 text-sm flex items-start gap-2">
                     <span className="text-green-500 mt-0.5 flex-shrink-0">•</span>{s}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
               <h2 className="text-base font-semibold text-yellow-400 mb-3">⚠️ Areas to Improve</h2>
               <ul className="space-y-2">
                 {(feedback.weaknesses || []).map((w, i) => (
-                  <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
+                  <li key={i} className="text-gray-600 text-sm flex items-start gap-2">
                     <span className="text-yellow-500 mt-0.5 flex-shrink-0">•</span>{w}
                   </li>
                 ))}
@@ -427,21 +427,21 @@ export default function WritingCoach() {
 
           {feedback.recommended_next_step && (
             <div className="bg-brand-500/10 border border-brand-500/30 rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-brand-400 mb-2">🎯 Recommended Next Step</h2>
-              <p className="text-gray-300 text-sm leading-relaxed">{feedback.recommended_next_step}</p>
+              <h2 className="text-base font-semibold text-brand-600 mb-2">🎯 Recommended Next Step</h2>
+              <p className="text-gray-600 text-sm leading-relaxed">{feedback.recommended_next_step}</p>
             </div>
           )}
 
           <div className="flex gap-4">
             <button
               onClick={() => { setFeedback(null); setStreamingText(''); setExtractedText(null); setExtractionMeta(null) }}
-              className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-colors"
+              className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl transition-colors"
             >
               Try same prompt again
             </button>
             <button
               onClick={loadPromptAndMemories}
-              className="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl transition-colors"
+              className="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition-colors"
             >
               New prompt →
             </button>

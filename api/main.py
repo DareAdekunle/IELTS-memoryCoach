@@ -120,16 +120,18 @@ app.add_middleware(
 
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 
+_frontend_url = os.getenv("FRONTEND_URL", "").strip()
+_allow_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+if _frontend_url and _frontend_url not in _allow_origins:
+    _allow_origins.append(_frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        os.getenv("FRONTEND_URL", "http://localhost:5173")
-    ],
+    allow_origins=_allow_origins,
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 # ─── Routers ──────────────────────────────────────────────────────────────────
