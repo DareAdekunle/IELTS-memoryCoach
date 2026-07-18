@@ -1,20 +1,76 @@
+version: '3.8'
+
+# ── Local development via Docker ─────────────────────────────────────────────
+# For most development, running uvicorn + npm dev directly is faster.
+# Use this compose file when you want to test the full Docker stack locally.
+#
+# Usage:
+#   docker compose up --build
+#   Frontend: http://localhost:5173
+#   API docs: http://localhost:8000/docs
+
 services:
-  app:
-    build: .
-    ports:
-      - "8501:8501"
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ielts-postgres-dev
+    environment:
+      POSTGRES_USER: ielts
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ielts_dev_password}
+      POSTGRES_DB: ielts_coach
     volumes:
-      # Mount the entire project into the container
-      # This means code changes reflect without rebuilding
-      - .:/app
-      # Mount the data volume separately so the database
-      # persists between container rebuilds
-      - ielts_data:/app/data/db
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ielts -d ielts_coach"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ielts-api-dev
+    ports:
+      - "8000:8000"
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=postgresql://ielts:${POSTGRES_PASSWORD:-ielts_dev_password}@postgres:5432/ielts_coach
+      - FRONTEND_URL=http://localhost:5173
+      - GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+    volumes:
+      - tts_cache:/app/tts_cache
+    command: >
+      uvicorn api.main:app
+        --host 0.0.0.0
+        --port 8000
+        --reload
+        --log-level info
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
-# Define the named volume
-# Docker manages this separately from the container
+  frontend:
+    image: node:20-alpine
+    container_name: ielts-frontend-dev
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - api
+
 volumes:
-  ielts_data:
+  postgres_data:
+    driver: local
+  tts_cache:
+    driver: local

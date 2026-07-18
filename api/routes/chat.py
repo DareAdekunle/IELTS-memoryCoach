@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional
 
@@ -24,6 +24,7 @@ class ContinueChatRequest(BaseModel):
     history: list
     message: str
     section: Optional[str] = "Writing"
+    session_id: Optional[str] = None
 
 
 @router.get("/context")
@@ -105,7 +106,9 @@ async def start_chat(
             "state": result["state"],
             "has_history": result["has_history"],
             "section": result["section"],
-            "system_prompt": result.get("system_prompt", "")
+            "system_prompt": result.get("system_prompt", ""),
+            "session_id": result.get("session_id"),
+            "pedagogy": result.get("pedagogy")
         }
 
     except Exception as e:
@@ -119,14 +122,15 @@ async def start_chat(
 @router.post("/continue")
 async def continue_chat(
     request: ContinueChatRequest,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user)
 ):
     """
     Continues an existing tutor session with a new learner message.
 
-    Passes learner_id and section so that when the tutor reaches
-    bridge_to_practice, micro-memories are extracted from the
-    drilling conversation and saved to the learner's memory profile.
+    When the tutor reaches bridge_to_practice: micro-memories are
+    extracted AND the Coach interprets the session's pedagogical
+    evidence in the background (hint dependency, support fading).
     """
     try:
         result = continue_chat_session(
@@ -134,8 +138,19 @@ async def continue_chat(
             conversation_history=request.history,
             learner_message=request.message,
             learner_id=current_user.learner_id,
-            section=request.section
+            section=request.section,
+            session_id=request.session_id
         )
+
+        # Coach interprets the session evidence once tutoring concludes
+        if result.get("session_completed") and request.session_id:
+            from app.services.coach_service import coach_tutor_session
+            background_tasks.add_task(
+                coach_tutor_session,
+                current_user.learner_id,
+                request.section,
+                request.session_id
+            )
 
         return {
             "success": True,

@@ -40,6 +40,18 @@ from app.services.agent_tools import (
     TUTOR_TOOL_SCHEMAS,
     execute_tutor_tool
 )
+from app.services.pedagogical_event_service import (
+    create_tutor_session,
+    update_session_state,
+    get_session_plan,
+    record_event,
+    record_hint,
+    mark_last_hint_self_corrected,
+    complete_session_plan,
+)
+from app.pedagogy.planner import create_session_plan, format_plan_block
+from app.pedagogy.action_tags import parse_action_tags, TAG_PROTOCOL_PROMPT
+from app.pedagogy.spine import validate_spine
 from app.utils.logger import get_logger
 
 logger = get_logger("services.chat_coach")
@@ -89,13 +101,24 @@ def parse_state_tag(raw_response: str) -> tuple:
     Returns (clean_text, state).
     Defaults to "explaining" if tag is missing or invalid.
     """
-    match = re.search(r'\[STATE:\s*(\w+)\]\s*$', raw_response.strip())
+    # Tolerant of model formatting drift: "[ STATE : drilling ]",
+    # and of the tag not being the last thing in the reply.
+    matches = list(re.finditer(
+        r'\[\s*STATE\s*:\s*(\w+)\s*\]', raw_response, re.IGNORECASE
+    ))
 
-    if not match:
+    if not matches:
         return raw_response.strip(), "explaining"
 
-    state = match.group(1).strip()
-    clean_text = raw_response[:match.start()].strip()
+    match = matches[-1]
+
+    state = match.group(1).strip().lower()
+
+    # Remove every state tag occurrence (not truncate) so any
+    # [ACTION:] tags emitted after the state tag survive for parsing
+    clean_text = re.sub(
+        r'\[\s*STATE\s*:\s*\w+\s*\]', '', raw_response, flags=re.IGNORECASE
+    ).strip()
 
     if state not in VALID_STATES:
         state = "explaining"
@@ -186,13 +209,33 @@ def start_chat_session(
             "has_history": False,
             "section": section,
             "system_prompt": "",
-            "learner_id": learner_id
+            "learner_id": learner_id,
+            "session_id": None,
+            "pedagogy": None
         }
+
+    # ── Pedagogical Skill Layer ──────────────────────────────────────
+    # Server-side session identity + deterministic teaching plan.
+    # Python selects the teaching method; Qwen delivers the teaching.
+    session_id = create_tutor_session(learner_id, section)
+    plan = None
+    try:
+        plan = create_session_plan(learner_id, section, session_id)
+    except Exception as e:
+        logger.warning(f"Pedagogy plan creation failed (non-blocking): {e}")
 
     # Build specialist system prompt
     context_brief = format_context_brief(context, section)
     template = load_prompt_template(TUTOR_PROMPTS[section])
     system_prompt = template.format(context_brief=context_brief)
+
+    # Inject the structured teaching plan (Backward Design anchor,
+    # dominant framework procedure, support level, exit criteria)
+    if plan:
+        system_prompt += "\n" + format_plan_block(plan)
+
+    # Action tag protocol — how the app records hints/attempts
+    system_prompt += "\n" + TAG_PROTOCOL_PROMPT
 
     # Append tool awareness to system prompt
     system_prompt += (
@@ -203,7 +246,10 @@ def start_chat_session(
         "- get_recent_attempts: pull actual learner work to quote\n"
         "- get_skill_ranks: check progress and tell learner how close they "
         "are to ranking up\n"
-        "- get_coaching_context: full refresh if you need a complete picture\n\n"
+        "- get_coaching_context: full refresh if you need a complete picture\n"
+        "- get_pedagogical_context: criterion stages, support levels and "
+        "hint dependency for this learner\n"
+        "- get_current_session_plan: re-read this session's teaching plan\n\n"
         "Always include [STATE: xxx] at the end of every response."
     )
 
@@ -255,6 +301,9 @@ def start_chat_session(
         )
 
     clean_text, state = parse_state_tag(final_content)
+    clean_text, actions = parse_action_tags(clean_text)
+    _record_actions(actions, session_id, learner_id, section)
+    update_session_state(session_id, state)
 
     return {
         "message": clean_text,
@@ -263,7 +312,9 @@ def start_chat_session(
         "section": section,
         "system_prompt": system_prompt,
         "learner_id": learner_id,
-        "context": context
+        "context": context,
+        "session_id": session_id,
+        "pedagogy": plan.to_dict() if plan else None
     }
 
 
@@ -272,7 +323,8 @@ def continue_chat_session(
     conversation_history: list,
     learner_message: str,
     learner_id: str = None,
-    section: str = "Writing"
+    section: str = "Writing",
+    session_id: str = None
 ) -> dict:
     """
     Continues an existing tutor session with a new learner message.
@@ -280,16 +332,20 @@ def continue_chat_session(
     The Tutor is now a tool-calling agent — it can query live learner
     data mid-conversation when it needs to reference specific evidence.
 
-    When the Tutor reaches bridge_to_practice, micro-memories are
-    extracted from the drilling conversation and saved — closing the
-    agent loop so Chat Coach sessions feed back into the Coach's
-    evidence base.
+    Pedagogical layer per turn:
+      1. [ACTION:] tags are parsed from the reply and recorded as
+         pedagogical/hint events (the Tutor records what happened).
+      2. Soft spine validation (Feedback Triad, priority cap) with
+         one regeneration retry — then log-only.
+      3. At bridge_to_practice: memories are extracted AND the session
+         is marked complete so the Coach can interpret the evidence.
 
     Returns:
         message:            The tutor's reply (state tag stripped)
         state:              The new conversation state
         memories_extracted: Number of memories saved (0 if not triggered)
         tools_called:       Which tools the Tutor called this turn
+        session_completed:  True when bridge_to_practice was reached
     """
     messages = [
         {"role": "system", "content": system_prompt}
@@ -361,11 +417,33 @@ def continue_chat_session(
         )
         final_content = follow_up.choices[0].message.content or ""
 
+    # Soft spine validation — LOG-ONLY. A regeneration retry doubles
+    # turn latency (each Qwen call is 10-20s), which makes the tutor
+    # feel frozen. Observability stays; enforcement is via the plan.
+    try:
+        check = validate_spine(final_content)
+        if not check["passed"]:
+            logger.info(
+                f"spine_check_failed (log-only) "
+                f"missing={check['triad']['missing'] if check['triad'] else []} "
+                f"priorities={check['priority_count']}"
+            )
+    except Exception as e:
+        logger.warning(f"Spine validation failed (non-blocking): {e}")
+
     clean_text, state = parse_state_tag(final_content)
+
+    # Parse and record pedagogical action tags
+    clean_text, actions = parse_action_tags(clean_text)
+    if session_id:
+        _record_actions(actions, session_id, learner_id, section)
+        update_session_state(session_id, state)
 
     # Extract memories when tutor concludes drilling
     memories_extracted = 0
+    session_completed = False
     if state == "bridge_to_practice" and learner_id:
+        session_completed = True
         try:
             # Build conversation for memory extraction
             drill_history = conversation_history + [
@@ -385,12 +463,120 @@ def continue_chat_session(
         except Exception as e:
             logger.warning(f"Chat memory extraction failed: {e}")
 
+        # Close out the pedagogy plan if the Tutor never tagged completion
+        if session_id:
+            try:
+                plan = get_session_plan(session_id)
+                if plan and not plan.get("outcome"):
+                    complete_session_plan(session_id, "completed")
+            except Exception as e:
+                logger.warning(f"Plan completion failed: {e}")
+
     return {
         "message": clean_text,
         "state": state,
         "memories_extracted": memories_extracted,
-        "tools_called": tools_called
+        "tools_called": tools_called,
+        "session_completed": session_completed,
+        "session_id": session_id
     }
+
+
+def _record_actions(
+    actions: list,
+    session_id: str,
+    learner_id: str,
+    section: str
+) -> None:
+    """
+    Maps parsed [ACTION:] tags to pedagogical/hint event records.
+    Best-effort — a failed record loses one data point, never the turn.
+    """
+    if not actions or not session_id:
+        return
+
+    plan = None
+    try:
+        plan = get_session_plan(session_id)
+    except Exception:
+        pass
+    criterion_id = plan["target_criterion"] if plan else None
+    framework_id = plan["dominant_framework"] if plan else None
+
+    for entry in actions:
+        try:
+            action = entry["action"]
+            params = entry.get("params", {})
+
+            if action == "hint":
+                record_hint(
+                    session_id, learner_id, section,
+                    hint_level=params["level"],
+                    criterion_id=criterion_id,
+                    framework_id=framework_id,
+                )
+                record_event(
+                    session_id, learner_id, section, "hint_given",
+                    criterion_id=criterion_id, framework_id=framework_id,
+                    evidence={"level": params["level"]},
+                )
+
+            elif action == "attempt":
+                result = params["result"]
+                if result == "self_corrected":
+                    record_event(
+                        session_id, learner_id, section,
+                        "self_correction_succeeded",
+                        criterion_id=criterion_id, framework_id=framework_id,
+                        success=True,
+                    )
+                    mark_last_hint_self_corrected(session_id, True)
+                else:
+                    success = result == "success"
+                    record_event(
+                        session_id, learner_id, section, "learner_attempted",
+                        criterion_id=criterion_id, framework_id=framework_id,
+                        success=success,
+                    )
+                    if not success:
+                        mark_last_hint_self_corrected(session_id, False)
+
+            elif action == "model_shown":
+                record_event(
+                    session_id, learner_id, section, "model_shown",
+                    criterion_id=criterion_id, framework_id=framework_id,
+                )
+
+            elif action == "framework_started":
+                record_event(
+                    session_id, learner_id, section, "framework_started",
+                    criterion_id=criterion_id, framework_id=framework_id,
+                )
+
+            elif action == "feedback_given":
+                record_event(
+                    session_id, learner_id, section, "feedback_given",
+                    criterion_id=criterion_id, framework_id=framework_id,
+                )
+
+            elif action == "independent_check":
+                record_event(
+                    session_id, learner_id, section,
+                    "independent_check_started",
+                    criterion_id=criterion_id, framework_id=framework_id,
+                )
+
+            elif action == "complete":
+                outcome = params.get("outcome", "completed")
+                record_event(
+                    session_id, learner_id, section, "framework_completed",
+                    criterion_id=criterion_id, framework_id=framework_id,
+                    evidence={"outcome": outcome},
+                )
+                complete_session_plan(session_id, outcome)
+
+        except Exception as e:
+            logger.warning(f"Failed to record action {entry}: {e}")
 
 
 def _resolve_tool_calls(

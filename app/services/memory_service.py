@@ -10,6 +10,7 @@ from app.db.database import SessionLocal
 from app.db.models import PracticeAttempt, LearnerMemory, MasteryScore
 from app.services.qwen_service import call_qwen_for_json
 from app.utils.json_utils import safe_parse_json, extract_json_from_text
+from app.services.embedding_service import embed_text, serialise, deserialise, cosine_similarity
 
 PROMPTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts")
 
@@ -154,6 +155,8 @@ def extract_and_save_memories(learner_id: str, section: str,
                 continue
 
             memory_id = str(uuid.uuid4())[:12]
+            text = mem["memory_text"]
+            emb = embed_text(text)  # None on failure — stored as NULL, no crash
 
             memory = LearnerMemory(
                 memory_id=memory_id,
@@ -161,10 +164,11 @@ def extract_and_save_memories(learner_id: str, section: str,
                 section=mem["section"],
                 skill=mem["skill"],
                 memory_type=mem["memory_type"],
-                memory_text=mem["memory_text"],
+                memory_text=text,
                 confidence=float(mem.get("confidence", 0.6)),
                 evidence_count=1,
-                status="active"
+                status="active",
+                embedding=serialise(emb) if emb else None,
             )
 
             db.add(memory)
@@ -185,28 +189,30 @@ def extract_and_save_memories(learner_id: str, section: str,
 
 # ─── RETRIEVE MEMORIES ────────────────────────────────────────────────────────
 
-def get_relevant_memories(learner_id: str, section: str, limit: int = 5) -> list:
+def get_relevant_memories(
+    learner_id: str,
+    section: str,
+    limit: int = 5,
+    context: str | None = None,
+) -> list:
     """
-    Retrieves the most relevant active memories for a learner,
-    ranked by a spaced repetition score that combines confidence
-    and recency.
+    Retrieves the most relevant active memories for a learner.
 
-    Spaced repetition weighting:
-      score = confidence × recency_weight
+    When `context` is provided (e.g. the current session's target skill
+    description or the learner's most recent attempt), memories are ranked
+    by a hybrid score combining semantic similarity with spaced repetition:
 
-    recency_weight:
-      Updated within 7 days  → 1.0  (full weight)
-      Updated within 30 days → 0.8
-      Updated within 90 days → 0.6
-      Older than 90 days     → 0.4  (fading — needs reinforcement)
+        score = 0.45 × semantic_similarity + 0.55 × spaced_repetition
 
-    This means a high-confidence memory from 6 months ago ranks
-    BELOW a medium-confidence memory updated last week — matching
-    the spaced repetition principle that recent evidence is more
-    predictive of current ability than old evidence.
+    This means memories that are *topically relevant to the current session*
+    rise to the top, while the spaced-repetition principle (recent evidence is
+    more predictive than old) remains in play.
 
-    Weaknesses are prioritised over strengths at equal score
-    since they are more actionable for coaching.
+    Without `context`, the pure spaced-repetition scorer is used:
+        score = confidence × recency_weight + weakness_boost
+
+    Spaced-repetition recency weights:
+      ≤7 days → 1.0 | ≤30 days → 0.8 | ≤90 days → 0.6 | older → 0.4
     """
     db = SessionLocal()
 
@@ -221,18 +227,14 @@ def get_relevant_memories(learner_id: str, section: str, limit: int = 5) -> list
 
         def spaced_repetition_score(m) -> float:
             confidence = m.confidence or 0.5
-
-            # Calculate days since last update
             updated = m.updated_at
             if updated is None:
                 days_old = 999
             else:
-                # Handle both naive and aware datetimes
-                if hasattr(updated, 'tzinfo') and updated.tzinfo is None:
+                if hasattr(updated, "tzinfo") and updated.tzinfo is None:
                     updated = updated.replace(tzinfo=timezone.utc)
                 days_old = max(0, (now - updated).days)
 
-            # Recency weight — decays with age
             if days_old <= 7:
                 recency = 1.0
             elif days_old <= 30:
@@ -242,17 +244,25 @@ def get_relevant_memories(learner_id: str, section: str, limit: int = 5) -> list
             else:
                 recency = 0.4
 
-            # Weakness gets a small boost — more actionable for coaching
             type_boost = 0.05 if m.memory_type == "weakness" else 0.0
-
             return (confidence * recency) + type_boost
 
-        # Sort by spaced repetition score descending
-        sorted_memories = sorted(
-            memories,
-            key=spaced_repetition_score,
-            reverse=True
-        )
+        # Semantic re-ranking when context provided and embeddings exist
+        context_emb = None
+        if context:
+            context_emb = embed_text(context)
+
+        def hybrid_score(m) -> float:
+            sr = spaced_repetition_score(m)
+            if context_emb and m.embedding:
+                mem_emb = deserialise(m.embedding)
+                if mem_emb:
+                    sem = cosine_similarity(context_emb, mem_emb)
+                    # Normalise: cosine is [-1,1] but embeddings are positive → [0,1]
+                    return 0.45 * sem + 0.55 * sr
+            return sr
+
+        sorted_memories = sorted(memories, key=hybrid_score, reverse=True)
 
         return [
             {

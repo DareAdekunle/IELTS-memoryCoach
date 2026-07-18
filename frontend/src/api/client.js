@@ -6,7 +6,10 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 const client = axios.create({
   baseURL: API_BASE,
-  headers: { 'Content-Type': 'application/json' }
+  headers: { 'Content-Type': 'application/json' },
+  // AI turns can stack multiple model calls (tutor reply + tools).
+  // 150s keeps slow turns alive but surfaces genuinely hung requests.
+  timeout: 150000
 })
 
 // Attach JWT token to every request automatically

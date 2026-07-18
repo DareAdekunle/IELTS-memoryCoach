@@ -75,6 +75,8 @@ export default function ChatCoach() {
   const [state, setState]                     = useState(null)
   const [hasHistory, setHasHistory]           = useState(null)
   const [tutorContext, setTutorContext]        = useState(null)
+  const [sessionId, setSessionId]             = useState(null)
+  const [pedagogy, setPedagogy]               = useState(null)
   const [input, setInput]                     = useState('')
   const [loading, setLoading]                 = useState(false)
   const [sending, setSending]                 = useState(false)
@@ -100,6 +102,8 @@ export default function ChatCoach() {
         setSystemPrompt(parsed.systemPrompt)
         setState(parsed.state)
         setHasHistory(parsed.hasHistory)
+        setSessionId(parsed.sessionId || null)
+        setPedagogy(parsed.pedagogy || null)
         return
       } catch {
         sessionStorage.removeItem(SESSION_CACHE_KEY(sectionId))
@@ -110,6 +114,8 @@ export default function ChatCoach() {
     setSystemPrompt('')
     setState(null)
     setHasHistory(null)
+    setSessionId(null)
+    setPedagogy(null)
     setLoading(true)
 
     // Phase 1 — fetch context instantly (DB only, no Qwen call)
@@ -131,12 +137,16 @@ export default function ChatCoach() {
       setState(data.state)
       setHasHistory(data.has_history)
       setSystemPrompt(data.system_prompt || '')
+      setSessionId(data.session_id || null)
+      setPedagogy(data.pedagogy || null)
 
       sessionStorage.setItem(SESSION_CACHE_KEY(sectionId), JSON.stringify({
         messages: newMessages,
         systemPrompt: data.system_prompt || '',
         state: data.state,
-        hasHistory: data.has_history
+        hasHistory: data.has_history,
+        sessionId: data.session_id || null,
+        pedagogy: data.pedagogy || null
       }))
 
     } catch (err) {
@@ -181,10 +191,13 @@ export default function ChatCoach() {
         system_prompt: systemPrompt,
         history: historyForCall,
         message: text,
-        section: selectedSection
+        section: selectedSection,
+        session_id: sessionId
       })
 
-      const assistantMessage = { role: 'assistant', content: res.data.message }
+      const replyText = (res.data.message || '').trim() ||
+        "Hmm, my reply didn't come through properly — could you say that again?"
+      const assistantMessage = { role: 'assistant', content: replyText }
       const updatedMessages = [...newMessages, assistantMessage]
 
       setMessages(updatedMessages)
@@ -194,11 +207,19 @@ export default function ChatCoach() {
         messages: updatedMessages,
         systemPrompt,
         state: res.data.state,
-        hasHistory
+        hasHistory,
+        sessionId,
+        pedagogy
       }))
 
     } catch (err) {
-      setError(err.response?.data?.detail || 'Something went wrong.')
+      const isTimeout = err.code === 'ECONNABORTED'
+      setError(isTimeout
+        ? 'The tutor took too long to respond. Please try sending your message again.'
+        : (err.response?.data?.detail || 'Something went wrong.'))
+      // Roll the unanswered message back into the input so it isn't lost
+      setMessages(messages)
+      setInput(text)
     } finally {
       setSending(false)
       setTimeout(() => inputRef.current?.focus(), 100)
@@ -222,6 +243,8 @@ export default function ChatCoach() {
     setState(null)
     setHasHistory(null)
     setTutorContext(null)
+    setSessionId(null)
+    setPedagogy(null)
     setError('')
     setInput('')
   }
@@ -308,6 +331,26 @@ export default function ChatCoach() {
             </button>
           </div>
         </div>
+
+        {/* Pedagogy strip — how the tutor is teaching this session */}
+        {pedagogy && (
+          <div className="max-w-3xl mx-auto mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 border border-brand-100">
+              {(pedagogy.learner_stage || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+            </span>
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100">
+              {(pedagogy.dominant_framework || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+            </span>
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+              Support: {pedagogy.support_level}
+            </span>
+            {pedagogy.target_descriptor && (
+              <span className="text-xs text-gray-500 truncate flex-1 min-w-0" title={pedagogy.target_descriptor}>
+                🎯 Band {pedagogy.target_band?.toFixed(1)}: {pedagogy.target_descriptor}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Messages */}

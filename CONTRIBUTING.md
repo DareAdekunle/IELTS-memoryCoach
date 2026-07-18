@@ -1,6 +1,6 @@
-# Contributing to IELTS MemoryCoach
+# Contributing to Qonda IELTS
 
-IELTS MemoryCoach is designed for extensibility. The taxonomy-driven
+Qonda IELTS is designed for extensibility. The taxonomy-driven
 architecture and modular service layer mean most new capabilities can
 be added without touching existing code.
 
@@ -66,7 +66,7 @@ The Memory Dashboard shows all sections automatically without changes.
 
 ## MCP server integration
 
-The MemoryCoach memory layer is exposed as an MCP server at
+The Qonda memory layer is exposed as an MCP server at
 `app/mcp/memory_server.py`. Any MCP-compatible AI agent can query:
 
 - `get_learner_weaknesses(learner_id)` — active weakness memories

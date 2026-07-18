@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react'
 import { getSkillRanks } from '../api/progress'
-import { Trophy, Loader2, Zap, ChevronRight, TrendingUp } from 'lucide-react'
+import { getCriterionStages } from '../api/pedagogy'
+import { Trophy, Loader2, Zap, ChevronRight, TrendingUp, GraduationCap } from 'lucide-react'
 import { Link } from 'react-router-dom'
+
+const STAGE_META = {
+  foundations:         { label: 'Foundations',         color: 'text-red-600',    bg: 'bg-red-50',    bar: 'bg-red-400',    pct: 25 },
+  guided_control:      { label: 'Guided Control',      color: 'text-amber-600',  bg: 'bg-amber-50',  bar: 'bg-amber-400',  pct: 50 },
+  independent_control: { label: 'Independent Control', color: 'text-blue-600',   bg: 'bg-blue-50',   bar: 'bg-blue-400',   pct: 75 },
+  automatization:      { label: 'Automatization',      color: 'text-emerald-600',bg: 'bg-emerald-50',bar: 'bg-emerald-400',pct: 100 },
+}
 
 // Band → colour mapping (replaces rank-based colours)
 // Anchored to IELTS band ranges learners actually recognise
@@ -154,6 +162,13 @@ export default function SkillMastery() {
   const [summariesBySection, setSummariesBySection] = useState({})
   const [loading, setLoading] = useState(true)
   const [activeSection, setActiveSection] = useState('Writing')
+  const [criterionStages, setCriterionStages] = useState([])
+
+  useEffect(() => {
+    getCriterionStages(activeSection)
+      .then(res => setCriterionStages(res.data.criterion_stages || []))
+      .catch(() => setCriterionStages([]))
+  }, [activeSection])
 
   useEffect(() => {
     Promise.all(
@@ -294,6 +309,49 @@ export default function SkillMastery() {
           )
         })}
       </div>
+
+      {/* Learning stages per criterion — the pedagogy layer */}
+      {criterionStages.length > 0 && hasAnyData && (
+        <div className="mb-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <GraduationCap className="w-4 h-4 text-brand-600" />
+            Learning stages
+            <span className="text-xs font-normal text-gray-400">
+              how your tutor teaches each criterion
+            </span>
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {criterionStages.map(crit => {
+              const meta = STAGE_META[crit.stage] || STAGE_META.foundations
+              const hasBand = crit.band !== null && crit.band !== undefined
+              return (
+                <div key={crit.criterion_id} className="bg-white border border-gray-200 rounded-2xl p-4">
+                  <p className="text-gray-900 text-sm font-semibold truncate mb-1">
+                    {crit.criterion_name}
+                  </p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={'text-xs font-medium px-2 py-0.5 rounded-full ' + meta.bg + ' ' + meta.color}>
+                      {meta.label}
+                    </span>
+                    {hasBand && (
+                      <span className="text-xs text-gray-500 font-mono">B{crit.band.toFixed(1)}</span>
+                    )}
+                  </div>
+                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
+                    <div
+                      className={'h-full rounded-full transition-all ' + meta.bar}
+                      style={{ width: (hasBand ? meta.pct : 5) + '%' }}
+                    />
+                  </div>
+                  <p className="text-gray-400 text-xs">
+                    Support: <span className="text-gray-600 font-medium">{crit.support_level}</span>
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* No data nudge */}
       {!hasAnyData && (
