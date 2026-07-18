@@ -53,7 +53,7 @@ logger = get_logger("services.coach")
 
 # ─── Coach system prompt ──────────────────────────────────────────────────────
 
-COACH_SYSTEM_PROMPT = """You are the IELTS MemoryCoach — an expert AI coach
+COACH_SYSTEM_PROMPT = """You are the Qonda IELTS Coach — an expert AI coach
 that evaluates learner practice submissions and maintains their coaching profile.
 
 Your job after every submission:
@@ -371,3 +371,175 @@ def coach_listening_submission(
 ) -> dict:
     """Coach evaluation after a Listening submission."""
     return run_coach_agent(learner_id, "Listening", attempt_result)
+
+
+# ─── Tutor-session interpretation ────────────────────────────────────────────
+# The Tutor records what happened. The Coach decides what it means.
+
+TUTOR_SESSION_COACH_PROMPT = """You are the Qonda IELTS Coach interpreting
+evidence from a completed Tutor session.
+
+The Tutor recorded raw pedagogical events (attempts, hints, self-corrections,
+independent checks). Your job is to decide what this evidence MEANS for the
+learner model:
+
+1. Call get_learner_memories to see existing patterns
+2. Interpret the session evidence provided below
+3. Call update_criterion_state for the target criterion with:
+   - the average hint level you observed
+   - counts of successes/failures and independent successes
+   - a requested support level IF the evidence justifies changing it
+     (deterministic rules will veto unearned reductions — that is expected)
+4. Optionally call write_memory (max 1) if the session revealed a NEW
+   pattern not already captured, or update_memory if it confirms/contradicts
+   an existing one
+
+Interpretation guidance:
+- Low hint levels + successful independent checks → consider requesting
+  reduced support
+- Repeated failures after a recent support reduction → request restored support
+- High hint dependence (avg level > 2.5) → support should stay or increase
+- Do NOT submit skill classifications — those come from practice
+  submissions, not tutoring sessions
+
+Finish with a 2-sentence summary of what the evidence showed.
+"""
+
+
+def coach_tutor_session(
+    learner_id: str,
+    section: str,
+    session_id: str,
+    max_iterations: int = 6
+) -> dict:
+    """
+    Coach interpretation pass over a completed Tutor session.
+    Triggered when the Tutor reaches bridge_to_practice.
+    """
+    from app.services.pedagogical_event_service import (
+        summarize_session_evidence,
+        get_session_plan,
+        get_session_hints,
+    )
+
+    evidence = summarize_session_evidence(session_id)
+    plan = get_session_plan(session_id)
+    hints = get_session_hints(session_id)
+
+    if evidence["total_events"] == 0 and not hints:
+        logger.info(f"No pedagogical evidence for session {session_id} — skipping")
+        return {"success": True, "skipped": True, "summary": "No evidence recorded"}
+
+    plan_brief = ""
+    if plan:
+        plan_brief = (
+            f"Session plan:\n"
+            f"  Target criterion: {plan['target_criterion']}\n"
+            f"  Stage: {plan['current_stage']}\n"
+            f"  Dominant framework: {plan['dominant_framework']}\n"
+            f"  Support level: {plan['support_level']}\n"
+            f"  Exit criteria: {json.dumps(plan['exit_criteria'])}\n"
+            f"  Outcome: {plan.get('outcome') or 'not tagged'}\n"
+        )
+
+    evidence_brief = (
+        f"## Tutor Session Evidence\n\n"
+        f"{plan_brief}\n"
+        f"Events: {evidence['total_events']}\n"
+        f"Learner attempts: {evidence['learner_attempts']} "
+        f"({evidence['successful_attempts']} successful)\n"
+        f"Self-corrections: {evidence['self_corrections_succeeded']} succeeded, "
+        f"{evidence['self_corrections_failed']} failed\n"
+        f"Independent checks: {evidence['independent_checks']}\n"
+        f"Hints given: {evidence['hints_given']} "
+        f"(highest level {evidence['highest_hint_level']}, "
+        f"average {evidence['average_hint_level']})\n"
+        f"Models shown: {evidence['models_shown']}\n"
+    )
+
+    target_criterion = plan["target_criterion"] if plan else "unknown"
+
+    messages = [
+        {"role": "system", "content": TUTOR_SESSION_COACH_PROMPT},
+        {"role": "user", "content": (
+            f"Learner ID: {learner_id}\n"
+            f"Section: {section}\n"
+            f"Target criterion: {target_criterion}\n\n"
+            f"{evidence_brief}\n"
+            f"Interpret this evidence and update the learner model."
+        )}
+    ]
+
+    tools_called = []
+    summary = ""
+    iterations = 0
+
+    logger.info(f"Coach interpreting tutor session {session_id}")
+
+    while iterations < max_iterations:
+        iterations += 1
+        try:
+            response = client.chat.completions.create(
+                model=QWEN_MODEL,
+                messages=messages,
+                tools=COACH_TOOL_SCHEMAS,
+                tool_choice="auto",
+                temperature=0.2
+            )
+        except Exception as e:
+            logger.error(f"Coach tutor-session interpretation failed: {e}")
+            return {"success": False, "error": str(e), "tools_called": tools_called}
+
+        message = response.choices[0].message
+        messages.append({
+            "role": "assistant",
+            "content": message.content or "",
+            "tool_calls": [
+                {
+                    "id": tc.id,
+                    "type": "function",
+                    "function": {
+                        "name": tc.function.name,
+                        "arguments": tc.function.arguments
+                    }
+                }
+                for tc in (message.tool_calls or [])
+            ] if message.tool_calls else []
+        })
+
+        if not message.tool_calls:
+            summary = message.content or ""
+            break
+
+        for tool_call in message.tool_calls:
+            tool_name = tool_call.function.name
+            try:
+                args = json.loads(tool_call.function.arguments)
+            except json.JSONDecodeError:
+                args = {}
+
+            # Guardrail: no skill classifications from tutoring evidence
+            if tool_name == "submit_classification":
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": json.dumps({
+                        "error": "Classifications only come from practice "
+                                 "submissions, not Tutor sessions."
+                    })
+                })
+                continue
+
+            tools_called.append(tool_name)
+            tool_result = execute_coach_tool(tool_name, args)
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": tool_result
+            })
+
+    logger.info(
+        f"Coach tutor-session interpretation complete: "
+        f"{len(tools_called)} tools called"
+    )
+    return {"success": True, "summary": summary, "tools_called": tools_called}

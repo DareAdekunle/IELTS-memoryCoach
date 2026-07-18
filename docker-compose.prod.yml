@@ -1,10 +1,28 @@
 version: '3.8'
 services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ielts-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ielts
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ielts_coach
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ielts -d ielts_coach"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ielts-memorycoach
+    container_name: qonda-ielts
     restart: unless-stopped
     ports:
       - "80:80"
@@ -14,16 +32,17 @@ services:
     environment:
       - FRONTEND_URL=https://ielts.qonda.xyz
       - GOOGLE_REDIRECT_URI=https://ielts.qonda.xyz/api/auth/google/callback
+      - DATABASE_URL=postgresql://ielts:${POSTGRES_PASSWORD}@postgres:5432/ielts_coach
     volumes:
-      # SQLite database — persists across container restarts and rebuilds
-      - db_data:/app/data/db
       # TTS audio cache — avoids regenerating Listening track audio
       - tts_cache:/app/tts_cache
-      # Let's Encrypt SSL certificates — mounted read-only into container
+      # SSL certificates
       - /etc/letsencrypt/live/ielts.qonda.xyz/fullchain.pem:/etc/letsencrypt/live/ielts.qonda.xyz/fullchain.pem:ro
       - /etc/letsencrypt/live/ielts.qonda.xyz/privkey.pem:/etc/letsencrypt/live/ielts.qonda.xyz/privkey.pem:ro
-      # Certbot webroot for renewals
       - /var/www/certbot:/var/www/certbot:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
@@ -32,7 +51,7 @@ services:
       start_period: 40s
 
 volumes:
-  db_data:
+  postgres_data:
     driver: local
   tts_cache:
     driver: local

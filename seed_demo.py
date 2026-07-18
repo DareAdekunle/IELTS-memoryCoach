@@ -1,5 +1,5 @@
 """
-seed_demo.py — Demo account seeding script for IELTS MemoryCoach
+seed_demo.py — Demo account seeding script for Qonda IELTS
 
 Creates a realistic demo learner with:
   - 6 Writing attempts showing improvement over time
@@ -225,7 +225,7 @@ def seed_demo(email=DEFAULT_EMAIL, password=DEFAULT_PASSWORD, reset=False):
 
     try:
         print(f"\n{'='*60}")
-        print("IELTS MemoryCoach — Demo Account Seeder")
+        print("Qonda IELTS — Demo Account Seeder")
         print(f"{'='*60}\n")
 
         # ── Check for existing demo account ──────────────────────────
@@ -421,7 +421,7 @@ def seed_demo(email=DEFAULT_EMAIL, password=DEFAULT_PASSWORD, reset=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Seed the IELTS MemoryCoach demo account"
+        description="Seed the Qonda IELTS demo account"
     )
     parser.add_argument(
         "--reset", action="store_true",

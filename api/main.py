@@ -21,6 +21,9 @@ from api.routes.memory import router as memory_router
 from api.routes.speaking import router as speaking_router
 from api.routes.listening import router as listening_router
 from api.routes.chat import router as chat_router
+from api.routes.pedagogy import router as pedagogy_router
+from api.routes.schedule import router as schedule_router
+from api.routes.telegram import router as telegram_router
 from app.mcp.memory_server import mcp as memory_mcp
 from app.utils.logger import get_logger, set_request_id
 
@@ -29,6 +32,45 @@ load_dotenv()
 logger = get_logger("api.main")
 
 Base.metadata.create_all(bind=engine)
+
+# ─── Schema migrations (safe, idempotent) ─────────────────────────────────────
+
+def _apply_schema_migrations():
+    """Add columns that exist in models but may be absent from older DBs."""
+    from sqlalchemy import text, inspect as sa_inspect
+    with engine.connect() as conn:
+        if engine.dialect.name == "sqlite":
+            # learner_memories.embedding
+            cols = {row[1] for row in conn.execute(text("PRAGMA table_info(learner_memories)"))}
+            if "embedding" not in cols:
+                conn.execute(text("ALTER TABLE learner_memories ADD COLUMN embedding TEXT"))
+                conn.commit()
+            # users.whatsapp_number
+            ucols = {row[1] for row in conn.execute(text("PRAGMA table_info(users)"))}
+            if "whatsapp_number" not in ucols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN whatsapp_number VARCHAR"))
+                conn.commit()
+            if "telegram_chat_id" not in ucols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN telegram_chat_id VARCHAR"))
+                conn.commit()
+        else:
+            inspector = sa_inspect(engine)
+            cols = {c["name"] for c in inspector.get_columns("learner_memories")}
+            if "embedding" not in cols:
+                conn.execute(text("ALTER TABLE learner_memories ADD COLUMN embedding TEXT"))
+                conn.commit()
+            ucols = {c["name"] for c in inspector.get_columns("users")}
+            if "whatsapp_number" not in ucols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN whatsapp_number VARCHAR"))
+                conn.commit()
+            if "telegram_chat_id" not in ucols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN telegram_chat_id VARCHAR"))
+                conn.commit()
+
+try:
+    _apply_schema_migrations()
+except Exception as _mig_err:
+    print(f"[startup] Schema migration warning (non-fatal): {_mig_err}")
 
 # ─── TTS Cache Warmup ─────────────────────────────────────────────────────────
 
@@ -84,10 +126,11 @@ async def lifespan(app: FastAPI):
 # ─── FastAPI app ──────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="IELTS MemoryCoach API",
+    title="Qonda IELTS API",
     description=(
         "AI-powered IELTS coaching with persistent memory, "
         "skill ranking, and conversational tutoring. "
+        "Qonda — Grasp English. Retain for life. "
         "Built on Alibaba Cloud Model Studio."
     ),
     version="1.0.0",
@@ -144,12 +187,15 @@ app.include_router(memory_router)
 app.include_router(speaking_router)
 app.include_router(listening_router)
 app.include_router(chat_router)
+app.include_router(pedagogy_router)
+app.include_router(schedule_router)
+app.include_router(telegram_router)
 
 
 @app.get("/")
 async def root():
     return {
-        "message": "IELTS MemoryCoach API",
+        "message": "Qonda IELTS API",
         "status": "running",
         "inference": "Alibaba Cloud Model Studio",
         "docs": "/docs"

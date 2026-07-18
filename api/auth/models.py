@@ -23,5 +23,7 @@ class User(Base):
     auth_provider = Column(String, default="local")  # "local" or "google"
     is_active = Column(Boolean, default=True)
     learner_id = Column(String, nullable=True)       # linked learner profile
+    whatsapp_number  = Column(String, nullable=True, index=True)
+    telegram_chat_id = Column(String, nullable=True, index=True)
     created_at = Column(DateTime, default=func.now())
     last_login = Column(DateTime, nullable=True)

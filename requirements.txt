@@ -1,9 +1,7 @@
-streamlit
 openai
 python-dotenv
 sqlalchemy
 dashscope
-audio-recorder-streamlit
 pydub
 fastapi
 uvicorn[standard]
@@ -17,3 +15,8 @@ pydantic[email]
 bcrypt==4.0.1
 fastmcp
 oss2
+psycopg2-binary
+numpy
+google-auth
+google-auth-oauthlib
+google-api-python-client

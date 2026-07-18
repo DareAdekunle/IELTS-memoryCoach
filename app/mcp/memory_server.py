@@ -1,7 +1,7 @@
 """
-app/mcp/memory_server.py — IELTS MemoryCoach MCP Server
+app/mcp/memory_server.py — Qonda IELTS MCP Server
 
-Exposes the MemoryCoach learner memory and skill ranking system
+Exposes the Qonda IELTS learner memory and skill ranking system
 as an MCP (Model Context Protocol) server.
 
 This means any MCP-compatible AI agent — Claude, a Qwen agent,
@@ -33,7 +33,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from fastmcp import FastMCP
 from app.db.database import SessionLocal
-from app.db.models import LearnerMemory, PracticeAttempt, LearnerSkillRank
+from app.db.models import LearnerMemory, PracticeAttempt, LearnerSkillRank, Learner
+from api.auth.models import User
 from app.services.memory_service import (
     get_relevant_memories,
     get_all_memories,
@@ -47,15 +48,65 @@ from app.services.skill_taxonomy_service import get_skill_by_id, get_rank_name
 # ─── MCP Server definition ────────────────────────────────────────────────────
 
 mcp = FastMCP(
-    name="IELTS MemoryCoach",
+    name="Qonda IELTS",
     instructions=(
-        "This server exposes learner coaching data from IELTS MemoryCoach. "
-        "Use it to query a learner's weaknesses, skill ranks, and recent "
-        "attempts to personalise tutoring, generate targeted practice, "
-        "or build progress reports. All tools require a learner_id. "
-        "Learner IDs can be found via the /progress/profile API endpoint."
+        "This server exposes learner coaching data from Qonda IELTS — an AI-powered "
+        "IELTS preparation platform with persistent memory and skill tracking.\n\n"
+        "IMPORTANT: All tools require a learner_id (a UUID). "
+        "If the user has not provided their learner_id, call find_learner(email) first "
+        "using the email address they provide. Ask them for their email if you don't have it.\n\n"
+        "For a full learner overview, always start with get_coaching_context — it combines "
+        "weaknesses, strengths, skill ranks, and memory stats in a single call.\n\n"
+        "For scheduling: use get_study_schedule to check the current schedule, "
+        "schedule_study_sessions to create or change it, add_one_off_session for a "
+        "one-time extra session, and cancel_study_schedule to remove it entirely."
     )
 )
+
+
+# ─── Tool 0: Find learner by email ───────────────────────────────────────────
+
+@mcp.tool()
+def find_learner(email: str) -> dict:
+    """
+    Look up a learner's ID and profile using their email address.
+
+    Call this first whenever the user hasn't provided a learner_id.
+    Ask the user for their email address if you don't already have it.
+
+    Args:
+        email: The learner's email address (e.g. "student@example.com")
+
+    Returns:
+        A dict with learner_id, name, target_score, test_date, and current_focus
+        if found. Returns {"found": false, "message": "..."} if no account exists.
+    """
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == email.strip().lower()).first()
+        if not user or not user.learner_id:
+            return {
+                "found": False,
+                "message": f"No Qonda learner profile found for {email}. "
+                           "They may need to register at ielts.qonda.xyz first."
+            }
+        learner = db.query(Learner).filter(Learner.learner_id == user.learner_id).first()
+        if not learner:
+            return {
+                "found": False,
+                "message": "User account exists but learner profile not yet created. "
+                           "Ask them to complete onboarding at ielts.qonda.xyz/onboarding."
+            }
+        return {
+            "found": True,
+            "learner_id": learner.learner_id,
+            "name": learner.name,
+            "target_score": learner.target_score,
+            "test_date": str(learner.test_date) if learner.test_date else None,
+            "current_focus": learner.current_focus,
+        }
+    finally:
+        db.close()
 
 
 # ─── Tool 1: Get learner weaknesses ───────────────────────────────────────────
@@ -354,20 +405,21 @@ def get_coaching_context(
     section: str = "Writing"
 ) -> dict:
     """
-    Returns a complete coaching context bundle for a learner.
+    Start here. Returns a complete coaching context bundle for a learner.
 
-    This is the primary tool for AI tutoring agents that need a
-    full picture of a learner before generating personalised content.
-    It combines weaknesses, strengths, skill ranks, weakest skill,
-    and memory stats into a single call.
+    Call this before generating any personalised content, advice, or practice
+    for a learner. It combines weaknesses, strengths, skill ranks, weakest
+    skill, and memory stats into a single call — faster than calling each
+    tool separately.
 
     Args:
-        learner_id: The learner's unique ID
-        section:    IELTS section to focus on
+        learner_id: The learner's unique ID (use find_learner to look this up)
+        section:    IELTS section to focus on (default: Writing)
 
     Returns:
-        A comprehensive dict suitable for injecting directly into
-        an AI tutor's system prompt or context window.
+        A comprehensive dict with has_history, weakest_skill, top_weaknesses,
+        top_strengths, skill_progress summary, and memory_profile stats.
+        Use has_history to detect a new learner with no attempts yet.
     """
     weaknesses = get_learner_weaknesses(learner_id, section, limit=3)
     strengths = get_learner_strengths(learner_id, section, limit=3)
@@ -400,16 +452,217 @@ def get_coaching_context(
     }
 
 
+# ─── Study Schedule Tools ─────────────────────────────────────────────────────
+
+@mcp.tool()
+def schedule_study_sessions(
+    learner_id: str,
+    days: list,
+    study_time: str,
+    duration_minutes: int = 30,
+    timezone: str = "UTC",
+) -> dict:
+    """
+    Set up recurring study sessions for a learner.
+
+    Creates or replaces the learner's study schedule. If the learner already
+    has Google Calendar connected, also creates recurring calendar events.
+
+    Args:
+        learner_id:        The learner's ID.
+        days:              Days to study — e.g. ["Mon", "Wed", "Fri"].
+                           Must be exact 3-letter capitalised abbreviations:
+                           Mon, Tue, Wed, Thu, Fri, Sat, Sun.
+                           Do NOT use full names (Monday) or lowercase (mon).
+        study_time:        Time in HH:MM 24-hour format — e.g. "07:00".
+        duration_minutes:  Session length. Must be 15, 30, 45 or 60.
+        timezone:          IANA timezone — e.g. "Africa/Lagos", "Asia/Manila".
+
+    Returns a dict with the saved schedule details.
+    """
+    from app.services import schedule_service, calendar_service
+    import json
+
+    schedule = schedule_service.create_or_update_schedule(
+        learner_id=learner_id,
+        days=days,
+        study_time=study_time,
+        duration_minutes=duration_minutes,
+        timezone=timezone,
+    )
+
+    # If learner already has Google Calendar connected, create events now
+    raw = schedule_service.get_schedule_raw(learner_id)
+    if raw and raw.google_refresh_token:
+        try:
+            test_date     = schedule_service.get_learner_test_date(learner_id)
+            weakest_skill = schedule_service.get_weakest_skill_label(learner_id)
+            learner_name  = schedule_service.get_learner_name(learner_id)
+
+            # Delete old events if any
+            if raw.google_calendar_event_id:
+                calendar_service.delete_study_events(
+                    raw.google_refresh_token, raw.google_calendar_event_id
+                )
+
+            event_id = calendar_service.create_study_events(
+                refresh_token    = raw.google_refresh_token,
+                days             = days,
+                study_time       = study_time,
+                duration_minutes = duration_minutes,
+                timezone         = timezone,
+                test_date        = test_date,
+                weakest_skill    = weakest_skill,
+                learner_name     = learner_name,
+            )
+            schedule_service.attach_google_calendar(
+                learner_id    = learner_id,
+                refresh_token = raw.google_refresh_token,
+                event_id      = event_id,
+                google_email  = raw.google_email,
+            )
+            schedule["calendar_updated"] = True
+        except Exception as e:
+            schedule["calendar_updated"] = False
+            schedule["calendar_error"]   = str(e)
+
+    return schedule
+
+
+@mcp.tool()
+def get_study_schedule(learner_id: str) -> dict:
+    """
+    Get a learner's current study schedule.
+
+    Returns their study days, time, duration, timezone, and whether they
+    have Google Calendar connected. Returns {"has_schedule": false} if none.
+
+    Args:
+        learner_id: The learner's ID.
+    """
+    from app.services import schedule_service
+    schedule = schedule_service.get_schedule(learner_id)
+    if not schedule:
+        return {"has_schedule": False}
+    return {"has_schedule": True, **schedule}
+
+
+@mcp.tool()
+def add_one_off_session(
+    learner_id: str,
+    date_iso: str,
+    study_time: str,
+    duration_minutes: int = 30,
+) -> dict:
+    """
+    Add a one-off study session on a specific date.
+
+    If the learner has Google Calendar connected, creates a single calendar
+    event on that date. Otherwise records the intent without a calendar event.
+
+    Args:
+        learner_id:        The learner's ID.
+        date_iso:          Date in YYYY-MM-DD format — e.g. "2026-08-15".
+        study_time:        Time in HH:MM 24-hour format — e.g. "18:00".
+        duration_minutes:  Session length in minutes.
+    """
+    from app.services import schedule_service, calendar_service
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+
+    raw = schedule_service.get_schedule_raw(learner_id)
+    tz_name = raw.timezone if raw else "UTC"
+
+    if not raw or not raw.google_refresh_token:
+        return {
+            "scheduled": False,
+            "reason": "No Google Calendar connected. Ask the learner to connect via the app.",
+            "suggested_time": f"{date_iso} {study_time} {tz_name}",
+        }
+
+    try:
+        import googleapiclient.discovery as gd
+        creds   = calendar_service._build_creds(raw.google_refresh_token)
+        service = gd.build("calendar", "v3", credentials=creds)
+
+        tz       = ZoneInfo(tz_name)
+        hour, minute = map(int, study_time.split(":"))
+        start_dt = datetime.strptime(date_iso, "%Y-%m-%d").replace(
+            hour=hour, minute=minute, tzinfo=tz
+        )
+        end_dt   = start_dt + timedelta(minutes=duration_minutes)
+
+        weakest_skill = schedule_service.get_weakest_skill_label(learner_id)
+        learner_name  = schedule_service.get_learner_name(learner_id)
+        skill_line    = f"\n\nSession focus: {weakest_skill}" if weakest_skill else ""
+
+        event = {
+            "summary":     f"Qonda IELTS — {duration_minutes} min practice",
+            "description": (
+                f"One-off study session for {learner_name}.{skill_line}\n\n"
+                f"Open Qonda: https://ielts.qonda.xyz\n\n"
+                f"Qonda — Grasp English. Retain for life."
+            ),
+            "start": {"dateTime": start_dt.isoformat(), "timeZone": tz_name},
+            "end":   {"dateTime": end_dt.isoformat(),   "timeZone": tz_name},
+            "reminders": {
+                "useDefault": False,
+                "overrides": [
+                    {"method": "email",  "minutes": 60},
+                    {"method": "popup",  "minutes": 10},
+                ],
+            },
+        }
+        created = service.events().insert(calendarId="primary", body=event).execute()
+        return {
+            "scheduled":  True,
+            "event_id":   created["id"],
+            "start":      start_dt.isoformat(),
+            "duration":   duration_minutes,
+            "calendar":   raw.google_email,
+        }
+    except Exception as e:
+        return {"scheduled": False, "error": str(e)}
+
+
+@mcp.tool()
+def cancel_study_schedule(learner_id: str) -> dict:
+    """
+    Cancel a learner's study schedule and remove all future calendar events.
+
+    Args:
+        learner_id: The learner's ID.
+    """
+    from app.services import schedule_service, calendar_service
+
+    raw = schedule_service.get_schedule_raw(learner_id)
+    if not raw:
+        return {"cancelled": False, "reason": "No active schedule found"}
+
+    if raw.google_refresh_token and raw.google_calendar_event_id:
+        calendar_service.delete_study_events(
+            raw.google_refresh_token, raw.google_calendar_event_id
+        )
+
+    schedule_service.cancel_schedule(learner_id)
+    return {"cancelled": True, "calendar_events_deleted": bool(raw.google_calendar_event_id)}
+
+
 # ─── Run standalone ───────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("Starting IELTS MemoryCoach MCP Server...")
+    print("Starting Qonda IELTS MCP Server...")
     print("Tools available:")
+    print("  - find_learner                  ← start here (email → learner_id)")
+    print("  - get_coaching_context          ← full learner overview in one call")
     print("  - get_learner_weaknesses")
     print("  - get_learner_strengths")
     print("  - get_skill_ranks")
     print("  - get_weakest_skill_for_learner")
     print("  - get_recent_attempts")
     print("  - get_learner_memory_stats")
-    print("  - get_coaching_context")
+    print("  - get_study_schedule")
+    print("  - schedule_study_sessions")
+    print("  - add_one_off_session")
+    print("  - cancel_study_schedule")
     mcp.run()

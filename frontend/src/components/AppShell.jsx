@@ -5,14 +5,15 @@ import { logout } from '../api/auth'
 import {
   LayoutDashboard, PenLine, BookOpen, TrendingUp, Brain,
   LogOut, Menu, X, Target, Mic, Headphones, MessageSquare,
-  Trophy, ChevronRight,
+  Trophy, ChevronRight, CalendarDays,
 } from 'lucide-react'
 
 const navGroups = [
   {
     label: 'Overview',
     items: [
-      { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/study-plan', icon: CalendarDays,    label: 'Study Plan' },
     ],
   },
   {
@@ -61,8 +62,8 @@ export default function AppShell({ children }) {
           <Target className="w-4.5 h-4.5 text-white w-[18px] h-[18px]" />
         </div>
         <div>
-          <p className="font-700 text-gray-900 text-sm font-bold leading-tight">MemoryCoach</p>
-          <p className="text-gray-400 text-xs">IELTS AI Tutor</p>
+          <p className="font-700 text-gray-900 text-sm font-bold leading-tight">Qonda IELTS</p>
+          <p className="text-gray-400 text-xs">Grasp English. Retain for life.</p>
         </div>
       </div>
 
@@ -156,7 +157,7 @@ export default function AppShell({ children }) {
             <div className="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center">
               <Target className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-sm">MemoryCoach</span>
+            <span className="font-bold text-gray-900 text-sm">Qonda IELTS</span>
           </div>
         </header>
 

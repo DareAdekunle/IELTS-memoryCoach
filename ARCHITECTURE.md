@@ -1,8 +1,54 @@
-# IELTS MemoryCoach — Architecture
+# Qonda IELTS — Architecture
+
+## The Pedagogical Skill Layer
+
+> Full detail in [`docs/pedagogy_framework.md`](docs/pedagogy_framework.md)
+
+Between the Tutor's reasoning and its response generation sits a
+**deterministic pedagogy layer** (`app/pedagogy/`). The learner model
+identifies *what* needs improvement; the Pedagogy Planner determines
+*how* it should be taught.
+
+> Python selects the teaching method; Qwen generates and delivers the teaching.
+
+```mermaid
+graph TD
+    A[Learner starts Tutor session] --> B[TutorSession row created]
+    B --> C[Stage Resolver\nderives per-criterion band + stage\nfrom learner_skill_ranks]
+    C --> D[Pedagogy Planner\ndeterministic routing]
+    D --> E[Dominant + supporting frameworks\nsupport level, practice conditions,\nfeedback priorities, exit criteria]
+    E --> F[Plan injected into Tutor\nsystem prompt as structured block]
+    F --> G[Tutor teaches — emits\nACTION tags for hints/attempts]
+    G --> H[Server parses tags →\npedagogical_events + hint_events]
+    H --> I[bridge_to_practice →\nCoach interprets evidence]
+    I --> J[update_criterion_state\nguarded by deterministic\nfading rules]
+    J --> C
+```
+
+**Key components**
+
+| Component | File | Role |
+|---|---|---|
+| Framework registry | `app/data/pedagogical_frameworks.json` + `pedagogy/registry.py` | 16 frameworks (4/section) with roles per stage (dominant/supporting/faded/retired) + the 4-habit Shared Spine |
+| Band descriptors | `app/data/band_descriptors.json` + `pedagogy/descriptors.py` | Backward Design anchors — every activity targets a specific descriptor |
+| Stage resolver | `pedagogy/stage_resolver.py` | Derives criterion bands/stages live from skill ranks (never stored — single source of truth) |
+| Planner | `pedagogy/planner.py` | Deterministic routing tables per section; builds and persists the session plan |
+| Practice conditions | `pedagogy/session_policy.py` | Binary gates: timed/untimed, replay limits, transcript policy, revision-required |
+| Action tags | `pedagogy/action_tags.py` | `[ACTION: hint level=2]` etc. — how the app records what happened inside freeform chat |
+| Spine validator | `pedagogy/spine.py` | Soft Feedback-Triad check with one retry, then log-only |
+| Fading rules | `pedagogy/fading.py` | Support reduction must be earned (≥3 successes, avg hint ≤1.0, accuracy ≥0.8); restoration always allowed; one step at a time |
+| Evidence store | `services/pedagogical_event_service.py` | tutor_sessions, tutor_session_plans, pedagogical_events, hint_events |
+| Coach interpretation | `coach_service.coach_tutor_session()` | Runs at bridge_to_practice; the Tutor records what happened, the Coach decides what it means |
+
+**Learner stages** (tracked per criterion, not per section):
+Foundations (≤5.5, knowledge) → Guided Control (6.0, consistency) →
+Independent Control (6.5–7.0, exam control) → Automatization (7.5+, precision).
+
+---
 
 ## The Agent Loop
 
-MemoryCoach implements a full **perceive → remember → reason → act**
+Qonda IELTS implements a full **perceive → remember → reason → act**
 agent loop that runs after every practice session.
 
 ```mermaid
@@ -23,28 +69,50 @@ graph TD
     Browser["🌐 React Frontend\nVite + Tailwind CSS"] -->|JWT + REST + SSE| Nginx
 
     subgraph ECS ["Alibaba Cloud ECS — Singapore"]
-        Nginx["Nginx\nPort 80\nSSE-aware proxy"] -->|/api/*| FastAPI
+        Nginx["Nginx\nPort 80/443\nSSE-aware proxy"] -->|/api/*| FastAPI
         Nginx -->|/*| Static["React Static Files\n/var/www/html"]
         FastAPI["FastAPI\nPort 8000\n2 uvicorn workers"] --> Services
-        Services["Python Services\ncoach, tutor, scoring,\nmemory, tts, asr, vision"]
-        Services --> SQLite["SQLite\nDocker Volume\nPersists across restarts"]
+        Services["Python Services\ncoach, tutor, scoring,\nmemory, tts, asr, vision,\nembeddings"]
+        Services --> PG["PostgreSQL 16\nDocker service\npostgres_data volume"]
     end
 
-    FastAPI -->|MCP protocol| MCP["MCP Server\n/mcp-server/mcp\n7 tools"]
-    MCP --> SQLite
+    FastAPI -->|MCP protocol| MCP["MCP Server\n/mcp-server/mcp\n12 tools"]
+    MCP --> PG
 
+    Telegram["Telegram\n@qieltsbot"] -->|webhook POST| FastAPI
+    FastAPI -->|Qwen tool-calling agent\nsame functions as MCP| Services
     Services -->|text + vision generation| ModelStudio["Alibaba Cloud\nModel Studio\nqwen-plus + qwen-turbo + qwen-vl-plus\nSingapore workspace"]
+    Services -->|text embeddings| EMB["DashScope Embeddings\ntext-embedding-v3\n1024 dimensions"]
     Services -->|speech-to-text| ASR["DashScope ASR\nqwen3-asr-flash"]
     Services -->|text-to-speech| TTS["DashScope TTS\nqwen3-tts-flash\nCherry voice"]
     TTS -->|audio upload| OSS["Alibaba Cloud OSS\nielts-memorycoach-audio\nSingapore"]
     OSS -->|proxied stream| Browser
 ```
 
+### Docker service topology (dev + prod)
+
+```
+docker-compose.yml (dev)             docker-compose.prod.yml (prod)
+─────────────────────────────────    ────────────────────────────────────
+postgres:16-alpine                   postgres:16-alpine
+  └─ postgres_data volume              └─ postgres_data volume
+                                         (persists across rebuilds)
+api (FastAPI + app/)                 app (Nginx + FastAPI in one image)
+  └─ depends_on: postgres healthy      └─ depends_on: postgres healthy
+  └─ DATABASE_URL → postgres           └─ DATABASE_URL → postgres
+
+frontend (node:20-alpine dev)        (React built into static files
+  └─ Vite dev server :5173              served by Nginx at /var/www/html)
+```
+
+Both environments resolve `DATABASE_URL` from the environment, so the
+`app/db/database.py` layer is identical — only the connection string changes.
+
 ---
 
 ## Coach / Tutor Agent Architecture
 
-MemoryCoach implements two distinct AI agents with a clean boundary:
+Qonda IELTS implements two distinct AI agents with a clean boundary:
 the Coach writes learner data, the Tutor reads it.
 
 ```mermaid
@@ -71,7 +139,7 @@ graph TD
         T4[get_skill_ranks] -->|reads| DB
     end
 
-    ENGINE --> DB[("SQLite\nlearner_skill_ranks\nlearner_memories")]
+    ENGINE --> DB[("PostgreSQL\nlearner_skill_ranks\nlearner_memories")]
 
     note1["Coach WRITES — evaluates\npractice, classifies skills,\nextracts memories"]
     note2["Tutor READS — personalises\nteaching, runs drills,\nqueries live data mid-session"]
@@ -91,9 +159,10 @@ flowchart TD
     A[Practice attempt submitted] --> B[Coach Agent gathers evidence\nvia tool calls]
     B --> C[submit_classification tool\ntriggers deterministic engine]
     C --> D[write_memory tool\nsaves new observation]
-    D --> E{Memory exists\nfor this skill?}
+    D --> EMB[embedding_service.embed_text\ntext-embedding-v3 1024-d vector]
+    EMB --> E{Memory exists\nfor this skill?}
 
-    E -->|No| F[INSERT new memory\nconfidence 0.5-0.7]
+    E -->|No| F[INSERT new memory\nconfidence 0.5-0.7\nembedding stored as JSON text]
     E -->|Yes| G[update_memory tool]
 
     G -->|Confirms| H[STRENGTHEN\nconfidence += 0.05-0.15]
@@ -107,14 +176,25 @@ flowchart TD
     L -->|No| K
     J --> N[Archived — shown\nin Memory Timeline]
 
-    K --> O[Spaced repetition retrieval\nrecency × confidence weighted]
+    K --> O[Hybrid retrieval\nsemantic + spaced repetition]
     O --> P[Tutor Agent reads via\nget_learner_weaknesses tool]
 ```
 
-**Spaced repetition weighting:** `get_relevant_memories()` scores each
-memory as `confidence × recency_weight` where recency decays from 1.0
-(updated within 7 days) to 0.4 (older than 90 days). Recent evidence
-outweighs stale evidence regardless of confidence level.
+**Hybrid retrieval:** `get_relevant_memories()` accepts an optional `context`
+string. When provided (e.g. the target band descriptor from the session plan),
+it embeds the context and re-ranks memories using:
+
+```
+score = 0.45 × cosine_similarity(context_embedding, memory_embedding)
+      + 0.55 × spaced_repetition_score
+```
+
+where `spaced_repetition_score = confidence × recency_weight` and recency
+decays from 1.0 (≤7 days) to 0.4 (>90 days). When no context is provided
+(e.g. MCP tool calls from external agents) pure spaced repetition is used.
+Embeddings are computed on write via `app/services/embedding_service.py`
+and stored as JSON text in the `embedding` column; cosine similarity is
+computed in Python with numpy — no pgvector extension required.
 
 ---
 
@@ -131,7 +211,7 @@ sequenceDiagram
     participant VL as qwen-vl-plus
     participant Q1 as qwen-plus
     participant CA as Coach Agent
-    participant DB as SQLite
+    participant DB as PostgreSQL
 
     Note over R,F: Option A — typed essay
     R->>F: POST /writing/submit/stream
@@ -306,35 +386,58 @@ Currently 9 tracks = 9 TTS calls total regardless of user count.
 
 ---
 
-## MCP Server
+## MCP Server + Telegram Agent
 
-The memory layer is exposed as an MCP server — any
-MCP-compatible agent can query learner coaching data.
-The Tutor agent also calls these tools internally via
-OpenAI function calling (not MCP protocol).
+The Qonda tool layer is exposed in two ways: as an MCP server (for Claude Desktop
+and any MCP-compatible client) and as a Qwen tool-calling agent powering the
+Telegram bot. Both call the same Python functions — one implementation, two surfaces.
 
 ```mermaid
 graph LR
     A["Tutor Agent\n(internal)"] -->|function calling| TOOLS
-    B["External tutoring\nplatform"] -->|MCP protocol| MCP
-    C["School dashboard\next. system"] -->|MCP protocol| MCP
-    D["Research tool"] -->|MCP protocol| MCP
+    B["Claude Desktop\nMCP client"] -->|MCP protocol| MCP
+    C["External platforms"] -->|MCP protocol| MCP
+    D["@qieltsbot\nTelegram"] -->|Qwen agent\ntool-calling| TOOLS
 
-    TOOLS["agent_tools.py\nOpenAI function schemas"]
-    MCP["MCP Server\n/mcp-server/mcp\nFastMCP 3.4.3"]
+    TOOLS["shared tool functions\n(app/mcp/memory_server.py\napp/services/*.py)"]
+    MCP["MCP Server\n/mcp-server/mcp\nFastMCP"]
 
     TOOLS --> DB
-    MCP --> DB[("SQLite\nlearner_memories\nlearner_skill_ranks\npractice_attempts\nlearner_seen_content")]
+    MCP --> DB[("PostgreSQL\nlearner_memories\nlearner_skill_ranks\npractice_attempts\nstudy_schedules")]
 ```
 
-**Available tools:**
-- `get_coaching_context` — full context bundle (primary tool for AI agents)
-- `get_learner_weaknesses` — active weakness memories with confidence
-- `get_learner_strengths` — active strength memories
-- `get_skill_ranks` — all skill ranks with band estimates and streak data
-- `get_weakest_skill_for_learner` — single weakest skill + rank definitions
-- `get_recent_attempts` — attempt history with score summaries
-- `get_learner_memory_stats` — memory profile statistics
+**12 tools (memory + scheduling):**
+
+| Tool | Category |
+|---|---|
+| `find_learner(email)` | Identity — resolve learner_id from email |
+| `get_coaching_context` | Overview — full bundle, call first |
+| `get_learner_weaknesses` | Memory — active weaknesses with confidence |
+| `get_learner_strengths` | Memory — active strengths |
+| `get_skill_ranks` | Skills — all ranks with band estimates |
+| `get_weakest_skill_for_learner` | Skills — single weakest + rank definitions |
+| `get_recent_attempts` | History — attempt history with scores |
+| `get_learner_memory_stats` | Memory — profile statistics |
+| `get_study_schedule` | Schedule — current schedule + calendar status |
+| `schedule_study_sessions` | Schedule — create/update recurring schedule |
+| `add_one_off_session` | Schedule — single extra session on a date |
+| `cancel_study_schedule` | Schedule — cancel + delete calendar events |
+
+### Telegram / Qwen agent loop
+
+```
+User messages @qieltsbot
+  → POST /telegram/webhook
+  → resolve learner from telegram_chat_id (users table)
+  → if unknown: ask for email → find_learner → store mapping
+  → Qwen (qwen-plus) agentic loop, up to 5 tool-call iterations
+  → reply sent via Telegram Bot API
+```
+
+The Qwen agent has access to all 12 tools above. A message like
+*"What should I study and when is my next session?"* triggers
+`get_coaching_context` + `get_study_schedule` in a single turn,
+then Qwen synthesises both results into one reply.
 
 ---
 
@@ -344,6 +447,7 @@ graph LR
 users
   user_id, email, username, password_hash
   google_id, auth_provider, learner_id
+  whatsapp_number, telegram_chat_id   ← messaging bot identity links
   is_active, created_at, last_login
 
 learners
@@ -360,8 +464,9 @@ learner_memories              ← The Coach Agent's core evidence store
   memory_type (weakness/strength)
   memory_text, confidence (0.0-1.0)
   evidence_count, status (active/archived)
-  created_at, updated_at
-  ← Retrieval weighted by recency × confidence (spaced repetition)
+  embedding TEXT nullable       ← JSON-serialised 1024-d float list
+  created_at, updated_at        (text-embedding-v3 via DashScope)
+  ← Retrieval: hybrid semantic (cosine sim) + spaced repetition score
 
 learner_skill_ranks           ← Deterministic rank engine store
   rank_id, learner_id, section, skill_id
@@ -382,7 +487,117 @@ mastery_scores
 
 session_summaries
   Session-level summaries
+
+study_schedules               ← Recurring study plan per learner
+  schedule_id, learner_id
+  days_of_week TEXT           ← JSON: ["Mon","Wed","Fri"]
+  study_time VARCHAR(5)       ← "07:00" (HH:MM)
+  duration_minutes INTEGER    ← 15 / 30 / 45 / 60
+  timezone VARCHAR(60)        ← IANA e.g. "Africa/Lagos"
+  google_refresh_token TEXT   ← OAuth token for Google Calendar writes
+  google_calendar_event_id TEXT ← recurring event series ID
+  google_email VARCHAR        ← connected Google account
+  is_active BOOLEAN
+  created_at, updated_at
+  ← Scheduling tools (MCP + Telegram) read/write this table
+  ← Google Calendar events created via google-api-python-client
+  ← RRULE: FREQ=WEEKLY;BYDAY=MO,WE,FR;UNTIL=<test_date>
+
+─── Pedagogical Skill Layer tables ──────────────────────────────────────────
+
+tutor_sessions                ← One per Tutor chat session
+  session_id (UUID), learner_id, section
+  current_state (introduction/explaining/drilling/bridge_to_practice)
+  started_at, completed_at
+
+learner_criterion_state       ← Support level + counters per learner/criterion
+  state_id, learner_id, section, criterion_id
+  support_level (full/partial/minimal/none)
+  recent_successes, recent_failures, average_hint_level
+  independent_accuracy, last_support_change
+  ← Mutated only by coach_tutor_session() via fading guardrail
+
+tutor_session_plans           ← Persisted PedagogyPlan for each session
+  session_plan_id, session_id, learner_id, section
+  target_skill, target_criterion, target_descriptor
+  current_stage, dominant_framework, supporting_frameworks_json
+  support_level, practice_conditions_json
+  feedback_priorities_json, exit_criteria_json
+  outcome, completed_at
+
+pedagogical_events            ← One row per [ACTION:] tag parsed from Tutor output
+  event_id, session_id, learner_id
+  event_type (hint/attempt/model_shown/feedback_given/independent_check/complete)
+  event_data_json, created_at
+  ← Best-effort evidence: a missing tag loses a data point, never breaks the chat
+
+hint_events                   ← One row per hint given
+  hint_id, session_id, learner_id
+  hint_level (1-4), self_corrected (bool)
+  created_at
+  ← self_corrected = True if learner repaired without hint in same turn
 ```
+
+---
+
+## Data Persistence
+
+Learner data is stored in **PostgreSQL 16**, running as a separate Docker
+service in both dev and prod compose files. Data survives container rebuilds
+because the `postgres_data` named volume is retained.
+
+```
+docker compose down && docker compose up --build
+  → postgres_data volume retained → all tables unchanged → all learner data preserved
+
+docker compose down -v
+  → volume deleted → data lost (only use this intentionally)
+```
+
+### Entrypoint startup sequence (prod)
+
+```mermaid
+sequenceDiagram
+    participant E as docker-entrypoint.sh
+    participant PG as postgres service
+    participant F as FastAPI / SQLAlchemy
+
+    Note over E: Container starts
+    E->>PG: psycopg2.connect() — retry 30× with 2s interval
+    PG-->>E: Ready (or abort after 60s)
+    E->>F: uvicorn api.main:app
+    F->>PG: Base.metadata.create_all() — creates tables if not present
+    F-->>E: Listening on :8000
+```
+
+`DATABASE_URL` is an environment variable — both compose files inject the
+PostgreSQL connection string. `app/db/database.py` detects `sqlite://` vs
+`postgresql://` and sets `connect_args` accordingly, so local development
+without Docker still works against a file-based SQLite database by default.
+
+### Migrating from legacy SQLite
+
+If upgrading from a previous SQLite-only deployment:
+
+```bash
+# While postgres container is running and healthy:
+python scripts/migrate_sqlite_to_postgres.py \
+    --sqlite ./ielts_coach.db \
+    --postgres "postgresql://ielts:<password>@localhost:5432/ielts_coach"
+```
+
+The script is idempotent (`INSERT ... ON CONFLICT DO NOTHING`) and migrates
+all 13 tables. Safe to re-run if interrupted.
+
+---
+
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `scripts/migrate_sqlite_to_postgres.py` | One-time idempotent migration from legacy SQLite to PostgreSQL. Reads all rows from every table and inserts with `ON CONFLICT DO NOTHING`. Safe to re-run. |
+| `scripts/db_backup.py` | OSS backup/restore for SQLite deployments (legacy path). The PostgreSQL `postgres_data` volume makes this unnecessary in production, but the script is retained for operators who prefer SQLite locally. |
+| `scripts/eval_pedagogy.py` | Offline evaluation harness for ACTION tag reliability and stage-routing correctness. Requires real session data to run meaningfully. |
 
 ---
 
@@ -425,12 +640,13 @@ Listening track audio is generated once globally.
 Every learner gets it proxied from Alibaba Cloud OSS instantly.
 TTS quota consumed exactly once per track for all users for all time.
 
-### 6. MCP as the memory API
-The memory layer is infrastructure, not just an app feature.
-Any MCP-compatible agent can query learner coaching history via
-standard protocol. Internally, the Tutor agent uses the same
-functions via OpenAI function calling rather than MCP protocol —
-same data, two consumption patterns.
+### 6. One tool layer, three consumers
+The coaching tool functions (`app/mcp/memory_server.py`) are called by three
+different consumers: the **Tutor agent** (OpenAI function calling, internal),
+the **MCP server** (FastMCP, Claude Desktop and external platforms), and the
+**Telegram Qwen agent** (tool-calling, `telegram_service.py`). One Python
+implementation, zero duplication. Adding a new tool immediately makes it
+available to all three surfaces.
 
 ### 7. SSE streaming for essay feedback
 The learner sees the first feedback token in ~1-2 seconds
@@ -450,3 +666,32 @@ recency_weight`. A memory updated last week outranks a
 higher-confidence memory from three months ago — matching
 the spaced repetition principle that recent evidence is more
 predictive of current ability.
+
+### 10. Hybrid semantic + spaced-repetition retrieval
+When the Pedagogy Planner builds a session plan it passes the target
+band descriptor (e.g. "uses a range of cohesive devices appropriately")
+as a context string to `get_relevant_memories()`. The service embeds
+the context (DashScope `text-embedding-v3`, 1024-d) and re-ranks
+memories with `0.45 × cosine_similarity + 0.55 × SR_score`.
+
+This gives the Tutor the memories most relevant to *what is being
+taught today*, not just the most recently updated ones. Embeddings
+are stored as JSON-serialised float lists in the `embedding` column;
+cosine similarity is computed in Python (numpy) — no pgvector or
+separate vector store is needed at IELTS coaching scale (typically
+20–200 memories per learner). When no context is provided (e.g.
+external MCP calls) the system falls back to pure spaced-repetition
+ranking, so existing integrations are unaffected.
+
+### 11. PostgreSQL as the production database
+PostgreSQL 16 runs as a separate Docker service with a named volume.
+Benefits over the former SQLite approach:
+- **Concurrent writes** — uvicorn's 2-worker setup hits a real connection
+  pool instead of a single file lock
+- **Production migration path** — standard PostgreSQL tooling (pg_dump,
+  logical replication, managed RDS) works without any code changes
+- **Readiness gate** — the entrypoint retries `psycopg2.connect()` up to
+  30 times before starting FastAPI, so a cold ECS boot never hits a
+  "database not ready" error
+`DATABASE_URL` remains env-var driven so SQLite still works for local
+development without Docker.

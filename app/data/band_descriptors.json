@@ -1,0 +1,187 @@
+{
+  "source_note": "Paraphrased from the official IELTS Band Descriptors (Public Version, British Council / IDP / Cambridge) — same convention as skill_taxonomy_*.json. Keyed by section → criterion_id → integer band. Used by Backward Design: every Tutor activity anchors to the learner's NEXT band descriptor.",
+  "Writing": {
+    "task_response": {
+      "criterion_name": "Task Response",
+      "descriptors": {
+        "4": "Responds to the task only in a minimal way; position unclear; ideas are difficult to identify and few are developed.",
+        "5": "Addresses the task only partially; expresses a position but development is not always clear; some ideas are limited or not well supported.",
+        "6": "Addresses all parts of the task although some parts more fully than others; presents a relevant position although conclusions may be unclear or repetitive.",
+        "7": "Addresses all parts of the task; presents a clear position throughout; presents, extends and supports main ideas, though there may be a tendency to over-generalise.",
+        "8": "Sufficiently addresses all parts of the task; presents a well-developed response with relevant, extended and supported ideas.",
+        "9": "Fully addresses all parts of the task; presents a fully developed position with relevant, fully extended and well-supported ideas."
+      }
+    },
+    "coherence_cohesion": {
+      "criterion_name": "Coherence & Cohesion",
+      "descriptors": {
+        "4": "Presents information and ideas but these are not arranged coherently; uses some basic cohesive devices inaccurately or repetitively; may not paragraph at all.",
+        "5": "Presents information with some organisation but there may be a lack of overall progression; makes inadequate, inaccurate or over-use of cohesive devices; paragraphing may be inadequate.",
+        "6": "Arranges information coherently with clear overall progression; uses cohesive devices effectively but cohesion within or between sentences may be faulty or mechanical; paragraphing is used but not always logically.",
+        "7": "Logically organises information; clear progression throughout; uses a range of cohesive devices appropriately although there may be some under- or over-use; presents a clear central topic within each paragraph.",
+        "8": "Sequences information and ideas logically; manages all aspects of cohesion well; uses paragraphing sufficiently and appropriately.",
+        "9": "Uses cohesion in such a way that it attracts no attention; skilfully manages paragraphing."
+      }
+    },
+    "lexical_resource": {
+      "criterion_name": "Lexical Resource",
+      "descriptors": {
+        "4": "Uses only basic vocabulary which may be used repetitively; limited control of word formation and spelling; errors may cause strain for the reader.",
+        "5": "Uses a limited range of vocabulary minimally adequate for the task; noticeable errors in spelling and word formation that may cause some difficulty.",
+        "6": "Uses an adequate range of vocabulary for the task; attempts less common vocabulary but with some inaccuracy; some spelling and word-formation errors that do not impede communication.",
+        "7": "Uses a sufficient range of vocabulary with some flexibility and precision; uses less common items with some awareness of style and collocation; occasional errors in word choice or spelling.",
+        "8": "Uses a wide range of vocabulary fluently and flexibly; skilfully uses uncommon items; rare errors in spelling or word formation.",
+        "9": "Uses a wide range of vocabulary with very natural and sophisticated control; rare minor slips only."
+      }
+    },
+    "grammatical_range_accuracy": {
+      "criterion_name": "Grammatical Range & Accuracy",
+      "descriptors": {
+        "4": "Uses only a very limited range of structures; some structures accurate but errors predominate and punctuation is often faulty.",
+        "5": "Uses only a limited range of structures; attempts complex sentences but these tend to be less accurate than simple sentences; frequent errors may cause some difficulty.",
+        "6": "Uses a mix of simple and complex sentence forms; makes some errors in grammar and punctuation but they rarely reduce communication.",
+        "7": "Uses a variety of complex structures; produces frequent error-free sentences; has good control of grammar and punctuation with only a few errors.",
+        "8": "Uses a wide range of structures; the majority of sentences are error-free; makes only very occasional errors or inappropriacies.",
+        "9": "Uses a wide range of structures with full flexibility and accuracy; rare minor slips only."
+      }
+    }
+  },
+  "Reading": {
+    "ri": {
+      "criterion_name": "Reading for Information",
+      "descriptors": {
+        "4": "Frequently fails to locate stated information; scanning is slow and often anchored to the wrong paragraph.",
+        "5": "Locates explicitly stated information when wording closely matches the text; misses answers that require moving beyond keyword matching.",
+        "6": "Locates most stated information including simply paraphrased detail; occasionally caught by distractor placement.",
+        "7": "Locates information reliably even when paraphrased; manages True/False/Not Given distinctions with only occasional slips.",
+        "8": "Locates information quickly and accurately across dense text; rarely misled by traps or near-miss distractors.",
+        "9": "Locates any stated detail rapidly and with near-perfect accuracy under full exam timing."
+      }
+    },
+    "rc": {
+      "criterion_name": "Reading Comprehension",
+      "descriptors": {
+        "4": "Grasps only surface topic; cannot reliably identify main ideas or follow an argument across paragraphs.",
+        "5": "Identifies main ideas in straightforward text; inference and writer's-purpose questions are frequently missed.",
+        "6": "Follows argument structure and identifies main ideas reliably; draws simple inferences but misses subtler implied meaning.",
+        "7": "Draws valid inferences from implied information; distinguishes claims from evidence with only occasional errors.",
+        "8": "Handles fine inference, writer stance and nuance with rare errors, including in above-level texts.",
+        "9": "Complete command of literal and implied meaning at speed."
+      }
+    },
+    "rv": {
+      "criterion_name": "Vocabulary in Context",
+      "descriptors": {
+        "4": "Unknown words regularly block comprehension; little evidence of using context to deduce meaning.",
+        "5": "Deduces meaning of common words from context; paraphrase recognition is unreliable.",
+        "6": "Recognises common paraphrase and synonym substitution; deduces most unfamiliar word meanings from context.",
+        "7": "Recognises sophisticated paraphrase reliably; unfamiliar vocabulary rarely affects answer accuracy.",
+        "8": "Handles low-frequency vocabulary and idiomatic paraphrase with rare errors.",
+        "9": "Vocabulary poses no barrier at any text level."
+      }
+    },
+    "rt": {
+      "criterion_name": "Text Structure",
+      "descriptors": {
+        "4": "Little awareness of how texts are organised; cannot use paragraph structure to navigate.",
+        "5": "Recognises basic organisation (introduction, body, conclusion) but cannot use it to locate answers efficiently.",
+        "6": "Uses paragraph topic sentences and discourse markers to navigate; matching-headings tasks remain error-prone.",
+        "7": "Uses text organisation strategically — predicts where answer types will appear; handles matching-headings reliably.",
+        "8": "Navigates dense, unconventionally structured texts with rare errors.",
+        "9": "Complete structural command of any text type at exam pace."
+      }
+    }
+  },
+  "Listening": {
+    "ld": {
+      "criterion_name": "Detail and Specific Information",
+      "descriptors": {
+        "4": "Misses most specific details; cannot reliably decode names, numbers or connected speech at natural pace.",
+        "5": "Catches details in slow, clear audio; weak forms, spelling of names and fast stretches cause frequent misses.",
+        "6": "Catches most stated details; fast passages, corrections and distractor traps still cause errors.",
+        "7": "Catches specific detail reliably in single-play conditions including most paraphrased detail.",
+        "8": "Detail retrieval is accurate across accents and speeds with rare gaps.",
+        "9": "Near-perfect detail retrieval at any natural speed."
+      }
+    },
+    "lm": {
+      "criterion_name": "Main Idea and Gist",
+      "descriptors": {
+        "4": "Follows only isolated words and phrases; cannot state what the recording was about.",
+        "5": "Follows the main idea of slow, clear audio; loses the thread when speakers digress or correct themselves.",
+        "6": "Follows main ideas and speaker purpose reliably; subtle shifts in topic or attitude are sometimes missed.",
+        "7": "Tracks main ideas, speaker intent and attitude through corrections and digressions in single-play conditions.",
+        "8": "Grasps gist, purpose and attitude with rare errors even in dense academic monologues.",
+        "9": "Complete grasp of literal and implied meaning at exam pace."
+      }
+    },
+    "li": {
+      "criterion_name": "Inference and Context",
+      "descriptors": {
+        "4": "Cannot infer unstated meaning; interprets everything literally.",
+        "5": "Draws simple inferences when strongly signalled; misses implied opinion and relationship between speakers.",
+        "6": "Infers speaker opinion and context reliably when moderately signalled; subtle implication still missed.",
+        "7": "Infers unstated meaning, opinion and speaker relationships reliably under single-play conditions.",
+        "8": "Handles subtle implication, irony and attitude with rare errors.",
+        "9": "Complete inferential command at exam pace."
+      }
+    },
+    "ls": {
+      "criterion_name": "Listening Strategies",
+      "descriptors": {
+        "4": "A single missed answer derails the rest of the section; no question preview or prediction.",
+        "5": "Previews questions but predictions are vague; recovers from misses slowly, losing subsequent answers.",
+        "6": "Predicts answer types from question preview; abandons missed answers and re-anchors within a question or two.",
+        "7": "Predicts content and language before listening; recovers immediately from misses using signposting language.",
+        "8": "Strategic control is automatic; misses are rare and never cost subsequent answers.",
+        "9": "Complete strategic control throughout the section."
+      }
+    }
+  },
+  "Speaking": {
+    "sf": {
+      "criterion_name": "Fluency & Coherence",
+      "descriptors": {
+        "4": "Speaks with long pauses; limited ability to link simple sentences; frequent repetition and self-correction.",
+        "5": "Maintains flow of speech but uses repetition, self-correction and slow speech to keep going; over-uses certain connectives.",
+        "6": "Speaks at length though may lose coherence at times; uses a range of connectives though not always appropriately.",
+        "7": "Speaks at length without noticeable effort; some hesitation is language-related rather than content-related.",
+        "8": "Fluent with only rare repetition or self-correction; hesitation is content-related only; topics developed coherently.",
+        "9": "Fluent with only very rare, content-related hesitation; fully coherent and extended discourse."
+      }
+    },
+    "sl": {
+      "criterion_name": "Lexical Resource",
+      "descriptors": {
+        "4": "Basic vocabulary sufficient only for familiar topics; frequent word-choice errors.",
+        "5": "Manages to talk about familiar and unfamiliar topics but with limited flexibility; attempts paraphrase with mixed success.",
+        "6": "Wide enough vocabulary to discuss topics at length; uses paraphrase effectively; some inappropriate word choices.",
+        "7": "Uses vocabulary flexibly including some less common and idiomatic items; some awareness of style and collocation.",
+        "8": "Wide vocabulary used fluently to convey precise meaning; skilful use of less common and idiomatic items.",
+        "9": "Full flexibility and precision in all contexts; sustained use of accurate and idiomatic language."
+      }
+    },
+    "sg": {
+      "criterion_name": "Grammatical Range & Accuracy",
+      "descriptors": {
+        "4": "Basic sentence forms only; frequent errors even in simple structures.",
+        "5": "Produces basic forms with reasonable accuracy; complex structures attempted but usually contain errors.",
+        "6": "Mix of simple and complex structures with limited flexibility; errors recur with complex structures but rarely impede communication.",
+        "7": "Range of complex structures used with some flexibility; frequent error-free sentences though some errors persist.",
+        "8": "Wide range of structures used flexibly; majority of sentences error-free; only occasional slips.",
+        "9": "Full range of structures used naturally and appropriately; errors are rare and minor."
+      }
+    },
+    "sp": {
+      "criterion_name": "Pronunciation",
+      "descriptors": {
+        "4": "Mispronunciations are frequent and cause strain; limited control of stress and intonation.",
+        "5": "Generally intelligible but mispronunciation of individual words or sounds reduces clarity at times.",
+        "6": "Can generally be understood throughout; uses some pronunciation features but control is mixed.",
+        "7": "Easy to understand throughout; sustained use of stress, rhythm and intonation with occasional lapses.",
+        "8": "Easy to understand; wide range of pronunciation features used flexibly; accent has minimal effect.",
+        "9": "Effortless to understand; full and precise control of all pronunciation features."
+      }
+    }
+  }
+}

@@ -160,6 +160,36 @@ COACH_TOOL_SCHEMAS = [
     {
         "type": "function",
         "function": {
+            "name": "update_criterion_state",
+            "description": (
+                "Update the pedagogical state for a criterion after interpreting "
+                "Tutor-session evidence. You may REQUEST a support-level change; "
+                "deterministic fading rules decide whether it is allowed "
+                "(reduction requires >=3 recent successes, avg hint level <=1.0, "
+                "accuracy >=0.8; restoration is always allowed one step). "
+                "Also updates hint dependency and success counters."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "learner_id": {"type": "string"},
+                    "section": {"type": "string"},
+                    "criterion_id": {"type": "string", "description": "Taxonomy category_id e.g. grammatical_range_accuracy"},
+                    "requested_support_level": {"type": "string", "description": "full, partial, minimal, or none — omit to leave unchanged"},
+                    "recent_successes": {"type": "integer", "description": "Successful attempts observed in the session evidence"},
+                    "recent_failures": {"type": "integer", "description": "Failed attempts observed"},
+                    "average_hint_level": {"type": "number", "description": "Average hint level from the session evidence"},
+                    "independent_accuracy": {"type": "number", "description": "0.0-1.0 accuracy on independent checks"},
+                    "independent_successes": {"type": "integer", "description": "Independent (no-help) successes to add to the counter"},
+                    "reason": {"type": "string", "description": "Why you are making this change"}
+                },
+                "required": ["learner_id", "section", "criterion_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "update_memory",
             "description": (
                 "Update the confidence of an existing memory based on new evidence. "
@@ -264,6 +294,43 @@ TUTOR_TOOL_SCHEMAS = [
                 "required": ["learner_id", "section"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_pedagogical_context",
+            "description": (
+                "Get the learner's pedagogical state for a section: per-criterion "
+                "bands, stages, support levels, target descriptors and hint "
+                "dependency. Call this to understand HOW to teach, not just what."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "learner_id": {"type": "string"},
+                    "section": {"type": "string"}
+                },
+                "required": ["learner_id", "section"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_current_session_plan",
+            "description": (
+                "Re-read this session's pedagogical teaching plan — target "
+                "descriptor, dominant framework, support level, feedback "
+                "priorities and exit criteria."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "session_id": {"type": "string"}
+                },
+                "required": ["session_id"]
+            }
+        }
     }
 ]
 
@@ -339,6 +406,73 @@ def execute_coach_tool(tool_name: str, args: dict) -> str:
                 result = {"saved": False, "error": str(e)}
             finally:
                 db.close()
+
+        elif tool_name == "update_criterion_state":
+            from app.pedagogy.stages import SupportLevel
+            from app.pedagogy.stage_resolver import (
+                get_criterion_state_row,
+                upsert_criterion_state,
+                resolve_criterion,
+            )
+            from app.pedagogy.fading import evaluate_support_change
+
+            learner_id = args["learner_id"]
+            section = args["section"]
+            criterion_id = args["criterion_id"]
+
+            state = get_criterion_state_row(learner_id, section, criterion_id)
+            resolved = resolve_criterion(learner_id, section, criterion_id)
+            current_level = SupportLevel(resolved["support_level"])
+
+            updates = {}
+
+            # Counters and hint dependency always update
+            if "average_hint_level" in args:
+                updates["hint_dependency_score"] = float(args["average_hint_level"])
+            if args.get("independent_successes"):
+                updates["independent_success_count"] = (
+                    state["independent_success_count"]
+                    + int(args["independent_successes"])
+                )
+
+            # Support change goes through the deterministic guardrail
+            support_result = None
+            if args.get("requested_support_level"):
+                try:
+                    requested = SupportLevel(args["requested_support_level"])
+                except ValueError:
+                    requested = current_level
+                support_result = evaluate_support_change(
+                    current_level=current_level,
+                    requested_level=requested,
+                    recent_successes=int(args.get("recent_successes", 0)),
+                    average_hint_level=float(args.get("average_hint_level", 4.0)),
+                    independent_accuracy=float(args.get("independent_accuracy", 0.0)),
+                    recent_failures=int(args.get("recent_failures", 0)),
+                    last_support_change=state["last_support_change"],
+                )
+                if support_result["allowed"] and \
+                        support_result["final_level"] != current_level.value:
+                    updates["support_level"] = support_result["final_level"]
+                    order = ["full", "partial", "minimal", "none"]
+                    direction = (
+                        "reduced"
+                        if order.index(support_result["final_level"])
+                        > order.index(current_level.value)
+                        else "restored"
+                    )
+                    updates["last_support_change"] = direction
+
+            saved = upsert_criterion_state(
+                learner_id, section, criterion_id, **updates
+            ) if updates else {"updated": False, "reason": "nothing to update"}
+
+            result = {
+                "criterion_id": criterion_id,
+                "previous_support_level": current_level.value,
+                "support_change": support_result,
+                "updates_applied": saved,
+            }
 
         elif tool_name == "update_memory":
             from app.db.database import SessionLocal
@@ -461,6 +595,26 @@ def execute_tutor_tool(tool_name: str, args: dict) -> str:
                 "skills": all_ranks,
                 "section": args["section"]
             }
+
+        elif tool_name == "get_pedagogical_context":
+            from app.pedagogy.stage_resolver import get_all_criterion_stages
+            from app.services.pedagogical_event_service import get_hint_dependency
+
+            stages = get_all_criterion_stages(
+                args["learner_id"], args["section"]
+            )
+            result = {
+                "criterion_stages": stages,
+                "hint_dependency": get_hint_dependency(
+                    args["learner_id"], args["section"]
+                ),
+            }
+
+        elif tool_name == "get_current_session_plan":
+            from app.services.pedagogical_event_service import get_session_plan
+
+            plan = get_session_plan(args["session_id"])
+            result = plan if plan else {"error": "No plan for this session"}
 
         else:
             result = {"error": f"Unknown tool: {tool_name}"}

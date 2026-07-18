@@ -1,4 +1,4 @@
-# CLAUDE.md — Agent Build Harness for IELTS MemoryCoach
+# CLAUDE.md — Agent Build Harness for Qonda IELTS
 
 Read this BEFORE making any changes. It captures build patterns,
 conventions, and hard-won fixes so they are not re-discovered.
@@ -30,21 +30,54 @@ SKILL MASTERY SYSTEM
   ✅ Classifier               — skill_classifier_service.py
   ✅ Context builder          — build_chat_coach_context() in memory_service
 
+PEDAGOGICAL SKILL LAYER
+  ✅ Framework registry       — 16 frameworks + 4-habit spine (app/pedagogy/)
+  ✅ Band descriptors         — band_descriptors.json, all 4 sections
+  ✅ Stage resolver           — per-criterion bands/stages, derived live
+  ✅ Pedagogy Planner         — deterministic routing, all 4 sections
+  ✅ Session plans + evidence — tutor_sessions/plans/events/hints tables
+  ✅ Action tag protocol      — [ACTION: hint level=N] parsed server-side
+  ✅ Coach interpretation     — coach_tutor_session() at bridge_to_practice
+  ✅ Support fading rules     — earned reduction, one step, guarded tool
+  ✅ Pedagogy API + UI        — /pedagogy/*, Tutor strip, Skill Mastery stages
+  ⬜ Condition-gate UI        — Listening replay/transcript limits in React
+  ⬜ Live tag-reliability eval — scripts/eval_pedagogy.py needs real sessions
+
 DASHBOARDS
   ✅ Progress Dashboard       — Writing, Reading tabs + Skill Ranks tab
   ✅ Memory Dashboard         — active/archived memories with confidence
 
+STUDY SCHEDULER + GOOGLE CALENDAR
+  ✅ study_schedules table    — days/time/duration/timezone + Google tokens
+  ✅ calendar_service.py      — OAuth flow, create/delete recurring events
+  ✅ schedule_service.py      — schedule CRUD, weakest-skill event description
+  ✅ /schedule/* API routes   — setup, get, cancel, calendar connect/disconnect
+  ✅ Onboarding (2-step)      — profile step 1, study schedule step 2
+  ✅ Study Plan page          — /study-plan, view/edit schedule + Google connect
+  ✅ MCP scheduling tools     — schedule_study_sessions, get_study_schedule,
+                                add_one_off_session, cancel_study_schedule
+
 DEPLOYMENT
-  ⬜ Nginx config             — needed for production
-  ⬜ Production Dockerfile    — FastAPI + React build in one container
-  ⬜ Alibaba Cloud ECS        — not yet deployed
-  ⬜ HTTPS / domain           — not yet configured
+  ✅ Nginx config             — nginx.conf, SSE-aware proxy
+  ✅ Production Dockerfile    — multi-stage React build + Python + Nginx
+  ✅ Alibaba Cloud ECS        — deployed at ielts.qonda.xyz
+  ✅ HTTPS / domain           — Let's Encrypt, docker-compose.prod.yml
+  ✅ Google OAuth             — button on Login + Register pages, callback handler
+  ✅ Data persistence         — PostgreSQL in Docker (postgres_data volume)
+  ✅ OSS DB backup            — scripts/db_backup.py (SQLite fallback legacy)
+  ✅ SQLite → PostgreSQL      — scripts/migrate_sqlite_to_postgres.py
+
+DOCS
+  ✅ README.md                — current features, roadmap, architecture
+  ✅ ARCHITECTURE.md          — system diagrams, DB schema, agent loops
+  ✅ docs/pedagogy_framework.md — full pedagogical design + code map
 
 UPCOMING
+  ⬜ Listening replay/transcript condition gates in frontend UI
   ⬜ Extend taxonomy to Reading, Speaking, Listening
-  ⬜ Skill mastery dashboard page
-  ⬜ PostgreSQL upgrade
   ⬜ Teacher / admin dashboard
+  ⬜ Production: add GOOGLE_CALENDAR_REDIRECT_URI to .env on ECS server
+  ⬜ Google Cloud Console: add production callback URI to OAuth app
 ```
 
 ---
@@ -215,16 +248,21 @@ Use string concatenation instead of template literals in className:
 className={'base-class ' + (condition ? 'active' : 'inactive')}
 ```
 
-### Database — SQLite + Docker volume
+### Database — PostgreSQL + Docker volume
 
-SQLite file lives on the host via Docker named volume.
-It persists across container rebuilds and restarts.
-It is NOT safe for multi-server deployments (use PostgreSQL for that).
-For hackathon/single-server: SQLite is completely fine.
+PostgreSQL runs as a separate Docker service (`postgres:16-alpine`).
+Data persists on the `postgres_data` named volume across container rebuilds.
+Connection string: `postgresql://ielts:<POSTGRES_PASSWORD>@postgres:5432/ielts_coach`
+
+SQLite is still supported for local-only development — set `DATABASE_URL` to a
+`sqlite:///...` path and the `connect_args` are set automatically in `database.py`.
+
+To migrate existing SQLite data to Postgres:
+  `python scripts/migrate_sqlite_to_postgres.py --sqlite ./ielts_coach.db --postgres <url>`
 
 The `learner_skill_ranks` table is separate from `learner_memories`.
 Do not confuse them — they serve different purposes:
-- `learner_memories`: free-text, confidence-weighted, section-level
+- `learner_memories`: free-text, confidence-weighted, section-level, now with embeddings
 - `learner_skill_ranks`: fixed taxonomy, deterministic, skill-level
 
 ---
@@ -257,6 +295,29 @@ States: `introduction` → `explaining` → `drilling` → `bridge_to_practice`
 Qwen emits `[STATE: xxx]` at end of every reply.
 `parse_state_tag()` in `chat_coach_service.py` strips it before display.
 Default if tag missing or invalid: `"explaining"` (safe middle state).
+
+### Pedagogical Skill Layer (never violate these)
+
+1. **Python selects the teaching method; Qwen delivers it.** The model
+   never controls stage transitions, framework eligibility, hint
+   escalation order, condition gates, or support-level changes.
+2. **Bands/stages are DERIVED, never stored.** `stage_resolver.py`
+   aggregates `learner_skill_ranks` per criterion live. Only
+   pedagogy-only state (support level, counters) lives in
+   `learner_criterion_state`. Do not add a stored stage column.
+3. **The Tutor records what happened; the Coach decides what it
+   means.** Tutor writes only events (via [ACTION:] tags parsed
+   server-side). Coach alone calls `update_criterion_state`, which is
+   guarded by `fading.evaluate_support_change` — unearned support
+   reductions are vetoed, changes are one step at a time.
+4. **[ACTION:] tags** are best-effort evidence — a missed tag loses a
+   data point, never breaks the chat. Never make tag parsing a hard
+   gate on the conversation.
+5. **Spine validation is SOFT** — one regeneration retry, then
+   log-only. Never reject Tutor replies outright.
+6. **No classifications from tutoring.** `submit_classification` is
+   blocked inside `coach_tutor_session` — skill ranks move only from
+   practice submissions.
 
 Profile-switch detection: `chat_learner_id` in React localStorage.
 If user changes account, chat session resets automatically.

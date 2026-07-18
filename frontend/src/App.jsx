@@ -17,6 +17,7 @@ import MemoryDashboard from './pages/MemoryDashboard'
 import ListeningCoach from './pages/ListeningCoach'
 import ChatCoach from './pages/ChatCoach'
 import SkillMastery from './pages/SkillMastery'
+import StudyPlan from './pages/StudyPlan'
 
 
 
@@ -69,6 +70,9 @@ export default function App() {
           } />
           <Route path="/skills" element={
             <ProtectedShell><SkillMastery /></ProtectedShell>
+          } />
+          <Route path="/study-plan" element={
+            <ProtectedShell><StudyPlan /></ProtectedShell>
           } />
 
           {/* Catch-all route */}

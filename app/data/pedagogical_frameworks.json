@@ -1,0 +1,413 @@
+{
+  "source_note": "Transcribed from pedagogical_framework_specification.md and integrated_frameworks_by_band.md. Roles per stage: dominant | supporting | introduced | faded | retired. Stages: foundations (<=5.5), guided_control (6.0), independent_control (6.5-7.0), automatization (7.5+).",
+  "role_weights": {
+    "dominant": 1.0,
+    "supporting": 0.6,
+    "introduced": 0.4,
+    "faded": 0.2,
+    "retired": 0.0
+  },
+  "frameworks": [
+    {
+      "id": "genre_based_pedagogy",
+      "name": "Genre-Based Pedagogy",
+      "section": "Writing",
+      "purpose": "Teach the learner what an IELTS response IS — deconstruct Band 8 models, co-write, then have the learner write alone through the teaching-learning cycle.",
+      "theory": "Genre theory (Systemic Functional Linguistics) — Hyland (2007); Martin & Rose (2008)",
+      "roles_by_stage": {
+        "foundations": "dominant",
+        "guided_control": "supporting",
+        "independent_control": "faded",
+        "automatization": "retired"
+      },
+      "procedure": [
+        "state_target_descriptor",
+        "show_band8_model",
+        "ask_learner_to_identify_genre_moves",
+        "model_moves_if_learner_cannot",
+        "jointly_construct_second_example",
+        "learner_constructs_independently",
+        "feedback_as_triad",
+        "require_revision_before_new_prompt"
+      ],
+      "constraints": [
+        "never_skip_learner_identification_step",
+        "models_must_match_target_task_type"
+      ],
+      "evidence_of_progress": "Learner independently identifies and uses required genre moves",
+      "reactivation_triggers": ["unfamiliar_task_type", "performance_regression"]
+    },
+    {
+      "id": "process_writing",
+      "name": "Process Writing",
+      "section": "Writing",
+      "purpose": "Enforce plan → draft → feedback → revise; revision of the learner's own work is mandatory before new prompts.",
+      "theory": "Cognitive process theory of writing — Flower & Hayes (1981); Badger & White (2000)",
+      "roles_by_stage": {
+        "foundations": "supporting",
+        "guided_control": "dominant",
+        "independent_control": "dominant",
+        "automatization": "supporting"
+      },
+      "procedure": [
+        "plan_with_support_level",
+        "learner_drafts",
+        "focused_feedback",
+        "learner_self_corrects",
+        "revision",
+        "independent_transfer_task"
+      ],
+      "constraints": [
+        "revision_required_before_new_prompt",
+        "never_provide_full_rewrite"
+      ],
+      "evidence_of_progress": "Revision is measurably better than the first draft",
+      "reactivation_triggers": ["performance_regression"]
+    },
+    {
+      "id": "focused_indirect_feedback",
+      "name": "Focused Indirect Corrective Feedback",
+      "section": "Writing",
+      "purpose": "Help the learner notice and repair recurring language errors — mark only 2-3 error categories; the learner self-corrects before direct correction is given.",
+      "theory": "Noticing Hypothesis (Schmidt, 1990) — Ferris (1999); Bitchener & Knoch (2010)",
+      "roles_by_stage": {
+        "foundations": "supporting",
+        "guided_control": "dominant",
+        "independent_control": "supporting",
+        "automatization": "faded"
+      },
+      "procedure": [
+        "select_maximum_three_error_categories",
+        "mark_errors_without_correcting",
+        "ask_learner_to_self_correct",
+        "provide_weakest_hint_if_needed",
+        "escalate_hint_only_if_needed",
+        "reveal_answer_after_attempt"
+      ],
+      "constraints": [
+        "never_correct_every_error",
+        "never_reveal_answer_before_attempt",
+        "never_focus_on_more_than_three_priorities"
+      ],
+      "evidence_of_progress": "Learner self-corrects marked errors",
+      "reactivation_triggers": ["performance_regression"]
+    },
+    {
+      "id": "scaffolding_with_fading",
+      "name": "Scaffolding with Fading",
+      "section": "Writing",
+      "purpose": "Systematically withdraw templates, sentence frames, and planning prompts as competence grows.",
+      "theory": "Zone of Proximal Development (Vygotsky, 1978) — Wood, Bruner & Ross (1976)",
+      "roles_by_stage": {
+        "foundations": "dominant",
+        "guided_control": "supporting",
+        "independent_control": "faded",
+        "automatization": "retired"
+      },
+      "procedure": [
+        "assess_current_support_level",
+        "provide_scaffolds_matching_support_level",
+        "observe_performance",
+        "withdraw_one_scaffold_at_a_time"
+      ],
+      "constraints": [
+        "never_remove_more_than_one_scaffold_at_once",
+        "restore_previous_support_on_regression"
+      ],
+      "evidence_of_progress": "Learner succeeds with less support",
+      "reactivation_triggers": ["performance_regression", "unfamiliar_task_type"]
+    },
+    {
+      "id": "explicit_strategy_instruction",
+      "name": "Explicit Strategy Instruction",
+      "section": "Reading",
+      "purpose": "Directly teach skimming, scanning, paraphrase recognition, and question-type strategies.",
+      "theory": "Strategy-based reading-comprehension research — Duke & Pearson (2002); Grabe (2009)",
+      "roles_by_stage": {
+        "foundations": "dominant",
+        "guided_control": "supporting",
+        "independent_control": "faded",
+        "automatization": "retired"
+      },
+      "procedure": [
+        "name_the_strategy",
+        "explain_when_to_use_it",
+        "demonstrate_on_untimed_passage",
+        "learner_applies_with_guidance",
+        "learner_selects_strategy_independently"
+      ],
+      "constraints": ["one_strategy_per_activity"],
+      "evidence_of_progress": "Learner selects the correct strategy independently",
+      "reactivation_triggers": ["weak_question_type_detected"]
+    },
+    {
+      "id": "reciprocal_teaching_think_aloud",
+      "name": "Reciprocal Teaching / Think-Aloud",
+      "section": "Reading",
+      "purpose": "Verbalise reasoning through a question step by step, then hand the teacher role to the learner.",
+      "theory": "Social constructivism (Vygotsky, 1978) — Palincsar & Brown (1984)",
+      "roles_by_stage": {
+        "foundations": "supporting",
+        "guided_control": "dominant",
+        "independent_control": "supporting",
+        "automatization": "faded"
+      },
+      "procedure": [
+        "tutor_models_reasoning_aloud",
+        "learner_verbalises_own_reasoning",
+        "diagnose_where_reasoning_failed",
+        "weakest_hint_first",
+        "learner_retries",
+        "independent_similar_question"
+      ],
+      "constraints": ["never_reveal_answer_before_learner_reasoning"],
+      "evidence_of_progress": "Learner accurately explains answer reasoning",
+      "reactivation_triggers": ["repeated_errors_on_question_type"]
+    },
+    {
+      "id": "gradual_release_of_responsibility",
+      "name": "Gradual Release of Responsibility",
+      "section": "Reading",
+      "purpose": "I do → we do → you do progression for each question type, ending in timed exam conditions.",
+      "theory": "Cognitive apprenticeship — Pearson & Gallagher (1983)",
+      "roles_by_stage": {
+        "foundations": "introduced",
+        "guided_control": "supporting",
+        "independent_control": "dominant",
+        "automatization": "dominant"
+      },
+      "procedure": [
+        "tutor_models_untimed",
+        "guided_attempts_with_graduated_hints",
+        "full_timed_sections_per_question_type",
+        "exam_timing_above_level_texts"
+      ],
+      "constraints": ["timed_work_only_after_consistent_strategy_use"],
+      "evidence_of_progress": "Learner moves from modelled to independent performance",
+      "reactivation_triggers": ["time_pressure_errors"]
+    },
+    {
+      "id": "error_driven_diagnosis",
+      "name": "Error-Driven Formative Diagnosis",
+      "section": "Reading",
+      "purpose": "Classify every wrong answer by cause — vocabulary gap, paraphrase miss, trap, or location failure — and target the next drill accordingly.",
+      "theory": "Assessment for Learning — Black & Wiliam (1998)",
+      "roles_by_stage": {
+        "foundations": "supporting",
+        "guided_control": "supporting",
+        "independent_control": "supporting",
+        "automatization": "supporting"
+      },
+      "procedure": [
+        "classify_error_cause",
+        "explain_cause_to_learner",
+        "target_next_drill_at_cause"
+      ],
+      "constraints": ["every_wrong_answer_gets_a_cause"],
+      "evidence_of_progress": "Repeated error causes reduce over time",
+      "reactivation_triggers": []
+    },
+    {
+      "id": "process_based_listening",
+      "name": "Process-Based Listening Instruction",
+      "section": "Listening",
+      "purpose": "Diagnose why mishearing occurs; drill connected speech, weak forms, and word-boundary decoding.",
+      "theory": "Speech decoding / bottom-up processing — Field (2008)",
+      "roles_by_stage": {
+        "foundations": "dominant",
+        "guided_control": "supporting",
+        "independent_control": "faded",
+        "automatization": "faded"
+      },
+      "procedure": [
+        "identify_decoding_failure_point",
+        "drill_connected_speech_feature",
+        "re-listen_and_verify"
+      ],
+      "constraints": ["transcript_support_at_foundations_only"],
+      "evidence_of_progress": "Decoding errors reduce",
+      "reactivation_triggers": ["decoding_failure_detected"]
+    },
+    {
+      "id": "metacognitive_cycle",
+      "name": "Metacognitive Pedagogical Cycle",
+      "section": "Listening",
+      "purpose": "Predict → first listen → verify → second listen → reflect on what was missed and why.",
+      "theory": "Metacognitive theory (Flavell, 1979) — Vandergrift & Goh (2012)",
+      "roles_by_stage": {
+        "foundations": "introduced",
+        "guided_control": "dominant",
+        "independent_control": "dominant",
+        "automatization": "faded"
+      },
+      "procedure": [
+        "predict_content_and_language",
+        "first_listen",
+        "verify_predictions",
+        "second_listen_if_replay_allowed",
+        "reflect_on_what_was_missed_and_why"
+      ],
+      "constraints": ["replay_limit_by_stage"],
+      "evidence_of_progress": "Learner can explain what was missed and why",
+      "reactivation_triggers": []
+    },
+    {
+      "id": "micro_listening_dictation",
+      "name": "Micro-Listening and Dictation",
+      "section": "Listening",
+      "purpose": "Sentence-level replay with dictation of exactly what was heard, making decoding gaps visible.",
+      "theory": "Noticing Hypothesis (Schmidt, 1990) — Field (2008)",
+      "roles_by_stage": {
+        "foundations": "dominant",
+        "guided_control": "supporting",
+        "independent_control": "faded",
+        "automatization": "retired"
+      },
+      "procedure": [
+        "play_single_sentence",
+        "learner_writes_exactly_what_was_heard",
+        "compare_to_transcript",
+        "identify_word_boundary_and_weak_form_gaps"
+      ],
+      "constraints": ["sentence_level_only"],
+      "evidence_of_progress": "Word-boundary and weak-form recognition improve",
+      "reactivation_triggers": ["decoding_failure_detected"]
+    },
+    {
+      "id": "scaffolding_with_fading_listening",
+      "name": "Scaffolding with Fading (Listening)",
+      "section": "Listening",
+      "purpose": "Make transcripts and replays available early in training, then systematically withdraw them as decoding accuracy stabilises.",
+      "theory": "Zone of Proximal Development (Vygotsky, 1978) — Wood, Bruner & Ross (1976)",
+      "roles_by_stage": {
+        "foundations": "dominant",
+        "guided_control": "supporting",
+        "independent_control": "faded",
+        "automatization": "retired"
+      },
+      "procedure": [
+        "assess_current_support_level",
+        "set_replay_and_transcript_policy",
+        "observe_performance",
+        "withdraw_one_scaffold_at_a_time"
+      ],
+      "constraints": ["restore_previous_support_on_regression"],
+      "evidence_of_progress": "Learner succeeds with less support",
+      "reactivation_triggers": ["performance_regression"]
+    },
+    {
+      "id": "task_based_language_teaching",
+      "name": "Task-Based Language Teaching",
+      "section": "Speaking",
+      "purpose": "Pre-task preparation → full uninterrupted task performance → post-task language analysis.",
+      "theory": "Fluency/accuracy/complexity trade-off (Skehan, 1998) — Ellis (2003); Willis (1996)",
+      "roles_by_stage": {
+        "foundations": "supporting",
+        "guided_control": "dominant",
+        "independent_control": "dominant",
+        "automatization": "supporting"
+      },
+      "procedure": [
+        "pre_task_preparation",
+        "uninterrupted_task_performance",
+        "post_task_language_analysis"
+      ],
+      "constraints": ["never_interrupt_during_task"],
+      "evidence_of_progress": "Learner completes an uninterrupted task successfully",
+      "reactivation_triggers": []
+    },
+    {
+      "id": "oral_corrective_feedback",
+      "name": "Oral Corrective Feedback (Prompts)",
+      "section": "Speaking",
+      "purpose": "Signal the error and elicit self-repair; recasts reserved for errors above the learner's current level.",
+      "theory": "Output Hypothesis (Swain, 1995) — Lyster & Ranta (1997); Lyster & Saito (2010)",
+      "roles_by_stage": {
+        "foundations": "supporting",
+        "guided_control": "dominant",
+        "independent_control": "supporting",
+        "automatization": "faded"
+      },
+      "procedure": [
+        "signal_error_without_correcting",
+        "elicit_self_repair",
+        "recast_only_if_above_learner_level",
+        "confirm_repaired_form"
+      ],
+      "constraints": ["prompts_before_recasts", "post_task_only_never_mid_task"],
+      "evidence_of_progress": "Learner repairs spoken errors after prompts",
+      "reactivation_triggers": ["recurring_error_pattern"]
+    },
+    {
+      "id": "fluency_432",
+      "name": "Fluency Development (4/3/2)",
+      "section": "Speaking",
+      "purpose": "Deliver the same talk in four, then three, then two minutes to proceduralise language.",
+      "theory": "Skill Acquisition Theory (DeKeyser, 2007) — Nation (1989); Nation & Newton (2009)",
+      "roles_by_stage": {
+        "foundations": "dominant",
+        "guided_control": "supporting",
+        "independent_control": "faded",
+        "automatization": "retired"
+      },
+      "procedure": [
+        "prepare_topic_and_vocabulary",
+        "deliver_4_minute_version",
+        "deliver_3_minute_version",
+        "deliver_2_minute_version"
+      ],
+      "constraints": ["same_topic_all_three_rounds", "no_accuracy_correction_during_drill"],
+      "evidence_of_progress": "Output becomes faster, smoother, and less hesitant",
+      "reactivation_triggers": ["new_or_difficult_topic"]
+    },
+    {
+      "id": "reformulation",
+      "name": "Reformulation",
+      "section": "Speaking",
+      "purpose": "Show a Band 8 version of the learner's own sentence; the learner then re-performs the upgraded version.",
+      "theory": "Noticing Hypothesis (Schmidt, 1990) — Thornbury (1997)",
+      "roles_by_stage": {
+        "foundations": "faded",
+        "guided_control": "introduced",
+        "independent_control": "dominant",
+        "automatization": "supporting"
+      },
+      "procedure": [
+        "take_learner_own_sentence",
+        "show_band8_reformulation",
+        "highlight_what_changed_and_why",
+        "learner_re_performs_upgraded_version",
+        "learner_reuses_in_new_context"
+      ],
+      "constraints": ["always_use_learner_own_language_as_base", "avoid_overload_at_foundations"],
+      "evidence_of_progress": "Learner reuses upgraded language independently",
+      "reactivation_triggers": []
+    }
+  ],
+  "shared_spine": [
+    {
+      "id": "backward_design",
+      "name": "Backward Design",
+      "rule": "Every activity must aim at a specific band descriptor. If asked why the Tutor is teaching this right now, the answer must be a band descriptor.",
+      "tightens_with_stage": "The target descriptor moves up one rung as the learner improves."
+    },
+    {
+      "id": "feedback_triad",
+      "name": "Feedback Triad",
+      "rule": "Every significant feedback message states: the goal, the current position, and one concrete next step. Maximum 2-3 priorities.",
+      "tightens_with_stage": "The goal it points at climbs the descriptor scale."
+    },
+    {
+      "id": "dynamic_assessment",
+      "name": "Dynamic Assessment",
+      "rule": "Weakest hint first; escalate one level at a time only if needed. Every hint is logged — hint level required is itself diagnostic data.",
+      "tightens_with_stage": "Hints start weaker and are withdrawn sooner at higher stages."
+    },
+    {
+      "id": "elicitation_before_telling",
+      "name": "Elicitation Before Telling",
+      "rule": "The learner attempts, retrieves, identifies, or repairs before the Tutor reveals the answer.",
+      "tightens_with_stage": "The elicitation gets vaguer — the learner is expected to do more of the finding independently."
+    }
+  ]
+}
