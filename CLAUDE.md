@@ -25,7 +25,8 @@ IELTS MODULES (all complete)
   ✅ Chat Coach               — memory-grounded conversational tutor
 
 SKILL MASTERY SYSTEM
-  ✅ Taxonomy                 — skill_taxonomy_writing.json (13 skills)
+  ✅ Taxonomy                 — all 4 sections: Writing (13), Reading (10),
+                                Speaking (9), Listening (8) — 40 sub-skills total
   ✅ Ranking engine           — learner_skill_ranks table, clean_streak
   ✅ Classifier               — skill_classifier_service.py
   ✅ Context builder          — build_chat_coach_context() in memory_service

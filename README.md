@@ -21,7 +21,6 @@ Every existing prep tool has the same fundamental flaw: **it forgets you between
 | Persistent memory across sessions | ✅ | ❌ | ❌ | ❌ |
 | Granular skill rank engine | ✅ | ❌ | ❌ | ❌ |
 | Specialist AI tutors per section | ✅ | ❌ | Partial | ❌ |
-| MCP API for external agents | ✅ | ❌ | ❌ | ❌ |
 | Telegram coaching bot (Qwen agent) | ✅ | ❌ | ❌ | ❌ |
 | Study schedule + Google Calendar | ✅ | ❌ | ❌ | ❌ |
 | All 4 IELTS skills | ✅ | ✅ | ✅ | ✅ |
@@ -148,10 +147,8 @@ Qonda IELTS is a full-stack AI coaching web application that remembers learners 
 - **Cross-section insights** — identifies skill gaps that span multiple sections
 - **IELTS band estimates (4.0–8.5)** per skill, updated after every session
 - **Handwritten essay upload** — qwen-vl-plus extracts text from photos
-- Skill taxonomy for all 4 sections: Writing (13), Reading (10),
-  Speaking (9), Listening (8) sub-skills
-- Memory layer exposed as **MCP server** (12 tools) for external agent consumption
-- **Telegram coaching bot** — Qwen agent with tool-calling, same tool layer as MCP server
+- **Skill taxonomy for all 4 sections**: Writing (13), Reading (10), Speaking (9), Listening (8) — 40 sub-skills total, each with 5 rank levels and IELTS band descriptors
+- **Telegram coaching bot** — Qwen agent with tool-calling, full coaching access on any device
 - **Study scheduler** — recurring study plan with Google Calendar integration
 - Streaming essay feedback (SSE) — first token in ~1-2 seconds
 - TTS audio cached in Alibaba Cloud OSS (generated once per track, served forever)
@@ -171,7 +168,6 @@ Qonda IELTS is a full-stack AI coaching web application that remembers learners 
 | Text-to-Speech | DashScope qwen3-tts-flash (Cherry voice) |
 | Text embeddings | DashScope text-embedding-v3 (1024-d) |
 | Audio storage | Alibaba Cloud OSS (oss-ap-southeast-1) |
-| Agent protocol | MCP (Model Context Protocol) via FastMCP |
 | Messaging bot | Telegram Bot API + Qwen agent with tool-calling |
 | Calendar | Google Calendar API (OAuth, recurring events) |
 | Compute | Alibaba Cloud ECS (Singapore) |
@@ -302,42 +298,6 @@ Speaking (9), Listening (8) sub-skills.
 
 ---
 
-## MCP Server
-
-The Qonda backend is exposed as an MCP server at `/mcp-server/mcp`. Any MCP-compatible AI agent — Claude Desktop, custom agents, school platforms — can query learner coaching data and manage study schedules without direct database access.
-
-```json
-// Claude Desktop config (~/.config/Claude/claude_desktop_config.json)
-{
-  "mcpServers": {
-    "qonda": {
-      "url": "https://ielts.qonda.xyz/api/mcp-server"
-    }
-  }
-}
-```
-
-**12 available tools:**
-
-| Tool | Purpose |
-|---|---|
-| `find_learner` | Resolve learner_id from email — always call first |
-| `get_coaching_context` | Full coaching overview in one call — start here |
-| `get_learner_weaknesses` | Active weakness memories with confidence scores |
-| `get_learner_strengths` | Active strength memories |
-| `get_skill_ranks` | All skill ranks with band estimates and streak data |
-| `get_weakest_skill_for_learner` | Single weakest skill + rank definitions |
-| `get_recent_attempts` | Attempt history with score summaries |
-| `get_learner_memory_stats` | Memory profile statistics |
-| `get_study_schedule` | Current study schedule + Google Calendar status |
-| `schedule_study_sessions` | Create or update recurring study schedule |
-| `add_one_off_session` | Add a single extra session on a specific date |
-| `cancel_study_schedule` | Cancel schedule and remove calendar events |
-
-**The same tool layer powers the Telegram bot.** When a learner messages `@qieltsbot`, Qwen calls these same functions via tool-calling — one backend, two AI surfaces (MCP + Telegram).
-
----
-
 ## Telegram Coaching Bot
 
 **[@qieltsbot](https://t.me/qieltsbot)** — Qwen-powered, available anywhere.
@@ -354,7 +314,7 @@ The Telegram bot brings Qonda's full coaching intelligence to any device without
 ```
 Telegram message → FastAPI /telegram/webhook
   → Qwen agent (qwen-plus, tool-calling)
-  → same Python functions as MCP server
+  → same backend coaching functions as the web app
   → reply sent via Telegram Bot API
 ```
 
@@ -370,7 +330,7 @@ Learners set a recurring study schedule (days, time, duration) during onboarding
 - **Recurring calendar events** — RRULE weekly recurrence, UNTIL = test date
 - **Personalized descriptions** — event title includes the learner's weakest skill
 - **Reminders** — email 60 min before, popup 10 min before
-- **MCP + Telegram writable** — `schedule_study_sessions` and `add_one_off_session` update both the DB and Google Calendar from any interface
+- **Telegram writable** — `schedule_study_sessions` and `add_one_off_session` update both the DB and Google Calendar from the Telegram bot
 
 ---
 
@@ -398,9 +358,6 @@ Other AI IELTS tools are chatbots with an IELTS system prompt. Qonda is the only
 
 **4. Semantic memory retrieval**
 Every coaching memory is embedded using DashScope `text-embedding-v3` at write time. When the Tutor plans a session, the feedback priorities are retrieved not by recency alone but by **semantic relevance to the current session's target descriptor** — a memory about relative-clause verb agreement surfaces when the session targets grammar, even if it was written two months ago. Retrieval is a hybrid of semantic similarity and spaced-repetition scoring, combining the best of both.
-
-**5. MCP as the infrastructure moat**
-The memory layer is exposed via MCP protocol — any human tutor, school platform, or language app can query a learner's full coaching profile with consent. When the learner moves from the app to a human tutor, or from one platform to another, their coaching intelligence travels with them. Qonda becomes the coaching infrastructure layer of their entire IELTS journey, not just one more app on their phone.
 
 ---
 
@@ -514,21 +471,35 @@ Phase 1 (current) — Solo practitioner web app
   ✅ Adaptive content — difficulty matched to current band level
   ✅ Specialist AI tutors grounded in real practice evidence
   ✅ Cross-section insights — identifies core gaps across skills
-  ✅ MCP server (12 tools) — memory + scheduling accessible to external agents
   ✅ Handwritten essay upload via qwen-vl
   ✅ Study scheduler — recurring sessions with Google Calendar integration
   ✅ Telegram bot — Qwen agent with tool-calling, coaching on any device
 
-Phase 2 — Mobile-first consumer product
+Phase 2 — Chat-native coaching (the juggler's phone IS the classroom)
+  The full IELTS coaching loop runs inside a chat thread — no browser,
+  no app install. The learner opens Telegram on their commute and picks
+  up exactly where they left off.
+
+  ⬜ Full practice sessions in Telegram/WhatsApp:
+       → send a paragraph → Qwen scores it → feedback arrives in thread
+       → record a voice note → ASR transcribes → Speaking feedback inline
+       → coach asks comprehension questions → Reading drills in chat
+       → Listening: audio clip sent, answers checked, memories saved
+  ⬜ Seamless memory continuity — every chat session writes to the same
+     learner profile as the web app; the juggler never starts over
+  ⬜ Push nudges: "You haven't practised Writing in 3 days — here's a
+     quick paragraph task for your commute"
+  ⬜ Streak tracking and milestone celebrations in thread
+  ⬜ WhatsApp Business integration (pending Meta Business verification)
+
+Phase 3 — Mobile-first consumer product
   ⬜ React Native app (same FastAPI backend, zero re-architecture)
-  ⬜ Push notifications via Telegram: "You haven't practised Writing in 3 days"
   ⬜ Offline mode — download practice content, sync results later
-  ⬜ Streak tracking and milestone celebrations
   ⬜ Voice selection for TTS — learners choose their examiner accent
      (British, American, Australian) to practise with the accent
      they will face in their actual test
 
-Phase 3 — Freemium at scale
+Phase 4 — Freemium at scale
   ⬜ Free tier: 5 sessions/month, memory limited to last 3 sessions
   ⬜ Premium: $9.99/month — unlimited sessions, full persistent memory,
      all 4 sections, complete band history
@@ -536,7 +507,7 @@ Phase 3 — Freemium at scale
   ⬜ PostgreSQL migration for multi-region scale
   ⬜ Payment via Stripe (card) + regional methods (M-Pesa, GCash, UPI)
 
-Phase 4 — Community and accountability
+Phase 5 — Community and accountability
   ⬜ Anonymous band leaderboards by target score and country
   ⬜ Study groups — 2-3 learners compare progress and hold each other
      accountable (the most powerful retention mechanism for adult learners)
@@ -544,10 +515,10 @@ Phase 4 — Community and accountability
   ⬜ Referral programme — one month free for each friend who reaches
      their target band
 
-Phase 5 — Platform
-  ⬜ Public MCP API — licensed IELTS tutors query a learner's full
-     coaching profile (with consent) and pick up exactly where the
-     app left off; Qonda becomes infrastructure for the broader
+Phase 6 — Platform
+  ⬜ Open coaching data API — licensed IELTS tutors query a learner's
+     full coaching profile (with consent) and pick up exactly where
+     the app left off; Qonda becomes infrastructure for the broader
      IELTS prep ecosystem
   ⬜ Taxonomy contribution — community validates and extends skill
      definitions; open-source core, hosted service
@@ -555,7 +526,7 @@ Phase 5 — Platform
      target band
 ```
 
-**Business model:** Freemium direct-to-consumer. Free tier drives acquisition at scale across emerging markets. Premium at $9.99/month converts the motivated — a learner spending $250 on an IELTS test fee will pay $10/month for a coach that actually remembers them. MCP API access for third-party tutoring platforms provides a B2B revenue layer without the complexity of institutional sales cycles.
+**Business model:** Freemium direct-to-consumer. Free tier drives acquisition at scale across emerging markets. Premium at $9.99/month converts the motivated — a learner spending $250 on an IELTS test fee will pay $10/month for a coach that actually remembers them. Coaching data API access for third-party tutoring platforms provides a B2B revenue layer without the complexity of institutional sales cycles.
 
 ---
 
@@ -569,7 +540,10 @@ Phase 5 — Platform
 
 **4. OSS for audio** — Listening track audio is generated once globally and stored in Alibaba Cloud OSS. Every learner gets it from OSS instantly. The TTS quota is consumed exactly once per track for all users for all time — adding a new track costs one TTS call regardless of how many learners use it.
 
-**5. MCP as the memory API** — exposing the memory layer as MCP means any compatible agent can query learner coaching history without database access. The Qonda memory becomes infrastructure, not just an app feature.
+**5. The chat thread as the classroom**
+The end-state vision for the juggler is that their phone's chat app — the one they already have open all day — becomes their IELTS classroom. No app to download, no browser tab to open, no login to remember. They send a paragraph on the way to work and the score arrives before they reach the office. They record a voice note in a lunch break and get Speaking feedback by the time they sit back down.
+
+Qonda is already partway there: the Telegram bot today handles coaching questions, schedule management, and skill lookups. The roadmap completes the loop — full practice sessions (Writing, Speaking, Reading, Listening) running entirely in-thread, with every submission writing to the same persistent memory profile as the web app. The juggler's ten-minute commute becomes a genuine coaching session. **That is a product no traditional IELTS tool can build without starting over.**
 
 ---
 
@@ -585,7 +559,6 @@ Phase 5 — Platform
 - [x] Deterministic rank engine
 - [x] Memory Timeline visualization
 - [x] Skill Mastery dedicated page with per-criterion stage display
-- [x] MCP server (12 tools — memory, skills, scheduling)
 - [x] Alibaba Cloud deployment (ECS + OSS + Model Studio)
 - [x] Pedagogical Skill Layer — 16 frameworks, 4 stages, support fading
 - [x] ACTION tag protocol — evidence loop closes after every tutor session
@@ -594,6 +567,6 @@ Phase 5 — Platform
 - [x] Study scheduler — recurring sessions with Google Calendar integration
 - [x] Telegram bot — Qwen agent with tool-calling (@qieltsbot)
 - [ ] Listening replay/transcript condition gates in frontend UI
-- [ ] Extend skill taxonomy to Reading, Speaking, Listening (pending)
+- [x] Extend skill taxonomy to Reading (10), Speaking (9), Listening (8) sub-skills
 - [ ] Teacher / admin dashboard
 - [ ] Video walkthrough

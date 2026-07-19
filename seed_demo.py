@@ -200,23 +200,37 @@ MEMORIES = [
 # - One skill with clean_streak=2 (one essay from rank-up — live demo moment)
 
 SKILL_RANKS = [
-    # Task Response
-    {"skill_id": "tr_full_coverage",        "current_rank": 2, "clean_streak": 1, "total_evidence": 6, "last_classification": "demonstrated_strength"},
-    {"skill_id": "tr_position_clarity",     "current_rank": 2, "clean_streak": 2, "total_evidence": 6, "last_classification": "demonstrated_strength"},  # ← one away from rank 3!
-    {"skill_id": "tr_idea_development",     "current_rank": 2, "clean_streak": 1, "total_evidence": 6, "last_classification": "demonstrated_strength"},
-    {"skill_id": "tr_conclusion_synthesis", "current_rank": 1, "clean_streak": 2, "total_evidence": 5, "last_classification": "demonstrated_strength"},
-    # Coherence & Cohesion
-    {"skill_id": "cc_logical_progression",  "current_rank": 2, "clean_streak": 0, "total_evidence": 6, "last_classification": "demonstrated_strength"},
-    {"skill_id": "cc_paragraphing",         "current_rank": 2, "clean_streak": 1, "total_evidence": 6, "last_classification": "demonstrated_strength"},
-    {"skill_id": "cc_cohesive_devices",     "current_rank": 1, "clean_streak": 1, "total_evidence": 5, "last_classification": "demonstrated_weakness"},
-    # Lexical Resource
-    {"skill_id": "lr_range",                "current_rank": 3, "clean_streak": 0, "total_evidence": 6, "last_classification": "demonstrated_strength"},
-    {"skill_id": "lr_precision",            "current_rank": 2, "clean_streak": 2, "total_evidence": 6, "last_classification": "demonstrated_strength"},
-    {"skill_id": "lr_spelling_word_formation", "current_rank": 2, "clean_streak": 1, "total_evidence": 5, "last_classification": "demonstrated_strength"},
-    # Grammatical Range & Accuracy
-    {"skill_id": "gra_sentence_variety",    "current_rank": 3, "clean_streak": 1, "total_evidence": 6, "last_classification": "demonstrated_strength"},
-    {"skill_id": "gra_accuracy",            "current_rank": 3, "clean_streak": 2, "total_evidence": 6, "last_classification": "demonstrated_strength"},  # ← one away from rank 4!
-    {"skill_id": "gra_punctuation",         "current_rank": 2, "clean_streak": 0, "total_evidence": 5, "last_classification": "demonstrated_strength"},
+    # ── Writing: Task Response ─────────────────────────────────────────────────
+    {"section": "Writing", "skill_id": "tr_full_coverage",        "current_rank": 2, "clean_streak": 1, "total_evidence": 6, "last_classification": "demonstrated_strength"},
+    {"section": "Writing", "skill_id": "tr_position_clarity",     "current_rank": 2, "clean_streak": 2, "total_evidence": 6, "last_classification": "demonstrated_strength"},  # ← one away from rank 3!
+    {"section": "Writing", "skill_id": "tr_idea_development",     "current_rank": 2, "clean_streak": 1, "total_evidence": 6, "last_classification": "demonstrated_strength"},
+    {"section": "Writing", "skill_id": "tr_conclusion_synthesis", "current_rank": 1, "clean_streak": 2, "total_evidence": 5, "last_classification": "demonstrated_strength"},
+    # ── Writing: Coherence & Cohesion ─────────────────────────────────────────
+    {"section": "Writing", "skill_id": "cc_logical_progression",  "current_rank": 2, "clean_streak": 0, "total_evidence": 6, "last_classification": "demonstrated_strength"},
+    {"section": "Writing", "skill_id": "cc_paragraphing",         "current_rank": 2, "clean_streak": 1, "total_evidence": 6, "last_classification": "demonstrated_strength"},
+    {"section": "Writing", "skill_id": "cc_cohesive_devices",     "current_rank": 1, "clean_streak": 1, "total_evidence": 5, "last_classification": "demonstrated_weakness"},
+    # ── Writing: Lexical Resource ──────────────────────────────────────────────
+    {"section": "Writing", "skill_id": "lr_range",                "current_rank": 3, "clean_streak": 0, "total_evidence": 6, "last_classification": "demonstrated_strength"},
+    {"section": "Writing", "skill_id": "lr_precision",            "current_rank": 2, "clean_streak": 2, "total_evidence": 6, "last_classification": "demonstrated_strength"},
+    {"section": "Writing", "skill_id": "lr_spelling_word_formation", "current_rank": 2, "clean_streak": 1, "total_evidence": 5, "last_classification": "demonstrated_strength"},
+    # ── Writing: Grammatical Range & Accuracy ─────────────────────────────────
+    {"section": "Writing", "skill_id": "gra_sentence_variety",    "current_rank": 3, "clean_streak": 1, "total_evidence": 6, "last_classification": "demonstrated_strength"},
+    {"section": "Writing", "skill_id": "gra_accuracy",            "current_rank": 3, "clean_streak": 2, "total_evidence": 6, "last_classification": "demonstrated_strength"},  # ← one away from rank 4!
+    {"section": "Writing", "skill_id": "gra_punctuation",         "current_rank": 2, "clean_streak": 0, "total_evidence": 5, "last_classification": "demonstrated_strength"},
+    # ── Reading: Information Retrieval ────────────────────────────────────────
+    {"section": "Reading", "skill_id": "ri_detail_retrieval",     "current_rank": 2, "clean_streak": 1, "total_evidence": 2, "last_classification": "demonstrated_strength"},
+    {"section": "Reading", "skill_id": "ri_skimming",             "current_rank": 1, "clean_streak": 1, "total_evidence": 2, "last_classification": "demonstrated_strength"},
+    {"section": "Reading", "skill_id": "ri_scanning",             "current_rank": 1, "clean_streak": 0, "total_evidence": 2, "last_classification": "demonstrated_weakness"},
+    # ── Reading: Reading Comprehension ────────────────────────────────────────
+    {"section": "Reading", "skill_id": "rc_main_idea",            "current_rank": 2, "clean_streak": 1, "total_evidence": 2, "last_classification": "demonstrated_strength"},
+    {"section": "Reading", "skill_id": "rc_inference",            "current_rank": 1, "clean_streak": 0, "total_evidence": 2, "last_classification": "demonstrated_weakness"},
+    {"section": "Reading", "skill_id": "rc_tfng",                 "current_rank": 1, "clean_streak": 1, "total_evidence": 2, "last_classification": "demonstrated_strength"},
+    {"section": "Reading", "skill_id": "rc_writer_intent",        "current_rank": 1, "clean_streak": 0, "total_evidence": 2, "last_classification": "demonstrated_weakness"},
+    # ── Reading: Vocabulary ───────────────────────────────────────────────────
+    {"section": "Reading", "skill_id": "rv_context_meaning",      "current_rank": 2, "clean_streak": 1, "total_evidence": 2, "last_classification": "demonstrated_strength"},
+    {"section": "Reading", "skill_id": "rv_paraphrase",           "current_rank": 1, "clean_streak": 1, "total_evidence": 2, "last_classification": "demonstrated_strength"},
+    # ── Reading: Text Structure ───────────────────────────────────────────────
+    {"section": "Reading", "skill_id": "rt_paragraph_purpose",    "current_rank": 1, "clean_streak": 0, "total_evidence": 2, "last_classification": "demonstrated_weakness"},
 ]
 
 
@@ -369,7 +383,7 @@ def seed_demo(email=DEFAULT_EMAIL, password=DEFAULT_PASSWORD, reset=False):
             rank = LearnerSkillRank(
                 rank_id=uid(),
                 learner_id=learner_id,
-                section="Writing",
+                section=rank_data["section"],
                 skill_id=rank_data["skill_id"],
                 current_rank=rank_data["current_rank"],
                 clean_streak=rank_data["clean_streak"],
@@ -378,11 +392,11 @@ def seed_demo(email=DEFAULT_EMAIL, password=DEFAULT_PASSWORD, reset=False):
             )
             db.add(rank)
 
-        at_rank_2 = len([r for r in SKILL_RANKS if r["current_rank"] == 2])
-        at_rank_3 = len([r for r in SKILL_RANKS if r["current_rank"] == 3])
+        writing_ranks = [r for r in SKILL_RANKS if r["section"] == "Writing"]
+        reading_ranks = [r for r in SKILL_RANKS if r["section"] == "Reading"]
         near_rankup = len([r for r in SKILL_RANKS if r["clean_streak"] == 2])
-        print(f"  ✅ {at_rank_2} skills at rank 2, {at_rank_3} at rank 3")
-        print(f"  ⭐ {near_rankup} skills with streak=2 (one essay from rank-up!)")
+        print(f"  ✅ {len(writing_ranks)} Writing skill ranks, {len(reading_ranks)} Reading skill ranks")
+        print(f"  ⭐ {near_rankup} skills with streak=2 (one attempt from rank-up!)")
 
         db.commit()
 

@@ -76,11 +76,8 @@ graph TD
         Services --> PG["PostgreSQL 16\nDocker service\npostgres_data volume"]
     end
 
-    FastAPI -->|MCP protocol| MCP["MCP Server\n/mcp-server/mcp\n12 tools"]
-    MCP --> PG
-
     Telegram["Telegram\n@qieltsbot"] -->|webhook POST| FastAPI
-    FastAPI -->|Qwen tool-calling agent\nsame functions as MCP| Services
+    FastAPI -->|Qwen tool-calling agent| Services
     Services -->|text + vision generation| ModelStudio["Alibaba Cloud\nModel Studio\nqwen-plus + qwen-turbo + qwen-vl-plus\nSingapore workspace"]
     Services -->|text embeddings| EMB["DashScope Embeddings\ntext-embedding-v3\n1024 dimensions"]
     Services -->|speech-to-text| ASR["DashScope ASR\nqwen3-asr-flash"]
@@ -191,7 +188,7 @@ score = 0.45 × cosine_similarity(context_embedding, memory_embedding)
 
 where `spaced_repetition_score = confidence × recency_weight` and recency
 decays from 1.0 (≤7 days) to 0.4 (>90 days). When no context is provided
-(e.g. MCP tool calls from external agents) pure spaced repetition is used.
+(e.g. tool calls with no session context) pure spaced repetition is used.
 Embeddings are computed on write via `app/services/embedding_service.py`
 and stored as JSON text in the `embedding` column; cosine similarity is
 computed in Python with numpy — no pgvector extension required.
@@ -386,42 +383,19 @@ Currently 9 tracks = 9 TTS calls total regardless of user count.
 
 ---
 
-## MCP Server + Telegram Agent
+## Telegram Coaching Agent
 
-The Qonda tool layer is exposed in two ways: as an MCP server (for Claude Desktop
-and any MCP-compatible client) and as a Qwen tool-calling agent powering the
-Telegram bot. Both call the same Python functions — one implementation, two surfaces.
+The Telegram bot runs a Qwen tool-calling agent that shares the same backend
+coaching functions as the web app — one implementation, two surfaces.
 
 ```mermaid
 graph LR
     A["Tutor Agent\n(internal)"] -->|function calling| TOOLS
-    B["Claude Desktop\nMCP client"] -->|MCP protocol| MCP
-    C["External platforms"] -->|MCP protocol| MCP
     D["@qieltsbot\nTelegram"] -->|Qwen agent\ntool-calling| TOOLS
 
-    TOOLS["shared tool functions\n(app/mcp/memory_server.py\napp/services/*.py)"]
-    MCP["MCP Server\n/mcp-server/mcp\nFastMCP"]
-
-    TOOLS --> DB
-    MCP --> DB[("PostgreSQL\nlearner_memories\nlearner_skill_ranks\npractice_attempts\nstudy_schedules")]
+    TOOLS["shared backend functions\n(app/services/*.py)"]
+    TOOLS --> DB[("PostgreSQL\nlearner_memories\nlearner_skill_ranks\npractice_attempts\nstudy_schedules")]
 ```
-
-**12 tools (memory + scheduling):**
-
-| Tool | Category |
-|---|---|
-| `find_learner(email)` | Identity — resolve learner_id from email |
-| `get_coaching_context` | Overview — full bundle, call first |
-| `get_learner_weaknesses` | Memory — active weaknesses with confidence |
-| `get_learner_strengths` | Memory — active strengths |
-| `get_skill_ranks` | Skills — all ranks with band estimates |
-| `get_weakest_skill_for_learner` | Skills — single weakest + rank definitions |
-| `get_recent_attempts` | History — attempt history with scores |
-| `get_learner_memory_stats` | Memory — profile statistics |
-| `get_study_schedule` | Schedule — current schedule + calendar status |
-| `schedule_study_sessions` | Schedule — create/update recurring schedule |
-| `add_one_off_session` | Schedule — single extra session on a date |
-| `cancel_study_schedule` | Schedule — cancel + delete calendar events |
 
 ### Telegram / Qwen agent loop
 
@@ -434,7 +408,7 @@ User messages @qieltsbot
   → reply sent via Telegram Bot API
 ```
 
-The Qwen agent has access to all 12 tools above. A message like
+The Qwen agent has access to all coaching and scheduling tools. A message like
 *"What should I study and when is my next session?"* triggers
 `get_coaching_context` + `get_study_schedule` in a single turn,
 then Qwen synthesises both results into one reply.
@@ -499,7 +473,7 @@ study_schedules               ← Recurring study plan per learner
   google_email VARCHAR        ← connected Google account
   is_active BOOLEAN
   created_at, updated_at
-  ← Scheduling tools (MCP + Telegram) read/write this table
+  ← Scheduling tools (web app + Telegram) read/write this table
   ← Google Calendar events created via google-api-python-client
   ← RRULE: FREQ=WEEKLY;BYDAY=MO,WE,FR;UNTIL=<test_date>
 
@@ -641,9 +615,8 @@ Every learner gets it proxied from Alibaba Cloud OSS instantly.
 TTS quota consumed exactly once per track for all users for all time.
 
 ### 6. One tool layer, three consumers
-The coaching tool functions (`app/mcp/memory_server.py`) are called by three
-different consumers: the **Tutor agent** (OpenAI function calling, internal),
-the **MCP server** (FastMCP, Claude Desktop and external platforms), and the
+The coaching tool functions (`app/services/`) are called by two
+consumers: the **Tutor agent** (Qwen function calling, internal) and the
 **Telegram Qwen agent** (tool-calling, `telegram_service.py`). One Python
 implementation, zero duplication. Adding a new tool immediately makes it
 available to all three surfaces.
@@ -680,7 +653,7 @@ are stored as JSON-serialised float lists in the `embedding` column;
 cosine similarity is computed in Python (numpy) — no pgvector or
 separate vector store is needed at IELTS coaching scale (typically
 20–200 memories per learner). When no context is provided (e.g.
-external MCP calls) the system falls back to pure spaced-repetition
+calls with no session context) the system falls back to pure spaced-repetition
 ranking, so existing integrations are unaffected.
 
 ### 11. PostgreSQL as the production database

@@ -1,0 +1,534 @@
+<title>Qonda IELTS — System Architecture</title>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:       #07101E;
+  --s0:       #0C1A30;
+  --s1:       #101F38;
+  --s2:       #152641;
+  --b0:       #1A2E4A;
+  --b1:       #243D60;
+  --orange:   #FF6520;
+  --orange-d: rgba(255,101,32,.13);
+  --orange-g: rgba(255,101,32,.22);
+  --teal:     #00C9A0;
+  --teal-d:   rgba(0,201,160,.12);
+  --blue:     #4A9FFF;
+  --blue-d:   rgba(74,159,255,.12);
+  --purple:   #9B7FFF;
+  --purple-d: rgba(155,127,255,.12);
+  --green:    #34D399;
+  --t1:       #E8F0FF;
+  --t2:       #8BA3C7;
+  --t3:       #4B6A8E;
+  --mono:     'JetBrains Mono','Fira Code','Cascadia Code',monospace;
+  --sans:     'Inter',system-ui,-apple-system,sans-serif;
+}
+
+body {
+  background: var(--bg);
+  background-image: radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);
+  background-size: 22px 22px;
+  color: var(--t1);
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 28px 32px 24px;
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─── */
+.hdr {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 26px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--b0);
+}
+.logo {
+  width: 42px; height: 42px;
+  background: var(--orange);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 21px; font-weight: 800; color: #fff;
+  flex-shrink: 0; letter-spacing: -1px;
+}
+.hdr-text h1 { font-size: 18px; font-weight: 700; letter-spacing: -.3px; }
+.hdr-text p  { font-size: 11px; color: var(--t3); font-family: var(--mono); }
+.hdr-badges  { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+.badge {
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; letter-spacing: .3px;
+  font-family: var(--mono);
+}
+.b-or { background: var(--orange-d); color: var(--orange); border: 1px solid rgba(255,101,32,.35); }
+.b-te { background: var(--teal-d);   color: var(--teal);   border: 1px solid rgba(0,201,160,.3); }
+.b-bl { background: var(--blue-d);   color: var(--blue);   border: 1px solid rgba(74,159,255,.3); }
+.b-pu { background: var(--purple-d); color: var(--purple); border: 1px solid rgba(155,127,255,.3); }
+
+/* ─── MAIN GRID ─── */
+.arch {
+  display: grid;
+  grid-template-columns: 186px 1fr 210px;
+  gap: 0;
+  position: relative;
+  min-height: 480px;
+}
+.connectors {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; overflow: visible;
+}
+.col-lbl {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--t3);
+  font-family: var(--mono); margin-bottom: 10px;
+}
+
+/* ─── LEFT: User surfaces ─── */
+.col-left { display: flex; flex-direction: column; gap: 10px; padding-right: 16px; }
+.surf {
+  background: var(--s0); border: 1px solid var(--b0);
+  border-radius: 8px; padding: 9px 11px;
+  display: flex; align-items: flex-start; gap: 9px;
+}
+.surf-icon { font-size: 17px; line-height: 1.2; flex-shrink: 0; }
+.surf-name { font-size: 12px; font-weight: 600; color: var(--t1); }
+.surf-sub  { font-size: 10px; color: var(--t3); font-family: var(--mono); line-height: 1.4; }
+.surf.c-bl { border-color: rgba(74,159,255,.3); }
+.surf.c-te { border-color: rgba(0,201,160,.3); }
+.surf.c-pu { border-color: rgba(155,127,255,.3); }
+
+/* ─── CENTER: ECS ─── */
+.col-mid { padding: 0 10px; }
+.ecs {
+  background: var(--s1);
+  border: 1.5px solid var(--orange);
+  border-radius: 12px;
+  padding: 18px 16px 14px;
+  position: relative;
+  box-shadow: 0 0 36px var(--orange-g), inset 0 0 50px rgba(255,101,32,.03);
+}
+.ecs-lbl {
+  position: absolute; top: -10px; left: 14px;
+  background: var(--bg); padding: 0 7px;
+  font-size: 9px; font-weight: 700; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--orange);
+  font-family: var(--mono);
+}
+.ecs-inner { display: flex; flex-direction: column; gap: 10px; }
+
+/* Nginx */
+.nginx-bar {
+  background: var(--s0); border: 1px solid var(--b1);
+  border-radius: 6px; padding: 7px 11px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nginx-name { font-size: 11px; font-weight: 600; font-family: var(--mono); color: var(--t2); }
+.nginx-meta { font-size: 9px; color: var(--t3); font-family: var(--mono); }
+
+/* FastAPI card */
+.fapi {
+  background: var(--s0); border: 1px solid var(--b1);
+  border-radius: 8px; padding: 12px 12px 10px;
+}
+.fapi-title {
+  font-size: 10px; font-weight: 700; font-family: var(--mono); color: var(--t2);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.fapi-title::before {
+  content: ''; display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; background: var(--green); box-shadow: 0 0 5px var(--green);
+}
+.agents-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 7px; margin-bottom: 9px;
+}
+.ag {
+  background: var(--s2); border: 1px solid var(--b0);
+  border-radius: 6px; padding: 7px 9px;
+}
+.ag-name { font-size: 11px; font-weight: 600; color: var(--t1); margin-bottom: 1px; }
+.ag-desc { font-size: 9px; color: var(--t3); font-family: var(--mono); line-height: 1.4; }
+.ag.c-te { border-color: rgba(0,201,160,.25); }
+.ag.c-bl { border-color: rgba(74,159,255,.25); }
+.ag.c-or { border-color: rgba(255,101,32,.25); }
+.ag.c-pu { border-color: rgba(155,127,255,.25); }
+
+.row2 { display: flex; gap: 7px; }
+.mem-box {
+  flex: 3; background: var(--teal-d);
+  border: 1px solid rgba(0,201,160,.25);
+  border-radius: 6px; padding: 7px 9px;
+}
+.mem-title { font-size: 11px; font-weight: 600; color: var(--teal); font-family: var(--mono); margin-bottom: 3px; }
+.mem-formula { font-size: 9px; color: var(--t3); font-family: var(--mono); }
+.ped-box {
+  flex: 2; background: var(--s2);
+  border: 1px solid var(--b0); border-radius: 6px; padding: 7px 9px;
+}
+.ped-title { font-size: 11px; font-weight: 600; color: var(--t2); margin-bottom: 2px; }
+.ped-desc  { font-size: 9px; color: var(--t3); font-family: var(--mono); }
+
+/* PostgreSQL */
+.pg {
+  background: var(--s0); border: 1px solid rgba(74,159,255,.25);
+  border-radius: 6px; padding: 9px 11px;
+}
+.pg-title {
+  font-size: 11px; font-weight: 600; color: var(--blue);
+  font-family: var(--mono); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 5px;
+}
+.pg-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.pg-tag {
+  font-size: 9px; font-family: var(--mono);
+  background: var(--blue-d); color: var(--t2);
+  padding: 2px 6px; border-radius: 4px;
+}
+
+/* ─── RIGHT: Qwen APIs ─── */
+.col-right { display: flex; flex-direction: column; gap: 7px; padding-left: 16px; }
+.api-card {
+  background: var(--s0); border: 1px solid rgba(255,101,32,.2);
+  border-radius: 7px; padding: 7px 10px;
+  display: flex; align-items: flex-start; gap: 7px;
+}
+.api-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--orange); flex-shrink: 0; margin-top: 4px; }
+.api-name { font-size: 11px; font-weight: 600; color: var(--orange); font-family: var(--mono); margin-bottom: 1px; }
+.api-use  { font-size: 9px; color: var(--t3); line-height: 1.4; }
+.oss-card {
+  background: var(--s0); border: 1.5px solid rgba(255,101,32,.35);
+  border-radius: 7px; padding: 7px 10px; margin-top: 3px;
+}
+.oss-title { font-size: 11px; font-weight: 600; color: var(--orange); font-family: var(--mono); margin-bottom: 1px; }
+.oss-sub   { font-size: 9px; color: var(--t3); }
+
+/* ─── EXTERNAL SERVICES ─── */
+.ext-row {
+  display: flex; gap: 10px;
+  margin-top: 20px; padding-top: 18px;
+  border-top: 1px solid var(--b0);
+}
+.ext-card {
+  background: var(--s0); border: 1px solid var(--b0);
+  border-radius: 8px; padding: 9px 13px;
+  flex: 1; display: flex; align-items: center; gap: 10px;
+}
+.ext-icon { font-size: 18px; flex-shrink: 0; line-height: 1; }
+.ext-name { font-size: 12px; font-weight: 600; }
+.ext-sub  { font-size: 10px; color: var(--t3); font-family: var(--mono); }
+
+/* ─── FOOTER ─── */
+.ftr {
+  margin-top: 18px; padding-top: 14px;
+  border-top: 1px solid var(--b0);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: var(--t3); font-family: var(--mono);
+}
+.ftr-brand { color: var(--orange); font-weight: 600; }
+</style>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="logo">Q</div>
+  <div class="hdr-text">
+    <h1>Qonda IELTS</h1>
+    <p>System Architecture · Track 1: MemoryAgent</p>
+  </div>
+  <div class="hdr-badges">
+    <span class="badge b-or">Alibaba Cloud ECS</span>
+    <span class="badge b-or">6 Qwen APIs</span>
+    <span class="badge b-te">MCP Server · 12 tools</span>
+    <span class="badge b-bl">PostgreSQL 16</span>
+    <span class="badge b-pu">Google Calendar</span>
+  </div>
+</div>
+
+<!-- MAIN DIAGRAM -->
+<div class="arch" id="arch">
+  <!-- SVG connectors overlay (filled by JS) -->
+  <svg class="connectors" id="svg-conn"></svg>
+
+  <!-- LEFT: User Surfaces -->
+  <div class="col-left">
+    <div class="col-lbl">User Surfaces</div>
+
+    <div class="surf c-bl" id="n-web">
+      <div class="surf-icon">🌐</div>
+      <div>
+        <div class="surf-name">Web App</div>
+        <div class="surf-sub">React + Vite<br>ielts.qonda.xyz</div>
+      </div>
+    </div>
+
+    <div class="surf c-te" id="n-tg-surf">
+      <div class="surf-icon">✈️</div>
+      <div>
+        <div class="surf-name">Telegram Bot</div>
+        <div class="surf-sub">@qieltsbot<br>Qwen tool-calling</div>
+      </div>
+    </div>
+
+    <div class="surf c-pu" id="n-study">
+      <div class="surf-icon">📅</div>
+      <div>
+        <div class="surf-name">Study Plan</div>
+        <div class="surf-sub">Google Calendar<br>OAuth scheduling</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: ECS -->
+  <div class="col-mid">
+    <div class="col-lbl" style="text-align:center;">Infrastructure</div>
+    <div class="ecs" id="n-ecs">
+      <div class="ecs-lbl">Alibaba Cloud ECS · Singapore · ecs.e-c1m2.large</div>
+
+      <div class="ecs-inner">
+
+        <!-- Nginx -->
+        <div class="nginx-bar" id="n-nginx">
+          <div class="nginx-name">Nginx</div>
+          <div class="nginx-meta">:80 / :443 · TLS · SSE proxy · Let's Encrypt</div>
+        </div>
+
+        <!-- FastAPI -->
+        <div class="fapi" id="n-fapi">
+          <div class="fapi-title">FastAPI · Port 8000 · Uvicorn 2 workers</div>
+
+          <div class="agents-grid">
+            <div class="ag c-te" id="n-coach">
+              <div class="ag-name">Coach Agent</div>
+              <div class="ag-desc">Scores submissions<br>writes memories + ranks</div>
+            </div>
+            <div class="ag c-bl" id="n-tutor">
+              <div class="ag-name">Tutor Agent</div>
+              <div class="ag-desc">Live mid-session<br>reads context + plans</div>
+            </div>
+            <div class="ag c-or" id="n-qwenag">
+              <div class="ag-name">Qwen Agent</div>
+              <div class="ag-desc">Telegram · tool-calling<br>agentic loop × 5</div>
+            </div>
+            <div class="ag c-pu" id="n-ped2">
+              <div class="ag-name">Pedagogy Layer</div>
+              <div class="ag-desc">16 frameworks<br>4 learner stages</div>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="mem-box" id="n-mem">
+              <div class="mem-title">Memory Service</div>
+              <div class="mem-formula">score = 0.45 · cosine_sim + 0.55 · SR_score</div>
+            </div>
+            <div class="ped-box" id="n-ped">
+              <div class="ped-title">Pedagogy Layer</div>
+              <div class="ped-desc">16 frameworks · 4 stages<br>band-gated fading</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PostgreSQL -->
+        <div class="pg" id="n-pg">
+          <div class="pg-title">🗃 PostgreSQL 16 · postgres_data volume</div>
+          <div class="pg-tags">
+            <span class="pg-tag">learner_memories</span>
+            <span class="pg-tag">learner_skill_ranks</span>
+            <span class="pg-tag">practice_attempts</span>
+            <span class="pg-tag">study_schedules</span>
+            <span class="pg-tag">tutor_sessions</span>
+            <span class="pg-tag">learner_criterion_state</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Qwen APIs -->
+  <div class="col-right">
+    <div class="col-lbl">Qwen Cloud APIs</div>
+
+    <div class="api-card" id="n-qplus">
+      <div class="api-dot"></div>
+      <div>
+        <div class="api-name">qwen-plus</div>
+        <div class="api-use">Essay eval · memory extraction · coach &amp; tutor agents</div>
+      </div>
+    </div>
+
+    <div class="api-card" id="n-qturbo">
+      <div class="api-dot"></div>
+      <div>
+        <div class="api-name">qwen-turbo</div>
+        <div class="api-use">Skill classification · JSON repair · fast tasks</div>
+      </div>
+    </div>
+
+    <div class="api-card" id="n-qvl">
+      <div class="api-dot"></div>
+      <div>
+        <div class="api-name">qwen-vl-plus</div>
+        <div class="api-use">Handwritten essay image extraction (multimodal)</div>
+      </div>
+    </div>
+
+    <div class="api-card" id="n-asr">
+      <div class="api-dot"></div>
+      <div>
+        <div class="api-name">qwen3-asr-flash</div>
+        <div class="api-use">Real-time speech-to-text · Speaking Coach</div>
+      </div>
+    </div>
+
+    <div class="api-card" id="n-tts">
+      <div class="api-dot"></div>
+      <div>
+        <div class="api-name">qwen3-tts-flash</div>
+        <div class="api-use">Text-to-speech · Cherry voice · Listening Coach</div>
+      </div>
+    </div>
+
+    <div class="api-card" id="n-emb">
+      <div class="api-dot"></div>
+      <div>
+        <div class="api-name">text-embedding-v3</div>
+        <div class="api-use">1024-d semantic memory embeddings · OSS-pgvector</div>
+      </div>
+    </div>
+
+    <div class="oss-card" id="n-oss">
+      <div class="oss-title">Alibaba Cloud OSS</div>
+      <div class="oss-sub">Audio CDN · ielts-memorycoach-audio · ap-southeast-1</div>
+    </div>
+  </div>
+</div>
+
+<!-- EXTERNAL SERVICES -->
+<div class="ext-row">
+  <div class="ext-card">
+    <div class="ext-icon">📅</div>
+    <div>
+      <div class="ext-name">Google Calendar API</div>
+      <div class="ext-sub">OAuth · RRULE recurring study events · reminders</div>
+    </div>
+  </div>
+  <div class="ext-card">
+    <div class="ext-icon">✈️</div>
+    <div>
+      <div class="ext-name">Telegram Bot API</div>
+      <div class="ext-sub">Webhook POST · sendMessage · typing_action</div>
+    </div>
+  </div>
+  <div class="ext-card">
+    <div class="ext-icon">🔐</div>
+    <div>
+      <div class="ext-name">Google OAuth 2.0</div>
+      <div class="ext-sub">Login + Calendar · Authlib · google-auth-oauthlib</div>
+    </div>
+  </div>
+  <div class="ext-card">
+    <div class="ext-icon">🌐</div>
+    <div>
+      <div class="ext-name">Let's Encrypt</div>
+      <div class="ext-sub">HTTPS · ielts.qonda.xyz · Certbot auto-renew</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="ftr">
+  <span><span class="ftr-brand">Qonda IELTS</span> · Track 1: MemoryAgent · Qwen Hackathon 2026</span>
+  <span>Model Studio · DashScope · ECS Singapore · OSS · PostgreSQL 16 · Docker Compose</span>
+</div>
+
+<script>
+(function() {
+  function rel(el, container) {
+    const er = el.getBoundingClientRect();
+    const cr = container.getBoundingClientRect();
+    return {
+      left:   er.left   - cr.left,
+      right:  er.right  - cr.left,
+      top:    er.top    - cr.top,
+      bottom: er.bottom - cr.top,
+      midX:   (er.left + er.right)  / 2 - cr.left,
+      midY:   (er.top  + er.bottom) / 2 - cr.top,
+    };
+  }
+
+  function curve(svg, x1, y1, x2, y2, color, dash, aw) {
+    const cp = (x1 + x2) / 2;
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', `M${x1},${y1} C${cp},${y1} ${cp},${y2} ${x2},${y2}`);
+    p.setAttribute('stroke', color);
+    p.setAttribute('stroke-width', '1.5');
+    p.setAttribute('fill', 'none');
+    p.setAttribute('opacity', '0.65');
+    if (dash) p.setAttribute('stroke-dasharray', dash);
+    svg.appendChild(p);
+
+    // Arrow
+    const a = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    a.setAttribute('points', `${x2},${y2} ${x2-7},${y2-3} ${x2-7},${y2+3}`);
+    a.setAttribute('fill', color);
+    a.setAttribute('opacity', '0.65');
+    svg.appendChild(a);
+  }
+
+  function draw() {
+    const arch = document.getElementById('arch');
+    const svg  = document.getElementById('svg-conn');
+    const ar   = arch.getBoundingClientRect();
+    svg.setAttribute('width',  ar.width);
+    svg.setAttribute('height', ar.height);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    const ids = ['n-web','n-tg-surf','n-study','n-nginx','n-fapi',
+                 'n-ped2','n-qwenag','n-qplus','n-asr','n-tts','n-emb'];
+    const nodes = {};
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) nodes[id] = rel(el, arch);
+    });
+
+    // Web → Nginx (left edge of ECS via nginx)
+    if (nodes['n-web'] && nodes['n-nginx'])
+      curve(svg,
+        nodes['n-web']['right'],   nodes['n-web']['midY'],
+        nodes['n-nginx']['left'],  nodes['n-nginx']['midY'],
+        '#4A9FFF', '', 7);
+
+    // Telegram surface → Qwen Agent (inside FastAPI)
+    if (nodes['n-tg-surf'] && nodes['n-qwenag'])
+      curve(svg,
+        nodes['n-tg-surf']['right'],  nodes['n-tg-surf']['midY'],
+        nodes['n-qwenag']['left'],    nodes['n-qwenag']['midY'],
+        '#00C9A0', '', 7);
+
+    // Study Plan → FastAPI
+    if (nodes['n-study'] && nodes['n-fapi'])
+      curve(svg,
+        nodes['n-study']['right'], nodes['n-study']['midY'],
+        nodes['n-fapi']['left'],   nodes['n-fapi']['midY'],
+        '#9B7FFF', '', 7);
+
+    // FastAPI → qwen-plus (first API)
+    if (nodes['n-fapi'] && nodes['n-qplus'])
+      curve(svg,
+        nodes['n-fapi']['right'],  nodes['n-fapi']['midY'],
+        nodes['n-qplus']['left'],  nodes['n-qplus']['midY'],
+        '#FF6520', '', 7);
+  }
+
+  if (document.readyState === 'complete') {
+    requestAnimationFrame(() => requestAnimationFrame(draw));
+  } else {
+    window.addEventListener('load', () => requestAnimationFrame(() => requestAnimationFrame(draw)));
+  }
+  window.addEventListener('resize', draw);
+})();
+</script>
