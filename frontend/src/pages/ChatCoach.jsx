@@ -65,7 +65,7 @@ const PRACTICE_LINKS = {
   Listening: '/listening',
 }
 
-const SESSION_CACHE_KEY = (section) => `chat_session_${section}`
+const SESSION_CACHE_KEY = (section, userId) => `chat_session_${userId}_${section}`
 
 export default function ChatCoach() {
   const { user } = useAuth()
@@ -94,7 +94,7 @@ export default function ChatCoach() {
     setError('')
 
     // Check session cache first
-    const cached = sessionStorage.getItem(SESSION_CACHE_KEY(sectionId))
+    const cached = sessionStorage.getItem(SESSION_CACHE_KEY(sectionId, user?.user_id))
     if (cached) {
       try {
         const parsed = JSON.parse(cached)
@@ -106,7 +106,7 @@ export default function ChatCoach() {
         setPedagogy(parsed.pedagogy || null)
         return
       } catch {
-        sessionStorage.removeItem(SESSION_CACHE_KEY(sectionId))
+        sessionStorage.removeItem(SESSION_CACHE_KEY(sectionId, user?.user_id))
       }
     }
 
@@ -140,7 +140,7 @@ export default function ChatCoach() {
       setSessionId(data.session_id || null)
       setPedagogy(data.pedagogy || null)
 
-      sessionStorage.setItem(SESSION_CACHE_KEY(sectionId), JSON.stringify({
+      sessionStorage.setItem(SESSION_CACHE_KEY(sectionId, user?.user_id), JSON.stringify({
         messages: newMessages,
         systemPrompt: data.system_prompt || '',
         state: data.state,
@@ -176,7 +176,7 @@ export default function ChatCoach() {
         }
         const updatedMessages = [...newMessages, replyMessage]
         setMessages(updatedMessages)
-        sessionStorage.setItem(SESSION_CACHE_KEY(selectedSection), JSON.stringify({
+        sessionStorage.setItem(SESSION_CACHE_KEY(selectedSection, user?.user_id), JSON.stringify({
           messages: updatedMessages,
           systemPrompt,
           state,
@@ -203,7 +203,7 @@ export default function ChatCoach() {
       setMessages(updatedMessages)
       setState(res.data.state)
 
-      sessionStorage.setItem(SESSION_CACHE_KEY(selectedSection), JSON.stringify({
+      sessionStorage.setItem(SESSION_CACHE_KEY(selectedSection, user?.user_id), JSON.stringify({
         messages: updatedMessages,
         systemPrompt,
         state: res.data.state,
@@ -235,7 +235,7 @@ export default function ChatCoach() {
 
   const resetSession = () => {
     if (selectedSection) {
-      sessionStorage.removeItem(SESSION_CACHE_KEY(selectedSection))
+      sessionStorage.removeItem(SESSION_CACHE_KEY(selectedSection, user?.user_id))
     }
     setSelectedSection(null)
     setMessages([])
