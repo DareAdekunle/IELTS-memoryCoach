@@ -22,11 +22,9 @@ def _upload_image_to_oss(image_bytes: bytes, media_type: str) -> tuple[str, str]
     key = f"tmp-essay-images/{uuid.uuid4()}.{ext}"
     auth = oss2.Auth(OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET)
     bucket = oss2.Bucket(auth, f"https://{OSS_ENDPOINT}", OSS_BUCKET)
-    bucket.put_object(
-        key, image_bytes,
-        headers={"Content-Type": media_type, "x-oss-object-acl": "public-read"},
-    )
-    url = f"https://{OSS_BUCKET}.{OSS_ENDPOINT}/{key}"
+    bucket.put_object(key, image_bytes, headers={"Content-Type": media_type})
+    # Generate a signed URL valid for 5 minutes — Qwen VL can fetch it without needing public ACL
+    url = bucket.sign_url("GET", key, 300, slash_safe=True)
     return url, key
 
 
