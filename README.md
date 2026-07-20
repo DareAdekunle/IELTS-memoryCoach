@@ -212,8 +212,9 @@ VPC + Security  — isolated network, principle of least privilege
 
 ### ✍️ Writing Coach
 - Adaptive prompts matched to learner's current band level
-- **Handwritten essay upload** — photograph your essay, qwen-vl-plus
-  extracts the text, same evaluation pipeline runs
+- **Handwritten essay upload** — photograph your essay, image is uploaded to
+  Alibaba Cloud OSS as a pre-signed URL, qwen-vl-plus fetches and extracts the
+  text, same evaluation pipeline runs; temporary OSS object deleted after processing
 - Evaluated against 5 official rubric criteria
 - Coach Agent classifies 13 granular sub-skills via tool calls
 - Streaming feedback via SSE (first token ~1-2s)
@@ -313,12 +314,15 @@ The Telegram bot brings Qonda's full coaching intelligence to any device without
 **Architecture:**
 ```
 Telegram message → FastAPI /telegram/webhook
+  → keyword pre-filter (blocks off-topic / abuse without LLM call)
   → Qwen agent (qwen-plus, tool-calling)
   → same backend coaching functions as the web app
   → reply sent via Telegram Bot API
 ```
 
 The Qwen agent loop runs up to 5 tool-call iterations per message — enough for chained queries like "What should I study, and when is my next scheduled session?" in a single reply.
+
+**Scope guardrails:** A keyword pre-filter in the webhook handler short-circuits requests for API keys, code, .env files, and jailbreak attempts before they reach Qwen — zero LLM cost, instant refusal. All coach and tutor prompts carry a non-negotiable scope section that enforces IELTS-only responses and provides a fixed refusal template for off-topic requests.
 
 ---
 
@@ -331,6 +335,7 @@ Learners set a recurring study schedule (days, time, duration) during onboarding
 - **Personalized descriptions** — event title includes the learner's weakest skill
 - **Reminders** — email 60 min before, popup 10 min before
 - **Telegram writable** — `schedule_study_sessions` and `add_one_off_session` update both the DB and Google Calendar from the Telegram bot
+- **PKCE OAuth** — Google now requires PKCE for all OAuth flows; the authorization URL includes a S256 code challenge, with the verifier encoded in the state parameter so the stateless callback can complete the token exchange correctly
 
 ---
 
@@ -564,8 +569,9 @@ Qonda is already partway there: the Telegram bot today handles coaching question
 - [x] ACTION tag protocol — evidence loop closes after every tutor session
 - [x] PostgreSQL 16 — persistent named volume, survives container rebuilds
 - [x] Semantic memory embeddings — DashScope text-embedding-v3, hybrid retrieval
-- [x] Study scheduler — recurring sessions with Google Calendar integration
+- [x] Study scheduler — recurring sessions with Google Calendar integration (PKCE OAuth)
 - [x] Telegram bot — Qwen agent with tool-calling (@qieltsbot)
+- [x] Scope guardrails — keyword pre-filter + prompt-level refusals across all coaches, tutors, and Telegram bot
 - [ ] Listening replay/transcript condition gates in frontend UI
 - [x] Extend skill taxonomy to Reading (10), Speaking (9), Listening (8) sub-skills
 - [ ] Teacher / admin dashboard

@@ -5,10 +5,10 @@ import {
 } from 'lucide-react'
 
 const STATS = [
-  { value: '40,000+', label: 'Active learners' },
-  { value: '+0.9',    label: 'Avg band gain' },
+  { value: '40,000+', label: 'Target MAU at launch' },
+  { value: '+0.9',    label: 'Expected avg band gain' },
   { value: '24/7',    label: 'Always available' },
-  { value: '4.8★',   label: 'User rating' },
+  { value: 'Beta',    label: 'Currently in test phase' },
 ]
 
 const FEATURES = [
