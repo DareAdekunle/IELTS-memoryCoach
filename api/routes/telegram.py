@@ -87,6 +87,26 @@ def _process_message(chat_id: str, text: str):
         )
         return
 
+    # ── Keyword pre-filter — block obvious out-of-scope requests cheaply ─────
+    _BLOCKED = [
+        "api key", "apikey", ".env", "secret key", "access token", "auth token",
+        "bearer token", "private key", "client secret", "webhook secret",
+        "curl ", "bash ", "terminal", "command line", "sudo", "chmod",
+        "openai", "anthropic", "gemini", "chatgpt", "llm api",
+        "write code", "write a script", "write a function", "write a program",
+        "help me code", "help me build", "help me set up", "help me install",
+        "ignore your instructions", "ignore previous", "disregard your",
+        "act as", "pretend you are", "you are now", "jailbreak",
+    ]
+    text_lower = text.lower()
+    if any(kw in text_lower for kw in _BLOCKED):
+        send_message(
+            chat_id,
+            "I'm your IELTS coach — I can only help with IELTS preparation. "
+            "What would you like to work on today?"
+        )
+        return
+
     # ── Known learner — run Qwen agent ────────────────────────────────────────
     history = _history[chat_id]
     history.append({"role": "user", "content": text})
