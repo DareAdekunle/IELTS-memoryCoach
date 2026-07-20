@@ -157,6 +157,8 @@ async def calendar_callback(code: str, state: str):
             learner_name     = learner_name,
         )
     except Exception as e:
+        logger.error("Google Calendar event creation failed: %s", e)
+        logger.error("refresh_token present: %s", bool(tokens.get("refresh_token")))
         return RedirectResponse(f"{FRONTEND_URL}/study-plan?error=calendar_create")
 
     schedule_service.attach_google_calendar(
