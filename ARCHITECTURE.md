@@ -218,8 +218,12 @@ sequenceDiagram
 
     Note over R,F: Option B — handwritten image
     R->>F: POST /writing/submit/image (multipart)
-    F->>VL: extract_text_from_image()
+    F->>OSS: upload image (private object)
+    OSS-->>F: pre-signed GET URL (5 min TTL)
+    F->>VL: extract_text_from_image(signed_url)
+    VL-->>OSS: fetches image via signed URL
     VL-->>F: extracted essay text + confidence
+    F->>OSS: delete temporary object
     F->>Q1: evaluate_writing(extracted_text)
     Q1-->>F: scores + feedback
 
@@ -412,6 +416,23 @@ The Qwen agent has access to all coaching and scheduling tools. A message like
 *"What should I study and when is my next session?"* triggers
 `get_coaching_context` + `get_study_schedule` in a single turn,
 then Qwen synthesises both results into one reply.
+
+### Scope guardrails
+
+Two layers prevent the bot from being used outside IELTS coaching:
+
+1. **Keyword pre-filter** (`api/routes/telegram.py`) — checks for ~27 blocked
+   patterns (API keys, `.env`, code/script requests, jailbreak phrases) before
+   any Qwen call is made. Matching messages receive a fixed refusal and the
+   agent loop never starts.
+
+2. **System prompt boundary** (`app/services/telegram_service.py`) — the Qwen
+   system prompt contains a non-negotiable scope section listing exactly what
+   to refuse and providing a fixed one-sentence refusal template. The same
+   scope guardrail appears in all five coach/tutor prompts (`app/prompts/`).
+
+The pre-filter handles obvious abuse cheaply; the prompt guardrail handles
+subtler attempts that reach the LLM.
 
 ---
 
@@ -656,7 +677,23 @@ separate vector store is needed at IELTS coaching scale (typically
 calls with no session context) the system falls back to pure spaced-repetition
 ranking, so existing integrations are unaffected.
 
-### 11. PostgreSQL as the production database
+### 11. OSS pre-signed URLs for Qwen VL image input
+DashScope's VL endpoint only accepts `https://` URLs — base64 data URIs are
+rejected with a 400. Handwritten essay images are uploaded to a private OSS
+object, a 5-minute pre-signed GET URL is generated (`bucket.sign_url`), and
+that URL is passed to `qwen-vl-plus`. The temporary object is deleted in a
+`finally` block regardless of success or failure. No public-read ACL is
+required; the pre-signed URL gives Qwen time-limited access only.
+
+### 12. PKCE for Google Calendar OAuth
+Google requires PKCE for all OAuth flows (web server applications included).
+`get_auth_url()` generates a `code_verifier`, derives the `S256` challenge,
+and encodes the verifier inside the `state` parameter (base64 JSON). The
+callback decodes `state`, extracts the verifier, and passes it to
+`flow.fetch_token(code_verifier=...)`. This keeps the flow fully stateless —
+no server-side session storage needed for the verifier.
+
+### 13. PostgreSQL as the production database
 PostgreSQL 16 runs as a separate Docker service with a named volume.
 Benefits over the former SQLite approach:
 - **Concurrent writes** — uvicorn's 2-worker setup hits a real connection
