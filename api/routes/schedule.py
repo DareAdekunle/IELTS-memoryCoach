@@ -14,10 +14,13 @@ Routes:
 """
 
 import os
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from typing import Optional, List
+
+logger = logging.getLogger(__name__)
 
 from api.auth.router import get_current_user
 from api.auth.models import User
@@ -128,6 +131,7 @@ async def calendar_callback(code: str, state: str):
     try:
         tokens = calendar_service.exchange_code(code)
     except Exception as e:
+        logger.error("Google Calendar token exchange failed: %s", e)
         return RedirectResponse(f"{FRONTEND_URL}/study-plan?error=token_exchange")
 
     raw = schedule_service.get_schedule_raw(learner_id)

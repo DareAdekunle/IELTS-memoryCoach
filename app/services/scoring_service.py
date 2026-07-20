@@ -1,5 +1,6 @@
 import os
 import sys
+import uuid
 import base64
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -7,6 +8,34 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from app.services.qwen_service import call_qwen_for_json, client, QWEN_MODEL
 from app.services.practice_service import get_rubric_summary
 from app.utils.json_utils import safe_parse_json, extract_json_from_text
+
+OSS_ACCESS_KEY_ID     = os.getenv("OSS_ACCESS_KEY_ID")
+OSS_ACCESS_KEY_SECRET = os.getenv("OSS_ACCESS_KEY_SECRET")
+OSS_BUCKET            = os.getenv("OSS_BUCKET", "ielts-memorycoach-audio")
+OSS_ENDPOINT          = os.getenv("OSS_ENDPOINT", "oss-ap-southeast-1.aliyuncs.com")
+
+
+def _upload_image_to_oss(image_bytes: bytes, media_type: str) -> tuple[str, str]:
+    """Upload image to OSS and return (public_url, object_key) for later deletion."""
+    import oss2
+    ext = media_type.split("/")[-1].replace("jpeg", "jpg")
+    key = f"tmp-essay-images/{uuid.uuid4()}.{ext}"
+    auth = oss2.Auth(OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET)
+    bucket = oss2.Bucket(auth, f"https://{OSS_ENDPOINT}", OSS_BUCKET)
+    bucket.put_object(key, image_bytes, headers={"Content-Type": media_type})
+    url = f"https://{OSS_BUCKET}.{OSS_ENDPOINT}/{key}"
+    return url, key
+
+
+def _delete_oss_object(key: str):
+    """Delete a temporary OSS object after Qwen VL has processed it."""
+    try:
+        import oss2
+        auth = oss2.Auth(OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET)
+        bucket = oss2.Bucket(auth, f"https://{OSS_ENDPOINT}", OSS_BUCKET)
+        bucket.delete_object(key)
+    except Exception:
+        pass
 
 PROMPTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts")
 
@@ -106,10 +135,10 @@ def extract_text_from_image(image_bytes: bytes, media_type: str = "image/jpeg") 
             "error": str | None
         }
     """
+    oss_key = None
     try:
-        # Encode image as base64 data URI
-        b64_image = base64.b64encode(image_bytes).decode("utf-8")
-        data_uri = f"data:{media_type};base64,{b64_image}"
+        # Upload to OSS so DashScope VL endpoint receives an https:// URL
+        image_url, oss_key = _upload_image_to_oss(image_bytes, media_type)
 
         response = client.chat.completions.create(
             model="qwen-vl-plus",
@@ -119,7 +148,7 @@ def extract_text_from_image(image_bytes: bytes, media_type: str = "image/jpeg") 
                     "content": [
                         {
                             "type": "image_url",
-                            "image_url": {"url": data_uri}
+                            "image_url": {"url": image_url}
                         },
                         {
                             "type": "text",
@@ -184,6 +213,9 @@ def extract_text_from_image(image_bytes: bytes, media_type: str = "image/jpeg") 
             "notes": "",
             "error": str(e)
         }
+    finally:
+        if oss_key:
+            _delete_oss_object(oss_key)
 
 
 def evaluate_writing_from_image(
