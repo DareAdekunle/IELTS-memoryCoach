@@ -9,6 +9,8 @@ via OAuth (Option A — write to the learner's calendar directly).
 import os
 import json
 import base64
+import hashlib
+import secrets
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from typing import Optional
@@ -37,19 +39,30 @@ def get_auth_url(learner_id: str) -> str:
     """Return the Google OAuth consent URL for calendar access."""
     from google_auth_oauthlib.flow import Flow
     flow = _make_flow()
+
+    # PKCE — Google requires this for all OAuth flows
+    code_verifier = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode().rstrip("=")
+    code_challenge = base64.urlsafe_b64encode(
+        hashlib.sha256(code_verifier.encode()).digest()
+    ).decode().rstrip("=")
+
+    # Store code_verifier in state so the callback can retrieve it
     state = base64.urlsafe_b64encode(
-        json.dumps({"learner_id": learner_id}).encode()
+        json.dumps({"learner_id": learner_id, "cv": code_verifier}).encode()
     ).decode()
+
     auth_url, _ = flow.authorization_url(
         access_type="offline",
         include_granted_scopes="false",
         prompt="consent",
         state=state,
+        code_challenge=code_challenge,
+        code_challenge_method="S256",
     )
     return auth_url
 
 
-def exchange_code(code: str) -> dict:
+def exchange_code(code: str, code_verifier: str = None) -> dict:
     """
     Exchange an OAuth authorisation code for tokens.
     Returns {"access_token": ..., "refresh_token": ..., "email": ...}
@@ -58,7 +71,10 @@ def exchange_code(code: str) -> dict:
     import googleapiclient.discovery as gd
 
     flow = _make_flow()
-    flow.fetch_token(code=code)
+    fetch_kwargs = {"code": code}
+    if code_verifier:
+        fetch_kwargs["code_verifier"] = code_verifier
+    flow.fetch_token(**fetch_kwargs)
     creds = flow.credentials
 
     # Get the user's email so we can display which account is linked

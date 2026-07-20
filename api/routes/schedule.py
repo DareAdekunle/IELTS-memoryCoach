@@ -125,11 +125,12 @@ async def calendar_callback(code: str, state: str):
     try:
         payload = calendar_service.decode_state(state)
         learner_id = payload["learner_id"]
+        code_verifier = payload.get("cv")
     except Exception:
         return RedirectResponse(f"{FRONTEND_URL}/study-plan?error=bad_state")
 
     try:
-        tokens = calendar_service.exchange_code(code)
+        tokens = calendar_service.exchange_code(code, code_verifier=code_verifier)
     except Exception as e:
         logger.error("Google Calendar token exchange failed: %s", e)
         return RedirectResponse(f"{FRONTEND_URL}/study-plan?error=token_exchange")
