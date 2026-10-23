@@ -73,6 +73,16 @@ DOCS
   ✅ ARCHITECTURE.md          — system diagrams, DB schema, agent loops
   ✅ docs/pedagogy_framework.md — full pedagogical design + code map
 
+SPRINT 0 — STABILISE (Oct 2026)
+  ✅ Tutor prompt/transcript server-side; session ownership enforced
+  ✅ Agent tools bound to authenticated learner; /mcp-server token-gated
+  ✅ Alembic migrations (scripts/migrate.py runs before the API)
+  ✅ Renamed Qonda → BandUp (domain + internal names unchanged)
+  ✅ pytest suite — docker exec ielts-api-dev pytest
+  ✅ Cost model — scripts/cost_model.py (live; a few cents per run)
+  ✅ WhatsApp parity + one-time-code bot linking + webhook verification
+  ⬜ ECS server shut down — app currently runs locally only
+
 UPCOMING
   ⬜ Listening replay/transcript condition gates in frontend UI
   ⬜ Extend taxonomy to Reading, Speaking, Listening
