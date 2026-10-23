@@ -10,6 +10,9 @@ This file is about *how to keep building it correctly*.
 
 ## 1. Project status (update this section as you go)
 
+What's next and what's left lives in [`PLAN.md`](PLAN.md) — update its
+checkboxes as work lands. This section is the feature inventory.
+
 ```
 RUNTIME
   ⬜ Hosting — the Alibaba Cloud ECS server was shut down (Oct 2026);
@@ -454,6 +457,7 @@ hand only.
 
 1. Read `README.md` — product scope and current features
 2. Read this file — conventions and gotchas
+   Then `PLAN.md` — the current sprint and what's left
 3. Check §1 status checklist against actual file tree
 4. Start the stack: `docker compose up -d`; seed a demo learner with
    `docker exec ielts-api-dev python seed_demo.py` if the DB is empty

@@ -394,5 +394,6 @@ Near-term engineering work:
 - [ ] Teacher / admin dashboard
 - [ ] Hosting for the beta
 
+The detailed sprint plan and checklist is in [`PLAN.md`](PLAN.md).
 Longer-term product phases are in
 [`docs/product-strategy.md`](docs/product-strategy.md).
