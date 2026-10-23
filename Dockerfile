@@ -32,6 +32,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 COPY api/ ./api/
 COPY scripts/ ./scripts/
+COPY migrations/ ./migrations/
+COPY alembic.ini .
 
 # Copy built React static files to Nginx serving directory
 COPY --from=frontend-builder /app/frontend/dist /var/www/html

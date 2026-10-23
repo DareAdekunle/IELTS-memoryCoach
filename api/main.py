@@ -13,7 +13,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 
-from app.db.database import engine, Base
 from api.auth.models import User
 from api.auth.router import router as auth_router
 from api.routes.writing import router as writing_router
@@ -33,46 +32,7 @@ load_dotenv()
 
 logger = get_logger("api.main")
 
-Base.metadata.create_all(bind=engine)
-
-# ─── Schema migrations (safe, idempotent) ─────────────────────────────────────
-
-def _apply_schema_migrations():
-    """Add columns that exist in models but may be absent from older DBs."""
-    from sqlalchemy import text, inspect as sa_inspect
-    with engine.connect() as conn:
-        if engine.dialect.name == "sqlite":
-            # learner_memories.embedding
-            cols = {row[1] for row in conn.execute(text("PRAGMA table_info(learner_memories)"))}
-            if "embedding" not in cols:
-                conn.execute(text("ALTER TABLE learner_memories ADD COLUMN embedding TEXT"))
-                conn.commit()
-            # users.whatsapp_number
-            ucols = {row[1] for row in conn.execute(text("PRAGMA table_info(users)"))}
-            if "whatsapp_number" not in ucols:
-                conn.execute(text("ALTER TABLE users ADD COLUMN whatsapp_number VARCHAR"))
-                conn.commit()
-            if "telegram_chat_id" not in ucols:
-                conn.execute(text("ALTER TABLE users ADD COLUMN telegram_chat_id VARCHAR"))
-                conn.commit()
-        else:
-            inspector = sa_inspect(engine)
-            cols = {c["name"] for c in inspector.get_columns("learner_memories")}
-            if "embedding" not in cols:
-                conn.execute(text("ALTER TABLE learner_memories ADD COLUMN embedding TEXT"))
-                conn.commit()
-            ucols = {c["name"] for c in inspector.get_columns("users")}
-            if "whatsapp_number" not in ucols:
-                conn.execute(text("ALTER TABLE users ADD COLUMN whatsapp_number VARCHAR"))
-                conn.commit()
-            if "telegram_chat_id" not in ucols:
-                conn.execute(text("ALTER TABLE users ADD COLUMN telegram_chat_id VARCHAR"))
-                conn.commit()
-
-try:
-    _apply_schema_migrations()
-except Exception as _mig_err:
-    print(f"[startup] Schema migration warning (non-fatal): {_mig_err}")
+# Schema is owned by Alembic — see scripts/migrate.py (runs before the API starts).
 
 # ─── TTS Cache Warmup ─────────────────────────────────────────────────────────
 

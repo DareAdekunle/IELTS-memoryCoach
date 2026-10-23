@@ -48,6 +48,9 @@ if echo "${DATABASE_URL:-sqlite}" | grep -q "sqlite"; then
     ) &
 fi
 
+# ── Schema migrations (Alembic) ───────────────────────────────────────────────
+python scripts/migrate.py
+
 # ── Start Nginx ───────────────────────────────────────────────────────────────
 echo "Starting Nginx..."
 nginx -g "daemon off;" &

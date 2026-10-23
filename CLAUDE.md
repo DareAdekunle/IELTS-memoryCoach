@@ -261,6 +261,13 @@ SQLite is still supported for local-only development — set `DATABASE_URL` to a
 To migrate existing SQLite data to Postgres:
   `python scripts/migrate_sqlite_to_postgres.py --sqlite ./ielts_coach.db --postgres <url>`
 
+**Schema changes go through Alembic** (`migrations/`). Never call
+`Base.metadata.create_all` from app code. To change the schema:
+1. Edit the model in `app/db/models.py` (or `api/auth/models.py`)
+2. `docker exec ielts-api-dev alembic revision --autogenerate -m "describe change"`
+3. Review the generated file in `migrations/versions/`, then restart the API —
+   `scripts/migrate.py` runs `alembic upgrade head` before uvicorn starts.
+
 The `learner_skill_ranks` table is separate from `learner_memories`.
 Do not confuse them — they serve different purposes:
 - `learner_memories`: free-text, confidence-weighted, section-level, now with embeddings

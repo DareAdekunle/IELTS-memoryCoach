@@ -560,8 +560,8 @@ sequenceDiagram
     Note over E: Container starts
     E->>PG: psycopg2.connect() — retry 30× with 2s interval
     PG-->>E: Ready (or abort after 60s)
+    E->>PG: scripts/migrate.py — alembic upgrade head
     E->>F: uvicorn api.main:app
-    F->>PG: Base.metadata.create_all() — creates tables if not present
     F-->>E: Listening on :8000
 ```
 
