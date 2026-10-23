@@ -16,7 +16,10 @@ Speaking or Listening requires only:
    existing schema (categories → skills → ranks)
 2. Add entries to `SKILL_ID_TO_MEMORY_LABELS` in
    `app/services/skill_taxonomy_service.py`
-3. Create a classifier prompt in `app/prompts/skill_classifier_<section>_prompt.txt`
+No classifier prompt is needed: the Coach agent (`run_coach_agent()` in
+`app/services/coach_service.py`) classifies against whatever taxonomy
+`format_skill_list_for_prompt(section)` returns, via its
+`submit_classification` tool.
 
 The rank engine, memory system, progress dashboard, and Chat Coach
 will work with the new taxonomy automatically — no UI changes needed.

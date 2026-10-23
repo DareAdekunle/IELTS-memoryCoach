@@ -625,7 +625,7 @@ all 13 tables. Safe to re-run if interrupted.
 |---|---|
 | `scripts/migrate.py` | Runs before the API: adopts pre-Alembic databases, then `alembic upgrade head`. |
 | `scripts/cost_model.py` | Runs each learner workflow once against a throwaway database and prices the Qwen usage it reports. Live API calls — a few cents per run. |
-| `scripts/manual_checks/` | Smoke scripts that call the live Qwen API (chat, speaking, classifier). Run by hand; not part of pytest. |
+| `scripts/manual_checks/` | Smoke scripts that call the live Qwen API (chat, speaking). Run by hand; not part of pytest. |
 | `scripts/migrate_sqlite_to_postgres.py` | One-time idempotent migration from legacy SQLite to PostgreSQL. Reads all rows from every table and inserts with `ON CONFLICT DO NOTHING`. Safe to re-run. |
 | `scripts/db_backup.py` | OSS backup/restore for SQLite deployments (legacy path). The PostgreSQL `postgres_data` volume makes this unnecessary in production, but the script is retained for operators who prefer SQLite locally. |
 | `scripts/eval_pedagogy.py` | Offline evaluation harness for ACTION tag reliability and stage-routing correctness. Requires real session data to run meaningfully. |
