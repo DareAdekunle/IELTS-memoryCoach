@@ -200,9 +200,9 @@ ASR (speech→text)  → asr_service.py → dashscope SDK
                      dashscope.MultiModalConversation.call()
                      model: qwen3-asr-flash
 
-TTS (text→speech)  → tts_service.py → dashscope SDK
-                     dashscope.audio.qwen_tts.SpeechSynthesizer.call()
-                     model: qwen3-tts-flash-2025-11-27
+TTS (text→speech)  → tts_service.py → HTTP POST to the DashScope
+                     multimodal-generation endpoint
+                     model: qwen3-tts-flash (override with TTS_MODEL env)
                      voice: Cherry
 ```
 
@@ -211,11 +211,10 @@ Do NOT use the dashscope SDK for text generation.
 
 ### TTS model selection
 
-`qwen3-tts-flash` has limited free quota (nearly exhausted).
-Use `qwen3-tts-flash-2025-11-27` which has 100% free quota remaining.
-If that runs out, check dashboard for other `qwen3-tts-*` variants
-with remaining quota. The API call structure is identical — just
-change `TTS_MODEL` in `tts_service.py`.
+Use `qwen3-tts-flash`. Dated snapshots get retired — as of Oct 2026
+`qwen3-tts-flash-2025-11-27` returns 404 "Model not exist". Beyond the
+free quota it is billed at $0.10 per 10k characters. To switch models,
+set `TTS_MODEL` in `.env`; the API call structure is identical.
 
 ### JSON parsing from Qwen
 
@@ -381,9 +380,8 @@ This is handled in `src/pages/ChatCoach.jsx` — don't remove it.
     `Authorization: Bearer $MCP_API_TOKEN`; if the env var is unset,
     every request gets 401.
 
-10. **TTS quota** — `qwen3-tts-flash` is nearly exhausted.
-    Use `qwen3-tts-flash-2025-11-27` instead. Change `TTS_MODEL`
-    in `app/services/tts_service.py`.
+10. **TTS model** — use `qwen3-tts-flash` (see §4 TTS model selection).
+    A 404 "Model not exist" means the configured snapshot was retired.
 
 ---
 

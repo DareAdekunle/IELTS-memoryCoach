@@ -10,7 +10,8 @@ load_dotenv()
 
 
 # ─── TTS Model Configuration ──────────────────────────────────────────────────
-TTS_MODEL = "qwen3-tts-flash-2025-11-27"
+# Dated snapshots get retired (2025-11-27 now returns "Model not exist").
+TTS_MODEL = os.getenv("TTS_MODEL", "qwen3-tts-flash")
 TTS_VOICE = "Cherry"
 
 # ─── HTTP Endpoint Configuration ──────────────────────────────────────────────
