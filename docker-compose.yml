@@ -41,8 +41,14 @@ services:
       - DATABASE_URL=postgresql://ielts:${POSTGRES_PASSWORD:-ielts_dev_password}@postgres:5432/ielts_coach
       - FRONTEND_URL=http://localhost:5173
       - GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+      - GOOGLE_CALENDAR_REDIRECT_URI=http://localhost:8000/schedule/calendar/callback
     volumes:
       - tts_cache:/app/tts_cache
+      - ./app:/app/app
+      - ./api:/app/api
+      - ./scripts:/app/scripts
+    # Skip docker-entrypoint.sh — it starts nginx with the production SSL config
+    entrypoint: []
     command: >
       uvicorn api.main:app
         --host 0.0.0.0

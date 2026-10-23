@@ -8,6 +8,10 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # Production:   postgresql://ielts:<password>@postgres:5432/ielts_coach
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./ielts_coach.db")
 
+# SQLAlchemy 2.1+ defaults postgresql:// to psycopg v3; we ship psycopg2-binary.
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = "postgresql+psycopg2://" + DATABASE_URL[len("postgresql://"):]
+
 # SQLite needs check_same_thread=False; PostgreSQL does not.
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
