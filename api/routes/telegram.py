@@ -6,7 +6,7 @@ POST /telegram/webhook — Incoming messages from Telegram users
 Message flow:
   1. Telegram POSTs the update to this endpoint
   2. Resolve learner_id from telegram_chat_id stored in users table
-  3. New users: ask for Qonda email → find_learner → store mapping
+  3. New users: ask for BandUp email → link chat to that learner
   4. Known users: run Qwen agent with tool-calling → send reply
 """
 
@@ -62,13 +62,13 @@ def _process_message(chat_id: str, text: str):
 
         if linked_learner_id:
             reply = run_qwen_agent(
-                user_message=f"My Qonda email is: {text.strip()}",
+                user_message=f"My BandUp email is: {text.strip()}",
                 learner_id=linked_learner_id,
                 conversation_history=[],
             )
         else:
             reply = (
-                "I couldn't find a Qonda account for that email. "
+                "I couldn't find a BandUp account for that email. "
                 "Please check the address or register at ielts.qonda.xyz, then try again."
             )
 
@@ -81,7 +81,7 @@ def _process_message(chat_id: str, text: str):
         _awaiting_email.add(chat_id)
         send_message(
             chat_id,
-            "👋 Hi! I'm *Qonda*, your AI IELTS coach — powered by Qwen.\n\n"
+            "👋 Hi! I'm *BandUp*, your AI IELTS coach — powered by Qwen.\n\n"
             "To connect your account, what's the email you registered with at "
             "ielts.qonda.xyz?"
         )
@@ -157,7 +157,7 @@ async def telegram_webhook(request: Request, background_tasks: BackgroundTasks):
                 _awaiting_email.add(chat_id)
                 send_message(
                     chat_id,
-                    "👋 Hi! I'm *Qonda*, your AI IELTS coach — powered by Qwen.\n\n"
+                    "👋 Hi! I'm *BandUp*, your AI IELTS coach — powered by Qwen.\n\n"
                     "To connect your account, what's the email you registered with at "
                     "ielts.qonda.xyz?"
                 )

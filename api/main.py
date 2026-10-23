@@ -88,11 +88,11 @@ async def lifespan(app: FastAPI):
 # ─── FastAPI app ──────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="Qonda IELTS API",
+    title="BandUp IELTS API",
     description=(
         "AI-powered IELTS coaching with persistent memory, "
         "skill ranking, and conversational tutoring. "
-        "Qonda — Grasp English. Retain for life. "
+        "BandUp — Grasp English. Retain for life. "
         "Built on Alibaba Cloud Model Studio."
     ),
     version="1.0.0",
@@ -173,7 +173,7 @@ app.include_router(telegram_router)
 @app.get("/")
 async def root():
     return {
-        "message": "Qonda IELTS API",
+        "message": "BandUp IELTS API",
         "status": "running",
         "inference": "Alibaba Cloud Model Studio",
         "docs": "/docs"

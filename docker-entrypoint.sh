@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Starting Qonda IELTS..."
+echo "Starting BandUp IELTS..."
 
 # ── Wait for PostgreSQL to be ready ──────────────────────────────────────────
 if echo "${DATABASE_URL:-}" | grep -q "postgresql"; then
@@ -65,7 +65,7 @@ uvicorn api.main:app \
     --log-level info &
 UVICORN_PID=$!
 
-echo "Qonda IELTS is running"
+echo "BandUp IELTS is running"
 echo "  Nginx PID:   $NGINX_PID"
 echo "  FastAPI PID: $UVICORN_PID"
 

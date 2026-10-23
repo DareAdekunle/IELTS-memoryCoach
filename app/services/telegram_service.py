@@ -159,7 +159,7 @@ def _execute_tool(tool_name: str, args: dict, learner_id: str | None) -> dict:
         cancel_study_schedule,
     )
     if not learner_id:
-        return {"error": "This Telegram chat is not linked to a Qonda account yet."}
+        return {"error": "This Telegram chat is not linked to a BandUp account yet."}
     dispatch = {
         "get_coaching_context":    get_coaching_context,
         "get_study_schedule":      get_study_schedule,
@@ -178,7 +178,7 @@ def _execute_tool(tool_name: str, args: dict, learner_id: str | None) -> dict:
 
 # ─── Qwen agentic loop ────────────────────────────────────────────────────────
 
-SYSTEM_PROMPT = """You are Qonda, an AI IELTS study coach built on Qwen by Alibaba Cloud.
+SYSTEM_PROMPT = """You are BandUp, an AI IELTS study coach built on Qwen by Alibaba Cloud.
 You help learners track their IELTS progress, understand their weaknesses, and manage \
 their study schedule — via Telegram.
 
@@ -222,7 +222,7 @@ def run_qwen_agent(user_message: str, learner_id: str | None, conversation_histo
     if learner_id:
         messages.append({
             "role": "system",
-            "content": f"[Context] This user's Qonda learner_id is: {learner_id}"
+            "content": f"[Context] This user's BandUp learner_id is: {learner_id}"
         })
 
     messages.extend(conversation_history[-6:])

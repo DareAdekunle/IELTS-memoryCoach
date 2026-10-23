@@ -53,7 +53,7 @@ logger = get_logger("services.coach")
 
 # ─── Coach system prompt ──────────────────────────────────────────────────────
 
-COACH_SYSTEM_PROMPT = """You are the Qonda IELTS Coach — an expert AI coach
+COACH_SYSTEM_PROMPT = """You are the BandUp IELTS Coach — an expert AI coach
 that evaluates learner practice submissions and maintains their coaching profile.
 
 Your job after every submission:
@@ -377,7 +377,7 @@ def coach_listening_submission(
 # ─── Tutor-session interpretation ────────────────────────────────────────────
 # The Tutor records what happened. The Coach decides what it means.
 
-TUTOR_SESSION_COACH_PROMPT = """You are the Qonda IELTS Coach interpreting
+TUTOR_SESSION_COACH_PROMPT = """You are the BandUp IELTS Coach interpreting
 evidence from a completed Tutor session.
 
 The Tutor recorded raw pedagogical events (attempts, hints, self-corrections,

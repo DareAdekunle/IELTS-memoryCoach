@@ -1,7 +1,7 @@
 """
 app/services/calendar_service.py
 
-Google Calendar integration for Qonda IELTS study scheduling.
+Google Calendar integration for BandUp IELTS study scheduling.
 Creates recurring study events in a learner's own Google Calendar
 via OAuth (Option A — write to the learner's calendar directly).
 """
@@ -132,13 +132,13 @@ def create_study_events(
 
     skill_line = f"\n\nSession focus: {weakest_skill}" if weakest_skill else ""
     description = (
-        f"Your Qonda IELTS study session, {learner_name}.{skill_line}\n\n"
-        f"Open Qonda: https://ielts.qonda.xyz\n\n"
-        f"Qonda — Grasp English. Retain for life."
+        f"Your BandUp IELTS study session, {learner_name}.{skill_line}\n\n"
+        f"Open BandUp: https://ielts.qonda.xyz\n\n"
+        f"BandUp — Grasp English. Retain for life."
     )
 
     event = {
-        "summary":     f"Qonda IELTS — {duration_minutes} min practice",
+        "summary":     f"BandUp IELTS — {duration_minutes} min practice",
         "description": description,
         "start": {"dateTime": start_dt.isoformat(), "timeZone": timezone},
         "end":   {"dateTime": end_dt.isoformat(),   "timeZone": timezone},

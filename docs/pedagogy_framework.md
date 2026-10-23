@@ -1,4 +1,4 @@
-# Qonda IELTS — Pedagogical Framework
+# BandUp IELTS — Pedagogical Framework
 
 > Python selects the teaching method. Qwen delivers it. The learner never notices the seam.
 

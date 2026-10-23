@@ -1,7 +1,7 @@
 """
-app/mcp/memory_server.py — Qonda IELTS MCP Server
+app/mcp/memory_server.py — BandUp IELTS MCP Server
 
-Exposes the Qonda IELTS learner memory and skill ranking system
+Exposes the BandUp IELTS learner memory and skill ranking system
 as an MCP (Model Context Protocol) server.
 
 This means any MCP-compatible AI agent — Claude, a Qwen agent,
@@ -48,9 +48,9 @@ from app.services.skill_taxonomy_service import get_skill_by_id, get_rank_name
 # ─── MCP Server definition ────────────────────────────────────────────────────
 
 mcp = FastMCP(
-    name="Qonda IELTS",
+    name="BandUp IELTS",
     instructions=(
-        "This server exposes learner coaching data from Qonda IELTS — an AI-powered "
+        "This server exposes learner coaching data from BandUp IELTS — an AI-powered "
         "IELTS preparation platform with persistent memory and skill tracking.\n\n"
         "IMPORTANT: All tools require a learner_id (a UUID). "
         "If the user has not provided their learner_id, call find_learner(email) first "
@@ -87,7 +87,7 @@ def find_learner(email: str) -> dict:
         if not user or not user.learner_id:
             return {
                 "found": False,
-                "message": f"No Qonda learner profile found for {email}. "
+                "message": f"No BandUp learner profile found for {email}. "
                            "They may need to register at ielts.qonda.xyz first."
             }
         learner = db.query(Learner).filter(Learner.learner_id == user.learner_id).first()
@@ -597,11 +597,11 @@ def add_one_off_session(
         skill_line    = f"\n\nSession focus: {weakest_skill}" if weakest_skill else ""
 
         event = {
-            "summary":     f"Qonda IELTS — {duration_minutes} min practice",
+            "summary":     f"BandUp IELTS — {duration_minutes} min practice",
             "description": (
                 f"One-off study session for {learner_name}.{skill_line}\n\n"
-                f"Open Qonda: https://ielts.qonda.xyz\n\n"
-                f"Qonda — Grasp English. Retain for life."
+                f"Open BandUp: https://ielts.qonda.xyz\n\n"
+                f"BandUp — Grasp English. Retain for life."
             ),
             "start": {"dateTime": start_dt.isoformat(), "timeZone": tz_name},
             "end":   {"dateTime": end_dt.isoformat(),   "timeZone": tz_name},
@@ -651,7 +651,7 @@ def cancel_study_schedule(learner_id: str) -> dict:
 # ─── Run standalone ───────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("Starting Qonda IELTS MCP Server...")
+    print("Starting BandUp IELTS MCP Server...")
     print("Tools available:")
     print("  - find_learner                  ← start here (email → learner_id)")
     print("  - get_coaching_context          ← full learner overview in one call")

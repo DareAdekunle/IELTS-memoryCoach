@@ -163,7 +163,7 @@ def _execute_tool(tool_name: str, args: dict, learner_id: str | None) -> dict:
         cancel_study_schedule,
     )
     if not learner_id:
-        return {"error": "This WhatsApp number is not linked to a Qonda account yet."}
+        return {"error": "This WhatsApp number is not linked to a BandUp account yet."}
     dispatch = {
         "get_coaching_context":   get_coaching_context,
         "get_study_schedule":     get_study_schedule,
@@ -182,7 +182,7 @@ def _execute_tool(tool_name: str, args: dict, learner_id: str | None) -> dict:
 
 # ─── Qwen agentic loop ────────────────────────────────────────────────────────
 
-SYSTEM_PROMPT = """You are Qonda, an AI IELTS study coach. You help learners track \
+SYSTEM_PROMPT = """You are BandUp, an AI IELTS study coach. You help learners track \
 their progress, understand their weaknesses, and manage their study schedule — \
 all via WhatsApp.
 

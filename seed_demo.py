@@ -1,5 +1,5 @@
 """
-seed_demo.py — Demo account seeding script for Qonda IELTS
+seed_demo.py — Demo account seeding script for BandUp IELTS
 
 Creates a realistic demo learner with:
   - 6 Writing attempts showing improvement over time
@@ -283,7 +283,7 @@ def seed_demo(email=DEFAULT_EMAIL, password=DEFAULT_PASSWORD, reset=False):
 
     try:
         print(f"\n{'='*60}")
-        print("Qonda IELTS — Demo Account Seeder")
+        print("BandUp IELTS — Demo Account Seeder")
         print(f"{'='*60}\n")
 
         # ── Check for existing demo account ──────────────────────────
@@ -486,7 +486,7 @@ def seed_demo(email=DEFAULT_EMAIL, password=DEFAULT_PASSWORD, reset=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Seed the Qonda IELTS demo account"
+        description="Seed the BandUp IELTS demo account"
     )
     parser.add_argument(
         "--reset", action="store_true",

@@ -147,7 +147,7 @@ export default function StudyPlan() {
           <Calendar className="w-6 h-6 text-brand-500" /> Study Plan
         </h1>
         <p className="text-gray-500 text-sm mt-1">
-          Set when you study — Qonda adds the sessions to your Google Calendar.
+          Set when you study — BandUp adds the sessions to your Google Calendar.
         </p>
       </div>
 

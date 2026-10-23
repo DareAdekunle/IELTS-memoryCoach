@@ -1,4 +1,4 @@
-# Qonda IELTS — Architecture
+# BandUp IELTS — Architecture
 
 ## The Pedagogical Skill Layer
 
@@ -48,7 +48,7 @@ Independent Control (6.5–7.0, exam control) → Automatization (7.5+, precisio
 
 ## The Agent Loop
 
-Qonda IELTS implements a full **perceive → remember → reason → act**
+BandUp IELTS implements a full **perceive → remember → reason → act**
 agent loop that runs after every practice session.
 
 ```mermaid
@@ -109,7 +109,7 @@ Both environments resolve `DATABASE_URL` from the environment, so the
 
 ## Coach / Tutor Agent Architecture
 
-Qonda IELTS implements two distinct AI agents with a clean boundary:
+BandUp IELTS implements two distinct AI agents with a clean boundary:
 the Coach writes learner data, the Tutor reads it.
 
 ```mermaid

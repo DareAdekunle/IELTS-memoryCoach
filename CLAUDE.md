@@ -1,4 +1,4 @@
-# CLAUDE.md — Agent Build Harness for Qonda IELTS
+# CLAUDE.md — Agent Build Harness for BandUp IELTS
 
 Read this BEFORE making any changes. It captures build patterns,
 conventions, and hard-won fixes so they are not re-discovered.

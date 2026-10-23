@@ -72,7 +72,7 @@ export default function LandingPage() {
             <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
               <Target className="w-[18px] h-[18px] text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-sm">Qonda IELTS</span>
+            <span className="font-bold text-gray-900 text-sm">BandUp IELTS</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm text-gray-600">
             <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
@@ -105,7 +105,7 @@ export default function LandingPage() {
             <span className="text-brand-600">Retain for life.</span>
           </h1>
           <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Qonda IELTS pairs adaptive lessons across all four skills with an AI tutor that truly comprehends your weaknesses — building a richer picture of you with every session.
+            BandUp IELTS pairs adaptive lessons across all four skills with an AI tutor that truly comprehends your weaknesses — building a richer picture of you with every session.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
@@ -144,7 +144,7 @@ export default function LandingPage() {
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">How the tutor helps</h2>
             <p className="text-gray-500 text-lg max-w-xl mx-auto">
-              Unlike a generic app, Qonda builds a long-term picture of your abilities.
+              Unlike a generic app, BandUp builds a long-term picture of your abilities.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -260,9 +260,9 @@ export default function LandingPage() {
             <div className="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center">
               <Target className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-gray-600 text-sm font-semibold">Qonda IELTS</span>
+            <span className="text-gray-600 text-sm font-semibold">BandUp IELTS</span>
           </div>
-          <p className="text-gray-400 text-sm">© {new Date().getFullYear()} Qonda IELTS. All rights reserved.</p>
+          <p className="text-gray-400 text-sm">© {new Date().getFullYear()} BandUp IELTS. All rights reserved.</p>
         </div>
       </footer>
     </div>

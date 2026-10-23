@@ -125,13 +125,13 @@ async def receive_message(request: Request):
 
         if learner_id:
             reply = run_qwen_agent(
-                user_message=f"My Qonda email is: {email}",
+                user_message=f"My BandUp email is: {email}",
                 learner_id=learner_id,
                 conversation_history=[],
             )
         else:
             reply = (
-                "I couldn't find a Qonda account for that email. "
+                "I couldn't find a BandUp account for that email. "
                 "Please check the address or register at ielts.qonda.xyz, then try again."
             )
 
@@ -143,8 +143,8 @@ async def receive_message(request: Request):
     if not learner_id:
         _awaiting_email.add(phone)
         greeting = (
-            "👋 Hi! I'm Qonda, your AI IELTS coach.\n\n"
-            "To connect your account, what's the email address you registered with on Qonda? "
+            "👋 Hi! I'm BandUp, your AI IELTS coach.\n\n"
+            "To connect your account, what's the email address you registered with on BandUp? "
             "(ielts.qonda.xyz)"
         )
         send_whatsapp_message(phone, greeting)

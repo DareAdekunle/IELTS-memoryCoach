@@ -100,7 +100,7 @@ export default function Onboarding() {
           <p className="text-gray-500 text-sm">
             {step === 1
               ? 'Help your coach personalise your IELTS preparation journey'
-              : 'Qonda will remind you when it\'s time to practice'}
+              : 'BandUp will remind you when it\'s time to practice'}
           </p>
         </div>
 

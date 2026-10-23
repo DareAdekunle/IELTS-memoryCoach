@@ -1,4 +1,4 @@
-# Qonda IELTS
+# BandUp IELTS
 
 > *Grasp English. Retain for life.*
 >
@@ -16,7 +16,7 @@
 
 Every existing prep tool has the same fundamental flaw: **it forgets you between sessions.** You get generic feedback today, generic feedback tomorrow, and no cumulative coaching intelligence. A tool that doesn't remember what you struggled with last week cannot make you better this week.
 
-| Feature | Qonda | British Council | Magoosh | IELTS.org |
+| Feature | BandUp | British Council | Magoosh | IELTS.org |
 |---|---|---|---|---|
 | Persistent memory across sessions | ✅ | ❌ | ❌ | ❌ |
 | Granular skill rank engine | ✅ | ❌ | ❌ | ❌ |
@@ -26,13 +26,13 @@ Every existing prep tool has the same fundamental flaw: **it forgets you between
 | All 4 IELTS skills | ✅ | ✅ | ✅ | ✅ |
 | Built on Alibaba Cloud | ✅ | ❌ | ❌ | ❌ |
 
-Qonda solves this with a **persistent AI memory layer** — every practice session extracts coaching insights that strengthen, weaken and archive over time, building an ever-richer model of each learner.
+BandUp solves this with a **persistent AI memory layer** — every practice session extracts coaching insights that strengthen, weaken and archive over time, building an ever-richer model of each learner.
 
 ---
 
 ## Key innovation — structured evidence from freeform conversation
 
-Every AI tutor in Qonda is a natural-language conversation. But conversations are opaque: how does the system know whether a hint was needed, whether the learner succeeded independently, or whether they're ready to reduce scaffolding?
+Every AI tutor in BandUp is a natural-language conversation. But conversations are opaque: how does the system know whether a hint was needed, whether the learner succeeded independently, or whether they're ready to reduce scaffolding?
 
 **The ACTION tag protocol solves this.** The Tutor embeds hidden structured tags inline as events happen:
 
@@ -50,7 +50,7 @@ The result: a closed evidence loop where every Tutor conversation, however freef
 
 ## The Agent Architecture
 
-Qonda implements a full **perceive → remember → reason → act** agent loop that runs after every practice session:
+BandUp implements a full **perceive → remember → reason → act** agent loop that runs after every practice session:
 
 ```
 PERCEIVE   Essay submitted / audio recorded / passage answered
@@ -82,7 +82,7 @@ This loop runs silently after every submission — the learner simply sees bette
 
 ## Custom AI Skills
 
-Qonda implements four **custom AI skills** — domain-specific agent configurations with specialist knowledge, teaching strategies, and internal state machines:
+BandUp implements four **custom AI skills** — domain-specific agent configurations with specialist knowledge, teaching strategies, and internal state machines:
 
 | Custom Skill | Specialist Knowledge | State Machine |
 |---|---|---|
@@ -130,7 +130,7 @@ Every Tutor session now runs on an evidence-based **pedagogy engine** (`app/peda
 
 ## What it does
 
-Qonda IELTS is a full-stack AI coaching web application that remembers learners across sessions. Unlike static quiz tools, it tracks weaknesses, monitors improvement, personalises feedback over time, and actively teaches learners through specialist AI tutors grounded in their own practice evidence.
+BandUp IELTS is a full-stack AI coaching web application that remembers learners across sessions. Unlike static quiz tools, it tracks weaknesses, monitors improvement, personalises feedback over time, and actively teaches learners through specialist AI tutors grounded in their own practice evidence.
 
 **Core features:**
 - Google OAuth and username/password authentication with JWT sessions
@@ -303,7 +303,7 @@ Speaking (9), Listening (8) sub-skills.
 
 **[@qieltsbot](https://t.me/qieltsbot)** — Qwen-powered, available anywhere.
 
-The Telegram bot brings Qonda's full coaching intelligence to any device without opening a browser. It uses the same Qwen model (qwen-plus with tool-calling) that drives the web app's Coach and Tutor agents.
+The Telegram bot brings BandUp's full coaching intelligence to any device without opening a browser. It uses the same Qwen model (qwen-plus with tool-calling) that drives the web app's Coach and Tutor agents.
 
 **What it can do:**
 - Answer coaching questions: *"What's my weakest IELTS skill?"*
@@ -328,7 +328,7 @@ The Qwen agent loop runs up to 5 tool-call iterations per message — enough for
 
 ## Study Scheduler + Google Calendar
 
-Learners set a recurring study schedule (days, time, duration) during onboarding or from the **Study Plan** page. Qonda creates recurring events in Google Calendar so sessions sit alongside meetings and commutes — exactly where a working professional needs them.
+Learners set a recurring study schedule (days, time, duration) during onboarding or from the **Study Plan** page. BandUp creates recurring events in Google Calendar so sessions sit alongside meetings and commutes — exactly where a working professional needs them.
 
 - **2-step onboarding** — profile setup followed by study schedule
 - **Recurring calendar events** — RRULE weekly recurrence, UNTIL = test date
@@ -339,18 +339,18 @@ Learners set a recurring study schedule (days, time, duration) during onboarding
 
 ---
 
-## Why Qonda wins — the moat
+## Why BandUp wins — the moat
 
 ### The learner we're building for
 
-There are 3.5 million IELTS test-takers every year. The majority are not full-time students — they are working professionals in Lagos, Nairobi, Manila, and Dhaka who need Band 6.5 or 7.0 to unlock a visa, a job offer, or a graduate place. They study in stolen windows: a 20-minute commute, a lunch break, the hour before midnight. Call them **jugglers** — every product decision in Qonda was made for them.
+There are 3.5 million IELTS test-takers every year. The majority are not full-time students — they are working professionals in Lagos, Nairobi, Manila, and Dhaka who need Band 6.5 or 7.0 to unlock a visa, a job offer, or a graduate place. They study in stolen windows: a 20-minute commute, a lunch break, the hour before midnight. Call them **jugglers** — every product decision in BandUp was made for them.
 
 Existing tools fail jugglers in a specific way: they reset. Every session, you get the same generic feedback, the same rubric, the same advice. The tool has no memory of what you struggled with last week, no sense of whether you're improving, no way to pick up where you left off. You are permanently a stranger to your own coach.
 
 ### Five compounding advantages
 
 **1. A data flywheel that only gets smarter**
-Every practice session writes new coaching memories — specific observations about this exact learner's error patterns, which approaches worked, which didn't. Memories compound with confidence-weighted spaced repetition: a high-confidence weakness from last week outranks a medium-confidence one from three months ago. After 10 sessions, Qonda knows the learner better than any generic AI coach. After 30, switching to a competitor means returning to generic feedback from scratch. **That switching cost grows with every session.**
+Every practice session writes new coaching memories — specific observations about this exact learner's error patterns, which approaches worked, which didn't. Memories compound with confidence-weighted spaced repetition: a high-confidence weakness from last week outranks a medium-confidence one from three months ago. After 10 sessions, BandUp knows the learner better than any generic AI coach. After 30, switching to a competitor means returning to generic feedback from scratch. **That switching cost grows with every session.**
 
 **2. Designed for the 20-minute window**
 - No-repeat content selection: 9 reading passages, 9 listening tracks, 15 speaking prompts, 7 writing prompts always served fresh until exhausted — a short session is always a genuine new challenge.
@@ -359,7 +359,7 @@ Every practice session writes new coaching memories — specific observations ab
 - Cross-section insights: the only IELTS tool that identifies when a grammar gap in Writing and a fluency gap in Speaking share the same root cause, and surfaces it in the dashboard.
 
 **3. A pedagogical layer that can't be copied without the research**
-Other AI IELTS tools are chatbots with an IELTS system prompt. Qonda is the only one with a structured, research-backed teaching plan for every session — 16 evidence-based frameworks (Backward Design, Dynamic Assessment, Focused Indirect Corrective Feedback, 4/3/2 Fluency), deterministic stage routing, support that fades only when the evidence earns it. A competitor building this from scratch needs months of pedagogical research, not just API access.
+Other AI IELTS tools are chatbots with an IELTS system prompt. BandUp is the only one with a structured, research-backed teaching plan for every session — 16 evidence-based frameworks (Backward Design, Dynamic Assessment, Focused Indirect Corrective Feedback, 4/3/2 Fluency), deterministic stage routing, support that fades only when the evidence earns it. A competitor building this from scratch needs months of pedagogical research, not just API access.
 
 **4. Semantic memory retrieval**
 Every coaching memory is embedded using DashScope `text-embedding-v3` at write time. When the Tutor plans a session, the feedback priorities are retrieved not by recency alone but by **semantic relevance to the current session's target descriptor** — a memory about relative-clause verb agreement surfaces when the session targets grammar, even if it was written two months ago. Retrieval is a hybrid of semantic similarity and spaced-repetition scoring, combining the best of both.
@@ -465,7 +465,7 @@ IELTS-memorycoach/
 
 3.5 million people take IELTS every year. Most of them are not students — they are **working professionals** in Lagos, Nairobi, Manila, Dhaka, and dozens of other cities who need a Band 6.5 or 7.0 to unlock a visa, a job offer, or a university place in an English-speaking country.
 
-They cannot attend classes. They study on their phone during a commute, in a lunch break, or at 10pm after the kids are in bed. Existing tools give them the same generic feedback every session with no memory of what they worked on last week. Qonda is built for them — an AI coach that learns who they are and gets smarter every time they practise, fitting around a full-time life rather than demanding they rearrange it.
+They cannot attend classes. They study on their phone during a commute, in a lunch break, or at 10pm after the kids are in bed. Existing tools give them the same generic feedback every session with no memory of what they worked on last week. BandUp is built for them — an AI coach that learns who they are and gets smarter every time they practise, fitting around a full-time life rather than demanding they rearrange it.
 
 ## Productization roadmap
 
@@ -523,7 +523,7 @@ Phase 5 — Community and accountability
 Phase 6 — Platform
   ⬜ Open coaching data API — licensed IELTS tutors query a learner's
      full coaching profile (with consent) and pick up exactly where
-     the app left off; Qonda becomes infrastructure for the broader
+     the app left off; BandUp becomes infrastructure for the broader
      IELTS prep ecosystem
   ⬜ Taxonomy contribution — community validates and extends skill
      definitions; open-source core, hosted service
@@ -548,7 +548,7 @@ Phase 6 — Platform
 **5. The chat thread as the classroom**
 The end-state vision for the juggler is that their phone's chat app — the one they already have open all day — becomes their IELTS classroom. No app to download, no browser tab to open, no login to remember. They send a paragraph on the way to work and the score arrives before they reach the office. They record a voice note in a lunch break and get Speaking feedback by the time they sit back down.
 
-Qonda is already partway there: the Telegram bot today handles coaching questions, schedule management, and skill lookups. The roadmap completes the loop — full practice sessions (Writing, Speaking, Reading, Listening) running entirely in-thread, with every submission writing to the same persistent memory profile as the web app. The juggler's ten-minute commute becomes a genuine coaching session. **That is a product no traditional IELTS tool can build without starting over.**
+BandUp is already partway there: the Telegram bot today handles coaching questions, schedule management, and skill lookups. The roadmap completes the loop — full practice sessions (Writing, Speaking, Reading, Listening) running entirely in-thread, with every submission writing to the same persistent memory profile as the web app. The juggler's ten-minute commute becomes a genuine coaching session. **That is a product no traditional IELTS tool can build without starting over.**
 
 ---
 
