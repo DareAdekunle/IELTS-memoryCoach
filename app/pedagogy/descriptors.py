@@ -31,6 +31,12 @@ def get_criterion_ids(section: str) -> list:
     return [k for k in _load().get(section, {}).keys()]
 
 
+def get_band_descriptors(section: str, criterion_id: str) -> dict:
+    """All descriptors for a criterion as {band (int): text}."""
+    entry = _load().get(section, {}).get(criterion_id) or {}
+    return {int(b): text for b, text in entry.get("descriptors", {}).items()}
+
+
 def get_criterion_name(section: str, criterion_id: str) -> str:
     entry = _load().get(section, {}).get(criterion_id)
     return entry["criterion_name"] if entry else criterion_id

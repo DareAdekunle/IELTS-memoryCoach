@@ -51,6 +51,7 @@ services:
       - ./migrations:/app/migrations
       - ./alembic.ini:/app/alembic.ini
       - ./tests:/app/tests
+      - ./evaluation:/app/evaluation
       - ./pytest.ini:/app/pytest.ini
       - ./seed_demo.py:/app/seed_demo.py
     # Skip docker-entrypoint.sh — it starts nginx with the production SSL config

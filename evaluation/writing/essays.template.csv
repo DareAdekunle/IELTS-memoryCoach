@@ -1,0 +1,2 @@
+essay_id,split,task,task_type,prompt,essay,source,writer_consent,notes
+W001,dev,task2,Agree or Disagree,"Some people think that children should start school at a very young age. To what extent do you agree or disagree?","(full essay text exactly as written, including errors)",recruited,yes,timed 40 min; no AI tools

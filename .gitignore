@@ -30,3 +30,7 @@ frontend/dist/
 # Agents markdown files
 AGENT.md
 CLAUDE.md
+# Calibration data contains people's writing — never commit it
+evaluation/writing/data/
+evaluation/writing/examples/results/
+evaluation/writing/examples/model_scores.jsonl

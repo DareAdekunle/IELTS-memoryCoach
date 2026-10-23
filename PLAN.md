@@ -74,12 +74,23 @@ Ship nothing new; fix what's broken.
 
 The most important work: scores must be defensible before anything is built on them.
 
+- [ ] Pilot first: 20 essays from ~10 writers, 2 raters (see
+      `evaluation/writing/README.md`)
 - [ ] Collect 50–100 Writing samples across Bands 5–8 with ratings from 2–3
       qualified IELTS raters; include borderline cases
 - [ ] Collect 30–50 Speaking samples (audio) with ratings
-- [ ] Build an evaluation harness: run BandUp scoring on the held-out set and
-      report mean absolute band error, within-±0.5 agreement, and per-criterion
-      agreement
+- [x] Evaluation harness — `scripts/eval_writing.py`: rater agreement, then
+      BandUp vs rater average (MAE, bias, within ±0.5/±1.0, QWK), cached
+      scores; templates + rater protocol in `evaluation/writing/`
+- [x] Candidate band scorer on the four official criteria —
+      `app/services/band_scoring_service.py` (not yet used by the app)
+- [ ] **Decide:** switch the Writing Coach to official-criteria bands. Today it
+      scores five custom skills on 1–5, so no essay gets an IELTS band
+- [ ] Unify the two Writing scoring paths (typed essays use the streaming
+      route's prompt; handwritten essays use `evaluate_writing()` with a
+      different rubric)
+- [ ] Watch for the "halo" pattern seen in a first synthetic run (identical
+      bands across all four criteria; generous at the top)
 - [ ] Separate Task 1 (Academic / General) and Task 2 scoring logic
 - [ ] Fix the weakest criteria first (typically Task Response, Coherence)
 - [ ] Speaking: separate transcript-based criteria from pronunciation; test

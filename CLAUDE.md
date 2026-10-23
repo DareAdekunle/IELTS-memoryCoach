@@ -73,6 +73,8 @@ CHAT COACHES
 QUALITY + OPERATIONS
   ✅ pytest suite             — docker exec ielts-api-dev pytest
   ✅ Cost model               — scripts/cost_model.py (live; a few cents per run)
+  ✅ Writing calibration      — scripts/eval_writing.py + evaluation/writing/
+                                (band_scoring_service = candidate, not in app yet)
   ✅ Security boundaries      — server-held tutor transcripts, tools bound to
                                 the authenticated learner, MCP token-gated
 

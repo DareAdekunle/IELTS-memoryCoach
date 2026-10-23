@@ -340,11 +340,14 @@ IELTS-memoryCoach/
 ├── scripts/
 │   ├── migrate.py          ← runs before the API: alembic upgrade head
 │   ├── cost_model.py       ← measures live Qwen cost per session
+│   ├── eval_writing.py     ← Writing scores vs human raters
 │   ├── manual_checks/      ← live-API smoke scripts (run by hand)
 │   ├── migrate_sqlite_to_postgres.py
 │   ├── db_backup.py        ← OSS backup/restore (legacy SQLite)
 │   └── eval_pedagogy.py    ← offline pedagogy behaviour eval
 ├── tests/                  ← pytest suite
+├── evaluation/             ← assessment calibration: metrics, rating templates,
+│                             rater guide (real data git-ignored)
 ├── docs/                   ← pedagogy design, product strategy, screenshots
 ├── docker-compose.yml      ← local development
 ├── docker-compose.prod.yml ← production (single image + Nginx)

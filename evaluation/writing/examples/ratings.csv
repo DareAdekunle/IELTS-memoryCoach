@@ -1,0 +1,7 @@
+essay_id,rater_id,task_response,coherence_cohesion,lexical_resource,grammatical_range_accuracy,justification
+SYN-WEAK,R1,4,5,4,4,Illustrative ratings only — not from a qualified rater.
+SYN-WEAK,R2,5,5,4,4,Illustrative ratings only — not from a qualified rater.
+SYN-MID,R1,6,7,6,6,Illustrative ratings only — not from a qualified rater.
+SYN-MID,R2,7,6,6,7,Illustrative ratings only — not from a qualified rater.
+SYN-STRONG,R1,8,8,8,8,Illustrative ratings only — not from a qualified rater.
+SYN-STRONG,R2,8,7,8,7,Illustrative ratings only — not from a qualified rater.
