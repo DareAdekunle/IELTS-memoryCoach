@@ -39,7 +39,7 @@ class PracticeAttempt(Base):
 class LearnerMemory(Base):
     """
     Stores what the coach has learned about the learner over time.
-    This is the heart of the MemoryAgent.
+    This is the heart of the learner memory system.
     One row per memory. Memories can be updated or archived.
     """
     __tablename__ = "learner_memories"

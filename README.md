@@ -1,110 +1,44 @@
 # BandUp IELTS
 
 > *Grasp English. Retain for life.*
->
-> An AI coach that truly comprehends each learner's weaknesses — and gets smarter with every session.
 
-**Live Demo:** https://ielts.qonda.xyz  
-**Demo Login:** demo@ieltscoach.com / demo1234  
-**Telegram Bot:** [@qieltsbot](https://t.me/qieltsbot)
+BandUp is an AI IELTS coach that remembers each learner across sessions. Every
+practice attempt is scored against the official IELTS criteria, turned into
+coaching memories and skill ranks, and used to plan the next lesson — so the
+coaching gets more specific the more someone practises.
 
----
+**Status:** beta. The app currently runs locally with Docker Compose; it was
+previously hosted on Alibaba Cloud ECS at `ielts.qonda.xyz`. AI inference uses
+Alibaba Cloud Model Studio (Qwen) and Alibaba Cloud OSS.
 
-## The Problem
-
-3.5 million people take IELTS every year. Most of them are not students — they are **working professionals** who need a Band 6.5 or 7.0 to unlock a visa, a job offer, or a university place. They study in stolen hours: on a commute, in a lunch break, after the kids are in bed.
-
-Every existing prep tool has the same fundamental flaw: **it forgets you between sessions.** You get generic feedback today, generic feedback tomorrow, and no cumulative coaching intelligence. A tool that doesn't remember what you struggled with last week cannot make you better this week.
-
-| Feature | BandUp | British Council | Magoosh | IELTS.org |
-|---|---|---|---|---|
-| Persistent memory across sessions | ✅ | ❌ | ❌ | ❌ |
-| Granular skill rank engine | ✅ | ❌ | ❌ | ❌ |
-| Specialist AI tutors per section | ✅ | ❌ | Partial | ❌ |
-| Telegram coaching bot (Qwen agent) | ✅ | ❌ | ❌ | ❌ |
-| Study schedule + Google Calendar | ✅ | ❌ | ❌ | ❌ |
-| All 4 IELTS skills | ✅ | ✅ | ✅ | ✅ |
-| Built on Alibaba Cloud | ✅ | ❌ | ❌ | ❌ |
-
-BandUp solves this with a **persistent AI memory layer** — every practice session extracts coaching insights that strengthen, weaken and archive over time, building an ever-richer model of each learner.
+For the market, positioning and business model see
+[`docs/product-strategy.md`](docs/product-strategy.md).
 
 ---
 
-## Key innovation — structured evidence from freeform conversation
+## What it does
 
-Every AI tutor in BandUp is a natural-language conversation. But conversations are opaque: how does the system know whether a hint was needed, whether the learner succeeded independently, or whether they're ready to reduce scaffolding?
-
-**The ACTION tag protocol solves this.** The Tutor embeds hidden structured tags inline as events happen:
-
-```
-[ACTION: hint level=2]                          — hint given at level 2 of 4
-[ACTION: attempt result=self_corrected]          — learner fixed it without help
-[ACTION: complete outcome=ready_for_reduced_support]  — session evidence is strong
-```
-
-These tags are **stripped before display** — the learner sees natural coaching text. The server parses them into a structured evidence record. After each session, the Coach agent reads that record to decide whether support has been earned, update criterion states, and inform the next session's teaching plan.
-
-The result: a closed evidence loop where every Tutor conversation, however freeform, feeds back into the deterministic coaching engine. **No competitor can replicate this without the accumulated data.**
-
----
-
-## The Agent Architecture
-
-BandUp implements a full **perceive → remember → reason → act** agent loop that runs after every practice session:
-
-```
-PERCEIVE   Essay submitted / audio recorded / passage answered
-           ↓
-           Qwen evaluates against official IELTS rubrics
-           ASR transcribes spoken responses (qwen3-asr-flash)
-
-REMEMBER   MemoryAgent extracts coaching observations
-           Updates learner_memories with confidence scoring
-           Strengthens confirmed patterns, weakens contradicted ones
-           Archives mastered weaknesses permanently
-           Updates learner_skill_ranks via deterministic rule engine
-
-REASON     Specialist tutor builds session context:
-           → Fetches weakest skill from learner_skill_ranks
-           → Retrieves evidence memory for that skill
-           → Pulls recent essay excerpt from practice_attempts
-           → Assembles personalised context brief
-
-ACT        Specialist AI tutor opens a targeted lesson
-           References the learner's actual writing/speech
-           Generates focused drills for the specific weakness
-           Bridges back to practice when ready
-```
-
-This loop runs silently after every submission — the learner simply sees better and more personalised coaching with each session.
-
----
-
-## Custom AI Skills
-
-BandUp implements four **custom AI skills** — domain-specific agent configurations with specialist knowledge, teaching strategies, and internal state machines:
-
-| Custom Skill | Specialist Knowledge | State Machine |
-|---|---|---|
-| Writing Tutor | IELTS Band Descriptors, task types, thesis structure, cohesion | introduction → explaining → drilling → bridge_to_practice |
-| Reading Tutor | T/F/NG strategy, skimming, scanning, paraphrase recognition | introduction → explaining → drilling → bridge_to_practice |
-| Speaking Tutor | Part 1/2/3 strategies, OREO structure, circumlocution | introduction → explaining → drilling → bridge_to_practice |
-| Listening Tutor | Prediction, distractor resistance, form completion | introduction → explaining → drilling → bridge_to_practice |
-
-Each skill uses hidden `[STATE: xxx]` tags for deterministic UI state tracking — the learner experiences natural conversation while the system reliably knows when to show the "Go practise" button.
-
-### The Pedagogical Skill Layer
-
-Every Tutor session now runs on an evidence-based **pedagogy engine** (`app/pedagogy/`). Before the Tutor says a word, a deterministic **Pedagogy Planner** builds a structured teaching plan:
-
-- **16 research-backed frameworks** (4 per section — e.g. Genre-Based Pedagogy, Focused Indirect Corrective Feedback, Micro-Listening & Dictation, 4/3/2 Fluency), each dominant/supporting/faded/retired depending on the learner's stage
-- **4 learner stages per criterion** — Foundations (≤5.5) → Guided Control (6.0) → Independent Control (6.5–7.0) → Automatization (7.5+) — derived live from skill ranks, so vocabulary can be independent while grammar still gets full scaffolding
-- **A Shared Pedagogical Spine** in every reply: Backward Design (every activity targets a band descriptor), the Feedback Triad (goal → current position → next step), Dynamic Assessment (weakest hint first, every hint logged), and Elicitation Before Telling
-- **Support that fades on evidence** — hidden `[ACTION: hint level=2]` tags record every hint and attempt; the Coach interprets the evidence after each session, and deterministic rules only allow support to fade after ≥3 low-hint successes at ≥80% accuracy — one step at a time, instantly restored on regression
-
-> The learner model identifies **what** needs improvement. The Planner decides **how** to teach it. The Tutor records what happened. The Coach decides what it means.
-
----
+- **All four IELTS skills** — Writing, Reading, Speaking and Listening, with
+  real practice content (7 writing prompts, 9 reading passages, 15 speaking
+  prompt sets, 9 listening tracks).
+- **Scoring against official rubrics** — Writing and Speaking are scored per
+  IELTS criterion; Reading and Listening answers are checked deterministically
+  (short answers and spelling variants via Qwen / fuzzy matching).
+- **Persistent learner memory** — coaching observations are strengthened,
+  weakened and archived over time, with semantic + spaced-repetition retrieval.
+- **Skill mastery** — 40 sub-skills (Writing 13, Reading 10, Speaking 9,
+  Listening 8), each with a deterministic rank and an IELTS band estimate
+  (4.0–8.5).
+- **Specialist AI tutors** — one per section, teaching from a structured,
+  research-backed lesson plan and the learner's own work.
+- **Adaptive content** — difficulty matched to the learner's band; seen items
+  are not repeated until the pool is exhausted.
+- **Handwritten essays** — photograph an essay; `qwen-vl-plus` extracts the text.
+- **Study scheduler** — recurring study plan synced to Google Calendar.
+- **Telegram and WhatsApp coaches** — ask about progress or reschedule study
+  sessions from a chat app.
+- **Dashboards** — progress trends, band estimates, memory timeline,
+  cross-section insights.
 
 ## Screenshots
 
@@ -114,13 +48,13 @@ Every Tutor session now runs on an evidence-based **pedagogy engine** (`app/peda
 ### Writing Coach — adaptive prompts, streaming feedback, handwritten essay upload
 ![Writing Coach](docs/screenshots/writing_page.png)
 
-### IELTS Tutor — specialist AI tutor grounded in real evidence
+### IELTS Tutor — specialist AI tutor grounded in the learner's evidence
 ![IELTS Tutor](docs/screenshots/tutor.png)
 
 ### Skill Mastery — IELTS band estimates across all skills
 ![Skill Mastery](docs/screenshots/skill_mastery.png)
 
-### Memory Timeline — the MemoryAgent's learning made visible
+### Memory Timeline — how the learner model changes over time
 ![Memory Timeline](docs/screenshots/memory.png)
 
 ### Progress Dashboard — score trends and skill improvements
@@ -128,32 +62,92 @@ Every Tutor session now runs on an evidence-based **pedagogy engine** (`app/peda
 
 ---
 
-## What it does
+## How it works
 
-BandUp IELTS is a full-stack AI coaching web application that remembers learners across sessions. Unlike static quiz tools, it tracks weaknesses, monitors improvement, personalises feedback over time, and actively teaches learners through specialist AI tutors grounded in their own practice evidence.
+### The coaching loop
 
-**Core features:**
-- Google OAuth and username/password authentication with JWT sessions
-- Real IELTS practice content for all four skills (9 reading passages,
-  9 listening tracks, 15 speaking prompts, 7 writing prompts)
-- **Adaptive content** — difficulty matched to learner's current band level
-- **No-repeat selection** — seen content avoided until all exhausted
-- AI-powered scoring using official IELTS rubrics and band descriptors
-- Persistent memory with **spaced repetition weighting** — recency × confidence
-- **Coach Agent** — evaluates practice via tool calls, classifies skills,
-  writes memories; backed by deterministic rank engine
-- **Tutor Agent** — calls live tools mid-conversation, extracts micro-memories
-  at session end to close the agent loop
-- **Cross-section insights** — identifies skill gaps that span multiple sections
-- **IELTS band estimates (4.0–8.5)** per skill, updated after every session
-- **Handwritten essay upload** — qwen-vl-plus extracts text from photos
-- **Skill taxonomy for all 4 sections**: Writing (13), Reading (10), Speaking (9), Listening (8) — 40 sub-skills total, each with 5 rank levels and IELTS band descriptors
-- **Telegram coaching bot** — Qwen agent with tool-calling, full coaching access on any device
-- **Study scheduler** — recurring study plan with Google Calendar integration
-- Streaming essay feedback (SSE) — first token in ~1-2 seconds
-- TTS audio cached in Alibaba Cloud OSS (generated once per track, served forever)
-- Progress dashboard with score trends and band estimates across all four skills
-- Memory timeline showing coaching intelligence evolution over time
+```
+PERCEIVE   Essay submitted / audio recorded / passage answered
+           → scored against IELTS criteria (qwen-plus); speech transcribed
+             (qwen3-asr-flash); handwriting extracted (qwen-vl-plus)
+
+REMEMBER   Coach agent gathers evidence with tool calls, then
+           → classifies each sub-skill (strength / weakness / not applicable)
+           → deterministic rank engine updates learner_skill_ranks
+           → writes / updates coaching memories with confidence + embeddings
+
+REASON     Tutor builds the session context
+           → weakest skill, relevant memories, recent work, criterion stage
+           → Pedagogy Planner chooses the teaching method (deterministic)
+
+ACT        Specialist Tutor teaches, referencing the learner's own writing
+           or speech; records hints and attempts as structured evidence
+```
+
+### Two agents: the Coach writes, the Tutor reads
+
+- **Coach agent** (`app/services/coach_service.py`) runs in the background
+  after every submission. It reads ranks, memories and the attempt via tools,
+  calls `submit_classification` (which triggers the rank engine) and writes
+  memories.
+- **Tutor agent** (`app/services/chat_coach_service.py`) runs the chat lesson.
+  Its tools are read-only; it cannot change ranks.
+
+### Deterministic rank engine
+
+AI classifies; Python decides. Rank changes are auditable in
+`learner_skill_ranks`.
+
+```
+"demonstrated_strength"  → clean_streak += 1
+"demonstrated_weakness"  → clean_streak = 0   (full reset)
+"not_applicable"         → no change
+
+clean_streak reaches 3   → current_rank += 1 (max 5), streak resets
+Rank never decreases automatically.
+Band estimate (4.0–8.5) is derived at read time from rank + streak.
+```
+
+### Pedagogy layer
+
+Before the Tutor says a word, a deterministic **Pedagogy Planner**
+(`app/pedagogy/`) builds a teaching plan:
+
+- **16 research-backed frameworks** (4 per section — e.g. Genre-Based
+  Pedagogy, Focused Indirect Corrective Feedback, Micro-Listening & Dictation,
+  4/3/2 Fluency), each dominant / supporting / faded / retired by stage.
+- **4 learner stages per criterion** — Foundations (≤5.5) → Guided Control
+  (6.0) → Independent Control (6.5–7.0) → Automatization (7.5+), derived live
+  from skill ranks.
+- **A shared pedagogical spine** in every reply — Backward Design, the Feedback
+  Triad (goal → current position → next step), Dynamic Assessment (weakest hint
+  first) and Elicitation Before Telling.
+- **Support that fades on evidence** — support is reduced only after ≥3
+  low-hint successes at ≥80% accuracy, one step at a time, and restored
+  immediately on regression.
+
+> The learner model identifies **what** needs improvement. The Planner decides
+> **how** to teach it. The Tutor records what happened. The Coach decides what
+> it means.
+
+### Structured evidence from free-form chat
+
+The Tutor embeds hidden tags as things happen:
+
+```
+[ACTION: hint level=2]                               — hint given at level 2 of 4
+[ACTION: attempt result=self_corrected]              — learner fixed it unaided
+[ACTION: complete outcome=ready_for_reduced_support] — session evidence is strong
+```
+
+Tags are stripped before display and parsed server-side into
+`pedagogical_events` / `hint_events`. When the lesson reaches
+`bridge_to_practice`, the Coach reads that evidence to decide whether support
+has been earned. A `[STATE: …]` tag drives each tutor's state machine:
+`introduction → explaining → drilling → bridge_to_practice`.
+
+Full design: [`docs/pedagogy_framework.md`](docs/pedagogy_framework.md) ·
+System design: [`ARCHITECTURE.md`](ARCHITECTURE.md)
 
 ---
 
@@ -162,210 +156,21 @@ BandUp IELTS is a full-stack AI coaching web application that remembers learners
 | Layer | Technology |
 |---|---|
 | Frontend | React (Vite) + Tailwind CSS |
-| Backend API | FastAPI (Python) |
-| AI text inference | Alibaba Cloud Model Studio (qwen-plus, qwen-turbo, qwen-vl-plus) |
-| Speech-to-Text | DashScope qwen3-asr-flash |
-| Text-to-Speech | DashScope qwen3-tts-flash (Cherry voice) |
-| Text embeddings | DashScope text-embedding-v3 (1024-d) |
-| Audio storage | Alibaba Cloud OSS (oss-ap-southeast-1) |
-| Messaging bot | Telegram Bot API + Qwen agent with tool-calling |
-| Calendar | Google Calendar API (OAuth, recurring events) |
-| Compute | Alibaba Cloud ECS (Singapore) |
+| Backend API | FastAPI (Python 3.11) |
+| Text + vision AI | Alibaba Cloud Model Studio — `qwen-plus`, `qwen-vl-plus` (`qwen-turbo` for JSON repair) |
+| Speech-to-text | `qwen3-asr-flash` |
+| Text-to-speech | `qwen3-tts-flash` (Cherry voice) |
+| Embeddings | `text-embedding-v3` (1024-d) |
+| Object storage | Alibaba Cloud OSS — listening audio cache, essay-image hand-off, backups |
+| Database | PostgreSQL 16; schema managed by Alembic |
 | Auth | JWT + Google OAuth (Authlib) |
-| Database | PostgreSQL 16 (Docker, persistent volume) |
-| Containerisation | Docker + Docker Compose |
-| Reverse proxy | Nginx |
+| Calendar | Google Calendar API (OAuth with PKCE) |
+| Chat channels | Telegram Bot API, WhatsApp Cloud API |
+| Containers | Docker + Docker Compose; Nginx in the production image |
+| Tests | pytest |
 
-**No agent framework** — all orchestration is hand-rolled Python with deterministic logic where it matters. The rank engine never uses AI for decisions.
-
----
-
-## Alibaba Cloud services
-
-```
-Model Studio    — text + vision AI inference
-                  qwen-plus  → essay evaluation, memory extraction,
-                               Coach agent, Tutor agent
-                  qwen-turbo → skill classification (fast, cheap)
-                  qwen-vl-plus → handwritten essay image extraction
-                  70M+ free tokens, Singapore region workspace
-
-DashScope ASR   — qwen3-asr-flash, real-time speech transcription
-                  Automatic compression + chunking for long recordings
-
-DashScope TTS   — qwen3-tts-flash, Cherry voice
-                  Listening track audio cached in OSS permanently
-
-OSS             — ielts-memorycoach-audio bucket, Singapore
-                  TTS audio generated once, served to all users forever
-                  Zero DashScope cost after first generation per track
-
-ECS             — ecs.e-c1m2.large, Singapore Zone A
-                  Docker + Nginx, 2 vCPU 4GB RAM
-
-VPC + Security  — isolated network, principle of least privilege
-```
-
----
-
-## IELTS modules
-
-### ✍️ Writing Coach
-- Adaptive prompts matched to learner's current band level
-- **Handwritten essay upload** — photograph your essay, image is uploaded to
-  Alibaba Cloud OSS as a pre-signed URL, qwen-vl-plus fetches and extracts the
-  text, same evaluation pipeline runs; temporary OSS object deleted after processing
-- Evaluated against 5 official rubric criteria
-- Coach Agent classifies 13 granular sub-skills via tool calls
-- Streaming feedback via SSE (first token ~1-2s)
-- Full memory lifecycle + skill rank updates
-
-### 📖 Reading Coach
-- 9 passages across 3 difficulty levels (3 per level)
-- Adaptive selection — passage difficulty matched to current band
-- Multiple Choice, True/False/Not Given, Short Answer
-- Objective answers checked instantly, short answers via Qwen
-- No-repeat selection — seen passages avoided until all exhausted
-- Full memory lifecycle + Coach Agent skill classification
-
-### 🎤 Speaking Coach
-- 15 prompt sets (5 beginner, 6 intermediate, 4 advanced)
-- Adaptive selection — prompt difficulty matched to current band
-- Browser microphone recording or file upload
-- qwen3-asr-flash transcription in real time
-- Cherry reads examiner feedback aloud via TTS
-- Band scores: Fluency, Lexical, Grammar, Pronunciation
-- No-repeat selection — seen prompts avoided until all exhausted
-- Coach Agent classifies 9 Speaking sub-skills after each session
-
-### 🎧 Listening Coach
-- 9 tracks across 3 difficulty levels (3 per level), all 4 IELTS parts
-- Adaptive selection — track difficulty matched to current band
-- Cherry generates audio on first request, cached in OSS permanently
-- Audio proxied via FastAPI (handles auth + cross-origin correctly)
-- Exam conditions: preview questions, play once, answer while listening
-- Fuzzy answer matching for spelling/number variants
-- No-repeat selection — seen tracks avoided until all exhausted
-- Coach Agent classifies 8 Listening sub-skills after each session
-
-### 🧑‍🏫 IELTS Tutor (Chat Coach)
-- 4 specialist tutors — select your section
-- **True agent loop** — Tutor calls live tools mid-conversation:
-  get_learner_weaknesses, get_recent_attempts, get_skill_ranks
-- Each tutor opens with live context from the Coach Agent, not
-  stale session-start data
-- When drilling concludes, micro-memories are extracted and saved —
-  closing the agent loop so tutoring feeds back into future coaching
-- Internal state machine behind natural conversation
-- Session cached in browser — no redundant API calls on navigation
-
----
-
-## Skill Mastery System
-
-Skills are displayed as **IELTS band estimates (4.0–8.5)** rather than
-internal ranks. Bands are derived from the rank engine at read time:
-streak 0 = base band for that rank; streak 1+ = base band + 0.5.
-A weakness (streak reset) drops the band back to base — realistic
-downward movement without destabilising the underlying engine.
-No band is shown until the learner completes their first practice session.
-
-### 13 Writing sub-skills (Official IELTS Band Descriptors)
-
-| Category | Sub-skills |
-|---|---|
-| Task Response | Full Task Coverage, Clarity of Position, Idea Development, Conclusion Synthesis |
-| Coherence & Cohesion | Logical Progression, Paragraphing, Cohesive Devices |
-| Lexical Resource | Vocabulary Range, Word Choice Precision, Spelling & Word Formation |
-| Grammatical Range & Accuracy | Sentence Variety, Grammatical Accuracy, Punctuation Control |
-
-### Rank engine (deterministic — no AI in rank decisions)
-
-```
-After each submission, the Coach Agent gathers evidence via tools,
-then calls submit_classification for each skill in the taxonomy:
-
-  "demonstrated_strength"  → clean_streak += 1
-  "demonstrated_weakness"  → clean_streak = 0  (full reset)
-  "not_applicable"         → no change
-
-clean_streak reaches 3     → current_rank += 1 (max 5)
-Band estimate derived at read time from rank + streak (4.0–8.5)
-Rank NEVER decreases automatically.
-All rank changes are auditable in learner_skill_ranks table.
-Supported for all 4 sections: Writing (13), Reading (10),
-Speaking (9), Listening (8) sub-skills.
-```
-
----
-
-## Telegram & WhatsApp Coaching Bots
-
-**[@qieltsbot](https://t.me/qieltsbot)** — Qwen-powered, available anywhere.
-
-The Telegram bot brings BandUp's full coaching intelligence to any device without opening a browser. It uses the same Qwen model (qwen-plus with tool-calling) that drives the web app's Coach and Tutor agents.
-
-**What it can do:**
-- Answer coaching questions: *"What's my weakest IELTS skill?"*
-- Give a full progress overview: *"How am I doing in Writing?"*
-- Reschedule study sessions: *"Move my Wednesday session to Friday at 9am"* — Qwen calls `schedule_study_sessions`, updates the DB, patches Google Calendar
-- Add one-off sessions: *"Add a 45-min session this Saturday at 10am"*
-
-**Connecting an account:** in the web app, open **Study Plan → Chat with your coach**, tap *Connect Telegram* (or *Connect WhatsApp*) and send the one-time code to the bot. Codes expire after 10 minutes, are single-use and stored only as a hash — knowing someone's email is not enough to reach their data.
-
-**Architecture** (Telegram and WhatsApp share one conversation flow in `app/services/bot_conversation.py`):
-```
-Message → /telegram/webhook (secret-token header) or /whatsapp/webhook (Meta signature)
-  → 200 returned immediately; reply built in the background
-  → link-code check (unlinked chats get connect instructions, no LLM call)
-  → keyword pre-filter (blocks off-topic / abuse without LLM call)
-  → Qwen agent (qwen-plus, tool-calling) — tools always run as the linked learner
-  → reply sent via Telegram Bot API / WhatsApp Cloud API
-```
-
-The Qwen agent loop runs up to 5 tool-call iterations per message — enough for chained queries like "What should I study, and when is my next scheduled session?" in a single reply.
-
-**Scope guardrails:** A keyword pre-filter in the webhook handler short-circuits requests for API keys, code, .env files, and jailbreak attempts before they reach Qwen — zero LLM cost, instant refusal. All coach and tutor prompts carry a non-negotiable scope section that enforces IELTS-only responses and provides a fixed refusal template for off-topic requests.
-
----
-
-## Study Scheduler + Google Calendar
-
-Learners set a recurring study schedule (days, time, duration) during onboarding or from the **Study Plan** page. BandUp creates recurring events in Google Calendar so sessions sit alongside meetings and commutes — exactly where a working professional needs them.
-
-- **2-step onboarding** — profile setup followed by study schedule
-- **Recurring calendar events** — RRULE weekly recurrence, UNTIL = test date
-- **Personalized descriptions** — event title includes the learner's weakest skill
-- **Reminders** — email 60 min before, popup 10 min before
-- **Telegram writable** — `schedule_study_sessions` and `add_one_off_session` update both the DB and Google Calendar from the Telegram bot
-- **PKCE OAuth** — Google now requires PKCE for all OAuth flows; the authorization URL includes a S256 code challenge, with the verifier encoded in the state parameter so the stateless callback can complete the token exchange correctly
-
----
-
-## Why BandUp wins — the moat
-
-### The learner we're building for
-
-There are 3.5 million IELTS test-takers every year. The majority are not full-time students — they are working professionals in Lagos, Nairobi, Manila, and Dhaka who need Band 6.5 or 7.0 to unlock a visa, a job offer, or a graduate place. They study in stolen windows: a 20-minute commute, a lunch break, the hour before midnight. Call them **jugglers** — every product decision in BandUp was made for them.
-
-Existing tools fail jugglers in a specific way: they reset. Every session, you get the same generic feedback, the same rubric, the same advice. The tool has no memory of what you struggled with last week, no sense of whether you're improving, no way to pick up where you left off. You are permanently a stranger to your own coach.
-
-### Five compounding advantages
-
-**1. A data flywheel that only gets smarter**
-Every practice session writes new coaching memories — specific observations about this exact learner's error patterns, which approaches worked, which didn't. Memories compound with confidence-weighted spaced repetition: a high-confidence weakness from last week outranks a medium-confidence one from three months ago. After 10 sessions, BandUp knows the learner better than any generic AI coach. After 30, switching to a competitor means returning to generic feedback from scratch. **That switching cost grows with every session.**
-
-**2. Designed for the 20-minute window**
-- No-repeat content selection: 9 reading passages, 9 listening tracks, 15 speaking prompts, 7 writing prompts always served fresh until exhausted — a short session is always a genuine new challenge.
-- Adaptive difficulty: content matched to current band so no session is wasted on material that's too easy or too hard.
-- Session continuity: a 5-day gap doesn't mean starting over — the coach resumes from the evidence, not from a blank slate.
-- Cross-section insights: the only IELTS tool that identifies when a grammar gap in Writing and a fluency gap in Speaking share the same root cause, and surfaces it in the dashboard.
-
-**3. A pedagogical layer that can't be copied without the research**
-Other AI IELTS tools are chatbots with an IELTS system prompt. BandUp is the only one with a structured, research-backed teaching plan for every session — 16 evidence-based frameworks (Backward Design, Dynamic Assessment, Focused Indirect Corrective Feedback, 4/3/2 Fluency), deterministic stage routing, support that fades only when the evidence earns it. A competitor building this from scratch needs months of pedagogical research, not just API access.
-
-**4. Semantic memory retrieval**
-Every coaching memory is embedded using DashScope `text-embedding-v3` at write time. When the Tutor plans a session, the feedback priorities are retrieved not by recency alone but by **semantic relevance to the current session's target descriptor** — a memory about relative-clause verb agreement surfaces when the session targets grammar, even if it was written two months ago. Retrieval is a hybrid of semantic similarity and spaced-repetition scoring, combining the best of both.
+No agent framework: orchestration is plain Python, with deterministic code
+wherever a decision affects learner records.
 
 ---
 
@@ -373,207 +178,221 @@ Every coaching memory is embedded using DashScope `text-embedding-v3` at write t
 
 ### Prerequisites
 - Docker + Docker Compose
-- DashScope API key (https://dashscope-intl.aliyuncs.com)
+- An Alibaba Cloud Model Studio (DashScope) API key; OSS credentials for audio
 
 ### Run locally
 
 ```bash
 git clone https://github.com/DareAdekunle/IELTS-memoryCoach.git
 cd IELTS-memoryCoach
-cp .env.example .env
-# Fill in the values — every variable is described in .env.example
-docker compose -f docker-compose.prod.yml up --build
+cp .env.example .env        # fill in the values; each one is described there
+docker compose up -d --build
 ```
 
-Open http://localhost
+- App: http://localhost:5173
+- API docs: http://localhost:8000/docs
 
-### Migrate existing data from SQLite
+The API container runs database migrations before it starts. Source folders
+are mounted, so backend and frontend changes reload without a rebuild.
 
-If you have an existing `ielts_coach.db`, migrate it to PostgreSQL with:
+### Demo data
 
 ```bash
-# While containers are running:
+docker exec ielts-api-dev python seed_demo.py
+```
+
+Creates `demo@ieltscoach.com` / `demo1234` with a realistic history (essays,
+reading attempts, memories and near-rank-up skills).
+
+### Tests
+
+```bash
+docker exec ielts-api-dev pytest
+```
+
+Tests run against a throwaway SQLite database and block live Qwen calls.
+Scripts that hit the live API are in `scripts/manual_checks/` and are run by
+hand.
+
+### Database migrations
+
+The schema is managed by Alembic (`migrations/`). After changing a model:
+
+```bash
+docker exec ielts-api-dev alembic revision --autogenerate -m "describe change"
+docker restart ielts-api-dev     # scripts/migrate.py applies it on start
+```
+
+To import data from a legacy SQLite database:
+
+```bash
 python scripts/migrate_sqlite_to_postgres.py \
     --sqlite ./ielts_coach.db \
     --postgres "postgresql://ielts:YOUR_PASSWORD@localhost:5432/ielts_coach"
 ```
 
-The script is idempotent — safe to run multiple times.
+### Production image
 
-### Seed demo data
+`docker-compose.prod.yml` builds one image with the React build, FastAPI and
+Nginx. `nginx.conf` expects Let's Encrypt certificates for the configured
+domain, so use the dev compose file for local work.
 
-```bash
-docker cp seed_demo.py ielts-memorycoach:/app/seed_demo.py
-docker exec ielts-memorycoach python seed_demo.py
+---
+
+## Chat coaches (Telegram & WhatsApp)
+
+Learners can ask *"What's my weakest skill?"*, *"How am I doing in
+Writing?"* or *"Move my Wednesday session to Friday at 9am"* — the coach calls
+the same backend functions as the web app and updates Google Calendar.
+
+**Connecting an account:** in the web app open **Study Plan → Chat with your
+coach**, choose *Connect Telegram* or *Connect WhatsApp*, and send the one-time
+code to the bot. Codes expire after 10 minutes, are single-use and stored only
+as a hash.
+
 ```
+Message → /telegram/webhook (secret-token header) or /whatsapp/webhook (Meta signature)
+  → 200 returned immediately; reply built in the background
+  → link-code check (unlinked chats get instructions, no LLM call)
+  → keyword pre-filter (off-topic / abuse blocked without an LLM call)
+  → Qwen agent (qwen-plus, tool-calling) — tools run as the linked learner
+  → reply sent via Telegram Bot API / WhatsApp Cloud API
+```
+
+Both channels share one conversation flow (`app/services/bot_conversation.py`).
+To receive messages the API must be reachable publicly (a tunnel such as ngrok
+works locally) and `TELEGRAM_WEBHOOK_SECRET` / `WHATSAPP_APP_SECRET` must be
+set — webhooks reject everything otherwise.
+
+---
+
+## Study scheduler + Google Calendar
+
+Learners set a recurring schedule (days, time, duration) during onboarding or
+on the **Study Plan** page; BandUp creates recurring Google Calendar events.
+
+- Weekly recurrence until the test date; reminders 60 and 10 minutes before
+- Event descriptions name the learner's current weakest skill
+- The chat coaches can change the schedule and patch the calendar
+- OAuth uses PKCE; the verifier travels in the `state` parameter, so the
+  callback stays stateless
+
+---
+
+## Security model
+
+- **Identity comes from the server.** Learner IDs come from the validated JWT
+  (web) or the linked chat (bots). Agent tool calls always run as that learner,
+  whatever `learner_id` the model supplies.
+- **Tutor prompts stay server-side.** The system prompt and transcript live in
+  `tutor_session_transcripts`; the browser sends only a session ID and the next
+  message, and sessions belonging to another learner return 404.
+- **Bots link by one-time code**, never by email address. Webhooks are verified
+  (Telegram secret token, WhatsApp HMAC signature) and fail closed.
+- **Scope guardrails** — a keyword pre-filter plus non-negotiable scope rules
+  in every coach, tutor and bot prompt keep conversations to IELTS.
+- **`/mcp-server` is admin-only** — it requires `MCP_API_TOKEN`; unset means
+  disabled.
+
+---
+
+## Running costs
+
+Measured with `scripts/cost_model.py` (Model Studio international list
+prices, October 2026):
+
+| Session | Approx. cost (USD) |
+|---|---|
+| Writing essay, scored + coached | $0.013 (up to ~$0.04 on long Coach runs) |
+| Reading passage | $0.005–0.026 |
+| Listening track (audio cached) | $0.005 |
+| Speaking test (8 min of audio) | $0.036 |
+| Tutor session, 8 turns | $0.019 |
+| Chat-coach message | $0.0013 |
+
+A typical active learner costs roughly **$0.80–1.20 per month** in AI usage.
+The Coach agent's multi-step tool use is the largest variable cost.
 
 ---
 
 ## Project structure
 
 ```
-IELTS-memorycoach/
-├── api/                    ← FastAPI backend
-│   ├── auth/               ← JWT + Google OAuth
-│   └── routes/             ← writing, reading, speaking,
-│                              listening, chat, progress, memory,
-│                              pedagogy, schedule, telegram
-├── app/                    ← Python services (AI + business logic)
-│   ├── pedagogy/           ← Pedagogical Skill Layer (deterministic)
-│   │   ├── stages.py       ← LearnerStage, SupportLevel, band_to_stage()
-│   │   ├── registry.py     ← 16 frameworks loaded from JSON
-│   │   ├── descriptors.py  ← band descriptors + Backward Design targets
-│   │   ├── stage_resolver.py ← live criterion stage + support lookup
-│   │   ├── planner.py      ← deterministic routing + session plan builder
-│   │   ├── session_policy.py ← practice condition gates per stage
-│   │   ├── action_tags.py  ← [ACTION: hint level=N] parser
-│   │   ├── fading.py       ← support-fading guardrail
-│   │   └── spine.py        ← Feedback Triad soft validator
-│   ├── data/               ← IELTS content, taxonomies, framework JSON
-│   │   ├── pedagogical_frameworks.json  ← 16 frameworks + shared spine
-│   │   └── band_descriptors.json        ← per-criterion band text (4–9)
-│   ├── services/           ← scoring, memory, tts, asr, mcp,
-│   │                          chat_coach, coach, pedagogical_event,
-│   │                          telegram_service, calendar_service,
-│   │                          schedule_service, embedding_service
-│   ├── prompts/            ← Qwen prompt templates (4 tutor skills)
+IELTS-memoryCoach/
+├── api/                    ← FastAPI app
+│   ├── auth/               ← JWT + Google OAuth, user + link-code models
+│   └── routes/             ← writing, reading, speaking, listening, chat,
+│                             progress, memory, pedagogy, schedule,
+│                             channels, telegram, whatsapp
+├── app/                    ← services (AI + business logic)
+│   ├── pedagogy/           ← deterministic pedagogy layer (planner, stages,
+│   │                         fading, action tags, spine)
+│   ├── services/           ← coach, chat_coach (tutor), scoring, memory,
+│   │                         asr, tts, embedding, calendar, schedule,
+│   │                         bot_conversation, channel_linking, …
+│   ├── prompts/            ← Qwen prompt templates
+│   ├── data/               ← IELTS content, taxonomies, frameworks, descriptors
 │   ├── db/                 ← SQLAlchemy models + session factory
-│   ├── mcp/                ← MCP server (FastMCP)
-│   └── utils/              ← JSON parser, logger, scoring helpers
+│   ├── mcp/                ← MCP server (FastMCP), admin-only
+│   └── utils/              ← JSON parsing, tool-call helpers, logging
 ├── frontend/               ← React app (Vite + Tailwind)
-│   └── src/
-│       ├── api/            ← axios clients per module
-│       ├── components/     ← AppShell, ProtectedRoute
-│       └── pages/          ← one page per module
+├── migrations/             ← Alembic migrations
 ├── scripts/
-│   ├── db_backup.py        ← SQLite ↔ Alibaba Cloud OSS backup/restore
+│   ├── migrate.py          ← runs before the API: alembic upgrade head
+│   ├── cost_model.py       ← measures live Qwen cost per session
+│   ├── manual_checks/      ← live-API smoke scripts (run by hand)
+│   ├── migrate_sqlite_to_postgres.py
+│   ├── db_backup.py        ← OSS backup/restore (legacy SQLite)
 │   └── eval_pedagogy.py    ← offline pedagogy behaviour eval
-├── tests/                  ← pedagogy test suites (registry, planner, integration)
-├── docs/
-│   └── pedagogy_framework.md ← full pedagogical design + code map
-├── Dockerfile              ← multi-stage: React build + Python + Nginx
-├── docker-compose.yml      ← local Docker development
-├── docker-compose.prod.yml ← production orchestration (ECS)
-├── nginx.conf              ← reverse proxy + SSE support
+├── tests/                  ← pytest suite
+├── docs/                   ← pedagogy design, product strategy, screenshots
+├── docker-compose.yml      ← local development
+├── docker-compose.prod.yml ← production (single image + Nginx)
 ├── seed_demo.py            ← demo account seeder
-├── ARCHITECTURE.md         ← system design + agent loop + DB schema
-└── CLAUDE.md               ← agent build harness (read before coding)
+├── ARCHITECTURE.md         ← system design, agent loops, DB schema
+└── CLAUDE.md               ← conventions for anyone (or any agent) changing the code
 ```
-
----
-
-## Who this is for
-
-3.5 million people take IELTS every year. Most of them are not students — they are **working professionals** in Lagos, Nairobi, Manila, Dhaka, and dozens of other cities who need a Band 6.5 or 7.0 to unlock a visa, a job offer, or a university place in an English-speaking country.
-
-They cannot attend classes. They study on their phone during a commute, in a lunch break, or at 10pm after the kids are in bed. Existing tools give them the same generic feedback every session with no memory of what they worked on last week. BandUp is built for them — an AI coach that learns who they are and gets smarter every time they practise, fitting around a full-time life rather than demanding they rearrange it.
-
-## Productization roadmap
-
-```
-Phase 1 (current) — Solo practitioner web app
-  ✅ All 4 IELTS skills with persistent AI memory
-  ✅ Band estimates (4.0–8.5) per skill, updated after every session
-  ✅ Adaptive content — difficulty matched to current band level
-  ✅ Specialist AI tutors grounded in real practice evidence
-  ✅ Cross-section insights — identifies core gaps across skills
-  ✅ Handwritten essay upload via qwen-vl
-  ✅ Study scheduler — recurring sessions with Google Calendar integration
-  ✅ Telegram bot — Qwen agent with tool-calling, coaching on any device
-
-Phase 2 — Chat-native coaching (the juggler's phone IS the classroom)
-  The full IELTS coaching loop runs inside a chat thread — no browser,
-  no app install. The learner opens Telegram on their commute and picks
-  up exactly where they left off.
-
-  ⬜ Full practice sessions in Telegram/WhatsApp:
-       → send a paragraph → Qwen scores it → feedback arrives in thread
-       → record a voice note → ASR transcribes → Speaking feedback inline
-       → coach asks comprehension questions → Reading drills in chat
-       → Listening: audio clip sent, answers checked, memories saved
-  ⬜ Seamless memory continuity — every chat session writes to the same
-     learner profile as the web app; the juggler never starts over
-  ⬜ Push nudges: "You haven't practised Writing in 3 days — here's a
-     quick paragraph task for your commute"
-  ⬜ Streak tracking and milestone celebrations in thread
-  ⬜ WhatsApp Business integration (pending Meta Business verification)
-
-Phase 3 — Mobile-first consumer product
-  ⬜ React Native app (same FastAPI backend, zero re-architecture)
-  ⬜ Offline mode — download practice content, sync results later
-  ⬜ Voice selection for TTS — learners choose their examiner accent
-     (British, American, Australian) to practise with the accent
-     they will face in their actual test
-
-Phase 4 — Freemium at scale
-  ⬜ Free tier: 5 sessions/month, memory limited to last 3 sessions
-  ⬜ Premium: $9.99/month — unlimited sessions, full persistent memory,
-     all 4 sections, complete band history
-  ⬜ Target price point is globally accessible — less than one prep book
-  ⬜ PostgreSQL migration for multi-region scale
-  ⬜ Payment via Stripe (card) + regional methods (M-Pesa, GCash, UPI)
-
-Phase 5 — Community and accountability
-  ⬜ Anonymous band leaderboards by target score and country
-  ⬜ Study groups — 2-3 learners compare progress and hold each other
-     accountable (the most powerful retention mechanism for adult learners)
-  ⬜ Milestone sharing — "I just hit Band 6.5 on Writing 🎉"
-  ⬜ Referral programme — one month free for each friend who reaches
-     their target band
-
-Phase 6 — Platform
-  ⬜ Open coaching data API — licensed IELTS tutors query a learner's
-     full coaching profile (with consent) and pick up exactly where
-     the app left off; BandUp becomes infrastructure for the broader
-     IELTS prep ecosystem
-  ⬜ Taxonomy contribution — community validates and extends skill
-     definitions; open-source core, hosted service
-  ⬜ Webhook system — notify integrations when a learner hits their
-     target band
-```
-
-**Business model:** Freemium direct-to-consumer. Free tier drives acquisition at scale across emerging markets. Premium at $9.99/month converts the motivated — a learner spending $250 on an IELTS test fee will pay $10/month for a coach that actually remembers them. Coaching data API access for third-party tutoring platforms provides a B2B revenue layer without the complexity of institutional sales cycles.
 
 ---
 
 ## Key design decisions
 
-**1. No agent framework** — LangChain/LlamaIndex were evaluated and rejected. Every pipeline is a fixed, known sequence. A framework adds abstraction cost with no benefit when there's no dynamic tool selection.
+1. **Deterministic where it matters.** The model classifies evidence and
+   writes teaching; Python owns ranks, stages, support levels and permissions.
+2. **Evaluation and coaching are separate steps.** The essay score streams to
+   the learner first (first token in ~1–2 s); the Coach agent classifies skills
+   and writes memories in the background, so a coaching failure never loses
+   the score.
+3. **Audio is generated once.** Listening audio is cached in OSS, so each track
+   costs one TTS call for all learners.
+4. **Embeddings without a vector database.** 1024-d vectors are stored as JSON
+   and ranked in Python with `0.45 × similarity + 0.55 × spaced-repetition
+   score` — ample at 20–200 memories per learner.
+5. **Pre-signed URLs for vision.** Qwen-VL only accepts `https://` image URLs,
+   so essay photos go to a private OSS object with a 5-minute signed URL and are
+   deleted afterwards.
 
-**2. Deterministic rank engine** — AI classifies (strength/weakness/not_applicable), Python counts to three and ranks up. Rank changes are auditable, tamper-proof and explainable.
-
-**3. Three separate Qwen calls per Writing submission** — essay evaluation (qwen-plus), skill classification (qwen-turbo), memory extraction (qwen-plus) are separate by design. Long feedback responses contain apostrophes that break JSON parsing. Isolation means one failure cannot cascade to the others.
-
-**4. OSS for audio** — Listening track audio is generated once globally and stored in Alibaba Cloud OSS. Every learner gets it from OSS instantly. The TTS quota is consumed exactly once per track for all users for all time — adding a new track costs one TTS call regardless of how many learners use it.
-
-**5. The chat thread as the classroom**
-The end-state vision for the juggler is that their phone's chat app — the one they already have open all day — becomes their IELTS classroom. No app to download, no browser tab to open, no login to remember. They send a paragraph on the way to work and the score arrives before they reach the office. They record a voice note in a lunch break and get Speaking feedback by the time they sit back down.
-
-BandUp is already partway there: the Telegram bot today handles coaching questions, schedule management, and skill lookups. The roadmap completes the loop — full practice sessions (Writing, Speaking, Reading, Listening) running entirely in-thread, with every submission writing to the same persistent memory profile as the web app. The juggler's ten-minute commute becomes a genuine coaching session. **That is a product no traditional IELTS tool can build without starting over.**
+More in [`ARCHITECTURE.md`](ARCHITECTURE.md#key-design-decisions).
 
 ---
 
 ## Roadmap
 
-- [x] Auth — Google OAuth + username/password + JWT
-- [x] Writing Coach — essay, AI scoring, streaming SSE
-- [x] Reading Coach — passages, questions, results
-- [x] Speaking Coach — ASR + TTS + 3-part session, recording timer
-- [x] Listening Coach — TTS audio + OSS caching
-- [x] IELTS Tutor — 4 specialist AI tutors with pedagogical session plans
-- [x] Writing skill taxonomy (13 sub-skills, Band Descriptors)
-- [x] Deterministic rank engine
-- [x] Memory Timeline visualization
-- [x] Skill Mastery dedicated page with per-criterion stage display
-- [x] Alibaba Cloud deployment (ECS + OSS + Model Studio)
-- [x] Pedagogical Skill Layer — 16 frameworks, 4 stages, support fading
-- [x] ACTION tag protocol — evidence loop closes after every tutor session
-- [x] PostgreSQL 16 — persistent named volume, survives container rebuilds
-- [x] Semantic memory embeddings — DashScope text-embedding-v3, hybrid retrieval
-- [x] Study scheduler — recurring sessions with Google Calendar integration (PKCE OAuth)
-- [x] Telegram bot — Qwen agent with tool-calling (@qieltsbot)
-- [x] Scope guardrails — keyword pre-filter + prompt-level refusals across all coaches, tutors, and Telegram bot
-- [ ] Listening replay/transcript condition gates in frontend UI
-- [x] Extend skill taxonomy to Reading (10), Speaking (9), Listening (8) sub-skills
+Near-term engineering work:
+
+- [x] Stabilise: security boundaries, Alembic, pytest suite, cost model,
+      WhatsApp parity
+- [ ] **Assessment validity** — calibrate Writing and Speaking scores against
+      human-rated samples; Task 1 / Task 2 specific scoring
+- [ ] **Memory 2.0** — link every memory to its source attempt; de-duplicate
+      and reconcile contradictions
+- [ ] **Diagnostic + adaptive planning** — initial diagnostic and a study plan
+      built from it
+- [ ] **Durable agent workflows** — move Coach/Tutor orchestration to a
+      persistent, recoverable workflow engine
+- [ ] Listening replay/transcript limits in the UI
 - [ ] Teacher / admin dashboard
-- [ ] Video walkthrough
+- [ ] Hosting for the beta
+
+Longer-term product phases are in
+[`docs/product-strategy.md`](docs/product-strategy.md).

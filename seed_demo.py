@@ -459,7 +459,7 @@ def seed_demo(email=DEFAULT_EMAIL, password=DEFAULT_PASSWORD, reset=False):
         print(f"  Email:    {email}")
         print(f"  Password: {password}")
         print(f"\nLearner ID: {learner_id}")
-        print(f"\nDemo highlights for judges:")
+        print(f"\nDemo walkthrough:")
         print(f"  📈 6 Writing essays showing clear improvement over 14 days")
         print(f"  📖 4 Reading attempts showing 64% → 79% → 86% → 93% progression")
         print(f"  🧠 {len(MEMORIES)} coaching memories across Writing and Reading")

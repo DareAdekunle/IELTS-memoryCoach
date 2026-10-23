@@ -68,7 +68,7 @@ graph LR
 graph TD
     Browser["🌐 React Frontend\nVite + Tailwind CSS"] -->|JWT + REST + SSE| Nginx
 
-    subgraph ECS ["Alibaba Cloud ECS — Singapore"]
+    subgraph HOST ["Docker host — local today (previously Alibaba Cloud ECS)"]
         Nginx["Nginx\nPort 80/443\nSSE-aware proxy"] -->|/api/*| FastAPI
         Nginx -->|/*| Static["React Static Files\n/var/www/html"]
         FastAPI["FastAPI\nPort 8000\n2 uvicorn workers"] --> Services
@@ -76,7 +76,8 @@ graph TD
         Services --> PG["PostgreSQL 16\nDocker service\npostgres_data volume"]
     end
 
-    Telegram["Telegram\n@qieltsbot"] -->|webhook POST| FastAPI
+    Telegram["Telegram\n@qieltsbot"] -->|webhook POST\nsecret token| FastAPI
+    WhatsApp["WhatsApp\nCloud API"] -->|webhook POST\nHMAC signature| FastAPI
     FastAPI -->|Qwen tool-calling agent| Services
     Services -->|text + vision generation| ModelStudio["Alibaba Cloud\nModel Studio\nqwen-plus + qwen-turbo + qwen-vl-plus\nSingapore workspace"]
     Services -->|text embeddings| EMB["DashScope Embeddings\ntext-embedding-v3\n1024 dimensions"]
@@ -97,6 +98,9 @@ postgres:16-alpine                   postgres:16-alpine
 api (FastAPI + app/)                 app (Nginx + FastAPI in one image)
   └─ depends_on: postgres healthy      └─ depends_on: postgres healthy
   └─ DATABASE_URL → postgres           └─ DATABASE_URL → postgres
+  └─ scripts/migrate.py, then          └─ docker-entrypoint.sh: wait for DB,
+     uvicorn --reload                     migrate.py, Nginx + uvicorn
+  └─ source mounted; pytest installed
 
 frontend (node:20-alpine dev)        (React built into static files
   └─ Vite dev server :5173              served by Nginx at /var/www/html)
@@ -387,21 +391,23 @@ Currently 9 tracks = 9 TTS calls total regardless of user count.
 
 ---
 
-## Telegram Coaching Agent
+## Chat Coaches (Telegram & WhatsApp)
 
-The Telegram bot runs a Qwen tool-calling agent that shares the same backend
-coaching functions as the web app — one implementation, two surfaces.
+Both chat coaches run a Qwen tool-calling agent over the same backend
+coaching functions as the web app, through one shared conversation flow
+(`app/services/bot_conversation.py`). Routes only handle transport:
+webhook verification, payload parsing and sending.
 
 ```mermaid
 graph LR
     A["Tutor Agent\n(internal)"] -->|function calling| TOOLS
-    D["@qieltsbot\nTelegram"] -->|Qwen agent\ntool-calling| TOOLS
+    D["Telegram / WhatsApp\nchat coaches"] -->|Qwen agent\ntool-calling| TOOLS
 
     TOOLS["shared backend functions\n(app/services/*.py)"]
     TOOLS --> DB[("PostgreSQL\nlearner_memories\nlearner_skill_ranks\npractice_attempts\nstudy_schedules")]
 ```
 
-### Telegram / Qwen agent loop
+### Chat agent loop
 
 ```
 User messages @qieltsbot (or the WhatsApp number)
@@ -420,9 +426,17 @@ The Qwen agent has access to all coaching and scheduling tools. A message like
 `get_coaching_context` + `get_study_schedule` in a single turn,
 then Qwen synthesises both results into one reply.
 
+### Account linking
+
+A chat is linked to an account only with a one-time code the learner creates
+while signed in to the web app (`POST /channels/{channel}/link-code`). Codes are
+8 characters, expire after 10 minutes, are single-use, stored as SHA-256
+hashes in `channel_link_codes`, and limited to 5 failed attempts per chat per
+15 minutes. Linking a chat to a new account unlinks it from any previous one.
+
 ### Scope guardrails
 
-Two layers prevent the bot from being used outside IELTS coaching:
+Two layers prevent the chat coaches from being used outside IELTS coaching:
 
 1. **Keyword pre-filter** (`app/services/bot_guardrails.py`) — checks for ~27 blocked
    patterns (API keys, `.env`, code/script requests, jailbreak phrases) before
@@ -445,7 +459,7 @@ subtler attempts that reach the LLM.
 users
   user_id, email, username, password_hash
   google_id, auth_provider, learner_id
-  whatsapp_number, telegram_chat_id   ← messaging bot identity links
+  whatsapp_number, telegram_chat_id   ← set only by redeeming a link code
   is_active, created_at, last_login
 
 learners
@@ -504,9 +518,15 @@ study_schedules               ← Recurring study plan per learner
 ─── Pedagogical Skill Layer tables ──────────────────────────────────────────
 
 tutor_sessions                ← One per Tutor chat session
-  session_id (UUID), learner_id, section
-  current_state (introduction/explaining/drilling/bridge_to_practice)
+  session_id, learner_id, section
+  state (introduction/explaining/drilling/bridge_to_practice)
   started_at, completed_at
+
+tutor_session_transcripts     ← Server-held system prompt + turns per session
+  session_id, learner_id
+  system_prompt TEXT, messages TEXT (JSON [{role, content}])
+  updated_at
+  ← The client sends only session_id + message; ownership checked per turn
 
 learner_criterion_state       ← Support level + counters per learner/criterion
   state_id, learner_id, section, criterion_id
@@ -534,7 +554,17 @@ hint_events                   ← One row per hint given
   hint_level (1-4), self_corrected (bool)
   created_at
   ← self_corrected = True if learner repaired without hint in same turn
+
+─── Chat channels ───────────────────────────────────────────────────────────
+
+channel_link_codes            ← One-time codes linking Telegram/WhatsApp to a user
+  code_hash (SHA-256), user_id, channel (telegram/whatsapp)
+  expires_at, created_at
 ```
+
+The schema is managed by **Alembic** (`migrations/`). `scripts/migrate.py`
+runs `alembic upgrade head` before the API starts; a database created before
+Alembic is adopted at the baseline revision without data loss.
 
 ---
 
@@ -593,6 +623,9 @@ all 13 tables. Safe to re-run if interrupted.
 
 | Script | Purpose |
 |---|---|
+| `scripts/migrate.py` | Runs before the API: adopts pre-Alembic databases, then `alembic upgrade head`. |
+| `scripts/cost_model.py` | Runs each learner workflow once against a throwaway database and prices the Qwen usage it reports. Live API calls — a few cents per run. |
+| `scripts/manual_checks/` | Smoke scripts that call the live Qwen API (chat, speaking, classifier). Run by hand; not part of pytest. |
 | `scripts/migrate_sqlite_to_postgres.py` | One-time idempotent migration from legacy SQLite to PostgreSQL. Reads all rows from every table and inserts with `ON CONFLICT DO NOTHING`. Safe to re-run. |
 | `scripts/db_backup.py` | OSS backup/restore for SQLite deployments (legacy path). The PostgreSQL `postgres_data` volume makes this unnecessary in production, but the script is retained for operators who prefer SQLite locally. |
 | `scripts/eval_pedagogy.py` | Offline evaluation harness for ACTION tag reliability and stage-routing correctness. Requires real session data to run meaningfully. |
@@ -617,19 +650,21 @@ judges the evidence; the engine enforces the rules. Rank changes
 are fully auditable — inspect `learner_skill_ranks` to see exactly
 why any rank moved.
 
-### 3. Three separate Qwen calls per Writing submission
-Isolation by design. Essay evaluation (qwen-plus), skill
-classification (qwen-turbo), and memory extraction (qwen-plus)
-are separate. Long feedback contains apostrophes that break JSON
-parsing; short classification responses are reliable. One failure
-cannot cascade.
+### 3. Evaluation and coaching are separate steps
+The essay evaluation streams to the learner and is saved first; the
+Coach agent then classifies skills and writes memories in a background
+task. A coaching failure can never lose the learner's score, and long
+feedback text (whose apostrophes often break JSON) never shares a
+response with structured classification output. Tool-call arguments are
+re-serialised before being echoed back to Qwen
+(`app/utils/tool_calls.py`), because a malformed echo makes the next
+request fail.
 
 ### 4. Task-tiered model routing
 ```
-qwen-plus     → complex reasoning (essay evaluation, memory
-                 extraction, Coach agent, Tutor agent)
-qwen-turbo    → structured output (skill classification,
-                 JSON repair) — faster, cheaper, sufficient
+qwen-plus     → evaluation, Coach agent (classification + memories),
+                 Tutor agent, chat coaches
+qwen-turbo    → JSON repair (fix_broken_json) — faster, cheaper
 qwen-vl-plus  → vision (handwritten essay image extraction)
 ```
 
@@ -639,11 +674,11 @@ Every learner gets it proxied from Alibaba Cloud OSS instantly.
 TTS quota consumed exactly once per track for all users for all time.
 
 ### 6. One tool layer, three consumers
-The coaching tool functions (`app/services/`) are called by two
-consumers: the **Tutor agent** (Qwen function calling, internal) and the
-**Telegram Qwen agent** (tool-calling, `telegram_service.py`). One Python
-implementation, zero duplication. Adding a new tool immediately makes it
-available to all three surfaces.
+The coaching tool functions (`app/services/`, `app/mcp/memory_server.py`)
+are called by the **Tutor agent**, the **chat coaches** (Telegram and
+WhatsApp) and the admin-only **MCP server**. One Python implementation;
+adding a tool makes it available everywhere. Every executor overwrites
+`learner_id` with the authenticated learner before running a tool.
 
 ### 7. SSE streaming for essay feedback
 The learner sees the first feedback token in ~1-2 seconds
@@ -704,7 +739,19 @@ Benefits over the former SQLite approach:
 - **Production migration path** — standard PostgreSQL tooling (pg_dump,
   logical replication, managed RDS) works without any code changes
 - **Readiness gate** — the entrypoint retries `psycopg2.connect()` up to
-  30 times before starting FastAPI, so a cold ECS boot never hits a
+  30 times before starting FastAPI, so a cold boot never hits a
   "database not ready" error
 `DATABASE_URL` remains env-var driven so SQLite still works for local
 development without Docker.
+
+### 14. Identity is never taken from the client or the model
+Learner identity comes from the validated JWT (web) or a linked chat
+(bots). Tutor system prompts and transcripts are stored server-side, so a
+client cannot rewrite the tutor's instructions or fabricate earlier turns
+(which would also poison memory extraction). Tool executors ignore any
+`learner_id` the model supplies.
+
+### 15. Alembic owns the schema
+`Base.metadata.create_all` is no longer called at startup. Every schema
+change is an Alembic revision, applied by `scripts/migrate.py` before the
+API starts, so production schema changes are versioned and reviewable.

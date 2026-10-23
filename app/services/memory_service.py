@@ -328,7 +328,7 @@ def update_memories(learner_id: str, section: str, score_result: dict) -> dict:
     """
     Reviews existing memories against new attempt results and updates them.
 
-    This is what makes the MemoryAgent intelligent over time:
+    This is what makes the learner memory more useful over time:
     - Persistent weaknesses gain higher confidence
     - Improving skills lose confidence
     - Mastered skills get archived

@@ -86,7 +86,7 @@ async def get_memory_timeline(
     """
     Returns memory evolution data for the timeline visualization.
     Shows how each memory's confidence changed across attempts,
-    making the MemoryAgent's learning process visible.
+    making the learner model's evolution visible.
     """
     if not current_user.learner_id:
         return {"timeline": [], "attempts_count": 0}

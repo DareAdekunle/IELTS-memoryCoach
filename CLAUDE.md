@@ -11,24 +11,30 @@ This file is about *how to keep building it correctly*.
 ## 1. Project status (update this section as you go)
 
 ```
+RUNTIME
+  ⬜ Hosting — the Alibaba Cloud ECS server was shut down (Oct 2026);
+               the app runs locally only: docker compose up -d
+  ✅ Model Studio (Qwen) + OSS — still live, used from local
+
 ARCHITECTURE
   ✅ FastAPI backend          — api/ folder, all routes wired
   ✅ React frontend           — frontend/ folder, Vite + Tailwind
   ✅ Auth                     — JWT + Google OAuth + bcrypt passwords
-  ✅ Docker Compose           — needs nginx.conf for production build
+  ✅ PostgreSQL 16 + Alembic  — scripts/migrate.py runs before the API
+  ✅ Docker Compose           — dev (docker-compose.yml) + prod image with Nginx
 
-IELTS MODULES (all complete)
-  ✅ Writing Coach            — essay, AI scoring, skill classification
-  ✅ Reading Coach            — passage, questions, short answer eval
-  ✅ Speaking Coach           — 3-part session, ASR, Cherry TTS
-  ✅ Listening Coach          — question preview, TTS audio, answers
-  ✅ Chat Coach               — memory-grounded conversational tutor
+IELTS MODULES
+  ✅ Writing Coach            — streamed evaluation, Coach agent, image upload
+  ✅ Reading Coach            — passages, questions, short-answer eval
+  ✅ Speaking Coach           — 3-part session, ASR, Cherry TTS feedback
+  ✅ Listening Coach          — question preview, cached TTS audio, answers
+  ✅ IELTS Tutor              — 4 specialist tutors with pedagogy plans
 
 SKILL MASTERY SYSTEM
-  ✅ Taxonomy                 — all 4 sections: Writing (13), Reading (10),
-                                Speaking (9), Listening (8) — 40 sub-skills total
-  ✅ Ranking engine           — learner_skill_ranks table, clean_streak
-  ✅ Classifier               — skill_classifier_service.py
+  ✅ Taxonomy                 — Writing (13), Reading (10), Speaking (9),
+                                Listening (8) — 40 sub-skills
+  ✅ Ranking engine           — learner_skill_ranks, clean_streak
+  ✅ Classification           — Coach agent submit_classification tool
   ✅ Context builder          — build_chat_coach_context() in memory_service
 
 PEDAGOGICAL SKILL LAYER
@@ -45,50 +51,34 @@ PEDAGOGICAL SKILL LAYER
   ⬜ Live tag-reliability eval — scripts/eval_pedagogy.py needs real sessions
 
 DASHBOARDS
-  ✅ Progress Dashboard       — Writing, Reading tabs + Skill Ranks tab
+  ✅ Progress Dashboard       — per-section tabs + Skill Ranks tab
   ✅ Memory Dashboard         — active/archived memories with confidence
 
 STUDY SCHEDULER + GOOGLE CALENDAR
   ✅ study_schedules table    — days/time/duration/timezone + Google tokens
-  ✅ calendar_service.py      — OAuth flow, create/delete recurring events
-  ✅ schedule_service.py      — schedule CRUD, weakest-skill event description
+  ✅ calendar_service.py      — OAuth (PKCE), create/delete recurring events
   ✅ /schedule/* API routes   — setup, get, cancel, calendar connect/disconnect
   ✅ Onboarding (2-step)      — profile step 1, study schedule step 2
-  ✅ Study Plan page          — /study-plan, view/edit schedule + Google connect
-  ✅ MCP scheduling tools     — schedule_study_sessions, get_study_schedule,
-                                add_one_off_session, cancel_study_schedule
+  ✅ Study Plan page          — schedule, Google Calendar, chat-coach linking
 
-DEPLOYMENT
-  ✅ Nginx config             — nginx.conf, SSE-aware proxy
-  ✅ Production Dockerfile    — multi-stage React build + Python + Nginx
-  ✅ Alibaba Cloud ECS        — deployed at ielts.qonda.xyz
-  ✅ HTTPS / domain           — Let's Encrypt, docker-compose.prod.yml
-  ✅ Google OAuth             — button on Login + Register pages, callback handler
-  ✅ Data persistence         — PostgreSQL in Docker (postgres_data volume)
-  ✅ OSS DB backup            — scripts/db_backup.py (SQLite fallback legacy)
-  ✅ SQLite → PostgreSQL      — scripts/migrate_sqlite_to_postgres.py
+CHAT COACHES
+  ✅ Telegram + WhatsApp      — shared flow in app/services/bot_conversation.py
+  ✅ Account linking          — one-time codes (/channels/*, Study Plan card)
+  ✅ Webhook verification     — Telegram secret token, WhatsApp HMAC
+  ⬜ Live again               — needs hosting (or a tunnel) + webhook secrets
 
-DOCS
-  ✅ README.md                — current features, roadmap, architecture
-  ✅ ARCHITECTURE.md          — system diagrams, DB schema, agent loops
-  ✅ docs/pedagogy_framework.md — full pedagogical design + code map
+QUALITY + OPERATIONS
+  ✅ pytest suite             — docker exec ielts-api-dev pytest
+  ✅ Cost model               — scripts/cost_model.py (live; a few cents per run)
+  ✅ Security boundaries      — server-held tutor transcripts, tools bound to
+                                the authenticated learner, MCP token-gated
 
-SPRINT 0 — STABILISE (Oct 2026)
-  ✅ Tutor prompt/transcript server-side; session ownership enforced
-  ✅ Agent tools bound to authenticated learner; /mcp-server token-gated
-  ✅ Alembic migrations (scripts/migrate.py runs before the API)
-  ✅ Renamed Qonda → BandUp (domain + internal names unchanged)
-  ✅ pytest suite — docker exec ielts-api-dev pytest
-  ✅ Cost model — scripts/cost_model.py (live; a few cents per run)
-  ✅ WhatsApp parity + one-time-code bot linking + webhook verification
-  ⬜ ECS server shut down — app currently runs locally only
-
-UPCOMING
-  ⬜ Listening replay/transcript condition gates in frontend UI
-  ⬜ Extend taxonomy to Reading, Speaking, Listening
+UPCOMING (see README roadmap)
+  ⬜ Assessment validity      — calibrate scores against human-rated samples
+  ⬜ Memory 2.0               — evidence-linked, de-duplicated memories
+  ⬜ Diagnostic + planning    — initial diagnostic, adaptive study plan
+  ⬜ Durable agent workflows  — recoverable Coach/Tutor orchestration
   ⬜ Teacher / admin dashboard
-  ⬜ Production: add GOOGLE_CALENDAR_REDIRECT_URI to .env on ECS server
-  ⬜ Google Cloud Console: add production callback URI to OAuth app
 ```
 
 ---
@@ -97,14 +87,15 @@ UPCOMING
 
 ```
 frontend/ (React, port 5173 in dev)
-    ↓ axios HTTP calls
+    ↓ axios HTTP calls (JWT)
 api/ (FastAPI, port 8000)
     ↓ imports from
-app/ (Python services — unchanged from Streamlit era)
+app/ (Python services, pedagogy, prompts, data)
     ↓ reads/writes
-SQLite (ielts_coach.db via Docker volume)
+PostgreSQL 16 (Docker volume postgres_data; schema via Alembic)
     ↓ external calls
-Qwen API (text via OpenAI SDK, ASR/TTS via DashScope SDK)
+Qwen (Model Studio) + Alibaba Cloud OSS + Google Calendar
+Telegram / WhatsApp webhooks → api/routes → app/services/bot_conversation.py
 ```
 
 **The `app/` folder is backend-only.** It is never imported by React.
@@ -143,13 +134,16 @@ If you see references to them, they are stale and should be deleted.
 
 ```
 Backend:
-  api/routes/<section>.py          ← REST endpoints
+  api/routes/<section>.py          ← REST endpoints; on submit:
+                                     save_<section>_attempt(), then a
+                                     BackgroundTask running
+                                     coach_<section>_submission()
   app/prompts/<section>_evaluator_prompt.txt
-  app/prompts/<section>_memory_extractor.txt
-  add to memory_service.py:
-    extract_<section>_memories()
-    save_<section>_attempt()
-    get_<section>_progress_data()
+  app/prompts/<section>_tutor_prompt.txt
+  app/data/<section> content + skill taxonomy (the Coach agent
+    classifies against the taxonomy via format_skill_list_for_prompt)
+  coach_service.py: coach_<section>_submission() → run_coach_agent()
+  memory_service.py: save_<section>_attempt(), get_<section>_progress_data()
 
 Frontend:
   src/api/<section>.js
@@ -173,6 +167,19 @@ async def my_route(current_user: User = Depends(get_current_user)):
 ```
 
 Never skip the `learner_id` check on routes that access learner data.
+
+### Identity always comes from the server
+
+- Web: the learner is `current_user.learner_id` from the JWT. Never accept a
+  `learner_id`, system prompt or conversation history from the client.
+- Agents: every tool executor overwrites `args["learner_id"]` with the
+  authenticated learner before running a tool — never trust the model's value.
+- Tutor chat: the system prompt and turns live in `tutor_session_transcripts`;
+  the client sends only `session_id` + `message`, and `load_owned_session()`
+  enforces ownership.
+- Echo tool calls back to Qwen with `assistant_tool_message()` from
+  `app/utils/tool_calls.py` — Qwen rejects the next request if an echoed
+  `function.arguments` is not valid JSON.
 
 ### React protected pages
 
@@ -199,25 +206,27 @@ Login/Register → FastAPI returns access_token
 Never store sensitive data in localStorage beyond the JWT token.
 Never bypass `get_current_user` for protected routes.
 
-### Qwen calls — three separate SDKs, never mix them
+### Qwen calls — which client for which job
 
 ```
-Text generation    → qwen_service.py → OpenAI SDK
+Text generation    → OpenAI SDK, compatible-mode endpoint
                      base_url: dashscope-intl.aliyuncs.com/compatible-mode/v1
-                     model: qwen-plus
+                     models: qwen-plus (main), qwen-turbo (JSON repair),
+                             qwen-vl-plus (handwriting; https URLs only)
 
-ASR (speech→text)  → asr_service.py → dashscope SDK
-                     dashscope.MultiModalConversation.call()
+ASR (speech→text)  → asr_service.py → HTTP POST to the workspace
+                     multimodal-generation endpoint, base64 audio data URI
                      model: qwen3-asr-flash
 
-TTS (text→speech)  → tts_service.py → HTTP POST to the DashScope
-                     multimodal-generation endpoint
+TTS (text→speech)  → tts_service.py → HTTP POST to the same endpoint
                      model: qwen3-tts-flash (override with TTS_MODEL env)
-                     voice: Cherry
+                     voice: Cherry; returns an audio URL, not bytes
+
+Embeddings         → embedding_service.py → dashscope.TextEmbedding
+                     model: text-embedding-v3 (1024-d)
 ```
 
 Do NOT use the OpenAI SDK for ASR/TTS — it returns 404.
-Do NOT use the dashscope SDK for text generation.
 
 ### TTS model selection
 
@@ -229,10 +238,11 @@ set `TTS_MODEL` in `.env`; the API call structure is identical.
 ### JSON parsing from Qwen
 
 Always use `safe_parse_json()` from `app/utils/json_utils.py`.
-Never call `json.loads()` directly on raw Qwen responses.
+Never call `json.loads()` directly on raw Qwen responses (tool-call
+arguments: use `parse_tool_args()` from `app/utils/tool_calls.py`).
 If `safe_parse_json` fails → `fix_broken_json()` asks Qwen to repair.
-Long feedback (5/5 essays) contains apostrophes that break JSON —
-this is why skill classification is a SEPARATE Qwen call from scoring.
+Long feedback contains apostrophes that break JSON — which is why
+evaluation and skill classification never share one response.
 
 ### React JSX — oxc parser rules
 
@@ -258,41 +268,49 @@ Use string concatenation instead of template literals in className:
 className={'base-class ' + (condition ? 'active' : 'inactive')}
 ```
 
-### Database — PostgreSQL + Docker volume
+### Database — PostgreSQL + Alembic
 
 PostgreSQL runs as a separate Docker service (`postgres:16-alpine`).
 Data persists on the `postgres_data` named volume across container rebuilds.
 Connection string: `postgresql://ielts:<POSTGRES_PASSWORD>@postgres:5432/ielts_coach`
+(`app/db/database.py` pins the psycopg2 driver — SQLAlchemy 2.1+ defaults
+to psycopg v3, which is not installed).
 
-SQLite is still supported for local-only development — set `DATABASE_URL` to a
-`sqlite:///...` path and the `connect_args` are set automatically in `database.py`.
-
-To migrate existing SQLite data to Postgres:
-  `python scripts/migrate_sqlite_to_postgres.py --sqlite ./ielts_coach.db --postgres <url>`
+SQLite still works for local-only development — set `DATABASE_URL` to a
+`sqlite:///...` path and `connect_args` are set automatically.
 
 **Schema changes go through Alembic** (`migrations/`). Never call
 `Base.metadata.create_all` from app code. To change the schema:
 1. Edit the model in `app/db/models.py` (or `api/auth/models.py`)
 2. `docker exec ielts-api-dev alembic revision --autogenerate -m "describe change"`
-3. Review the generated file in `migrations/versions/`, then restart the API —
-   `scripts/migrate.py` runs `alembic upgrade head` before uvicorn starts.
+3. Review the generated file in `migrations/versions/`, then
+   `docker restart ielts-api-dev` — `scripts/migrate.py` runs
+   `alembic upgrade head` before uvicorn starts (uvicorn's auto-reload does not).
+
+To migrate existing SQLite data to Postgres:
+  `python scripts/migrate_sqlite_to_postgres.py --sqlite ./ielts_coach.db --postgres <url>`
 
 The `learner_skill_ranks` table is separate from `learner_memories`.
 Do not confuse them — they serve different purposes:
-- `learner_memories`: free-text, confidence-weighted, section-level, now with embeddings
+- `learner_memories`: free-text, confidence-weighted, section-level, with embeddings
 - `learner_skill_ranks`: fixed taxonomy, deterministic, skill-level
 
 ---
 
 ## 5. Skill Mastery System
 
-### Three Qwen calls per Writing submission (never merge)
+### Submission pipeline (all sections)
 
 ```
-Call 1: evaluate_writing()          → rubric scores + feedback + memories
-Call 2: classify_writing_skills()   → 13-skill fixed-list classification
-Call 3: extract_and_save_memories() → free-text memory extraction
+1. Evaluate      → scores + feedback (Writing streams it via SSE)
+2. Save attempt  → practice_attempts — the learner's result is now safe
+3. Coach agent   → BackgroundTask: coach_<section>_submission()
+                   → run_coach_agent(): reads evidence via tools,
+                     submit_classification (rank engine), write/update memory
 ```
+
+Keep evaluation and classification in separate model calls, and keep the
+Coach agent in the background — a coaching failure must never lose a score.
 
 ### Rank-up rule (never change without discussion)
 
@@ -305,7 +323,9 @@ clean_streak reaches 3 → current_rank += 1 (max 5), streak resets to 0
 Rank NEVER decreases automatically.
 ```
 
-### Chat Coach state machine
+These rules are pinned by `tests/test_rank_rules.py`.
+
+### Tutor state machine
 
 States: `introduction` → `explaining` → `drilling` → `bridge_to_practice`
 
@@ -336,9 +356,10 @@ Default if tag missing or invalid: `"explaining"` (safe middle state).
    blocked inside `coach_tutor_session` — skill ranks move only from
    practice submissions.
 
-Profile-switch detection: `chat_learner_id` in React localStorage.
-If user changes account, chat session resets automatically.
-This is handled in `src/pages/ChatCoach.jsx` — don't remove it.
+Tutor sessions are cached in the browser's sessionStorage under a key that
+includes the user id (`chat_session_<userId>_<section>`), so switching
+accounts never shows another user's session. A 404 from `/chat/continue`
+clears the stale cache.
 
 ---
 
@@ -346,17 +367,19 @@ This is handled in `src/pages/ChatCoach.jsx` — don't remove it.
 
 1. **`requirements.txt` must be hand-maintained**, never `pip freeze`
    in a Conda env — it captures local Conda paths Docker can't find.
+   Test-only packages go in `requirements-dev.txt` (installed in the dev
+   image via the `INSTALL_DEV` build arg).
 
-2. **ASR 401 errors** usually mean wrong SDK class used, not wrong key.
-   Use `MultiModalConversation.call()` not `Recognition.call()`.
+2. **ASR/TTS 401 or 404 errors** usually mean the wrong endpoint or SDK
+   class, not a wrong key. Both use HTTP POST to the workspace
+   multimodal-generation endpoint (see §4).
 
-3. **TTS returns a URL, not bytes.**
-   `response.output["audio"]["url"]` → download from URL → save as WAV.
-   `data` field is always empty string. `id` is a UUID string, not audio.
+3. **TTS returns a URL, not bytes.** `output.audio.url` → download → store.
+   A 404 "Model not exist" means the configured TTS snapshot was retired.
 
-4. **Audio recorder dedup** — `audio_recorder()` returns same bytes on
-   every Streamlit/React rerender. Hash audio bytes (md5) and skip if
-   already processed. Pattern in `SpeakingCoach.jsx` `handleAudioBlob`.
+4. **Audio recorder dedup** — the recorder can return the same bytes on
+   re-render. Hash audio bytes (md5) and skip if already processed.
+   Pattern in `SpeakingCoach.jsx` `handleAudioBlob`.
 
 5. **ASR file size limit ~10MB.** Compress via pydub (mono 16kHz 16-bit)
    in `asr_service.compress_audio()` before sending. ffmpeg required in
@@ -366,41 +389,41 @@ This is handled in `src/pages/ChatCoach.jsx` — don't remove it.
    parse errors. Pre-compute all conditions as variables before JSX.
 
 7. **Google OAuth test mode** — only emails listed as test users in
-   Google Cloud Console can sign in while app is in testing mode.
-   Add judge/reviewer emails as test users before the demo.
+   Google Cloud Console can sign in while the app is in testing mode.
+   Locally, `http://localhost:8000/auth/google/callback` and
+   `http://localhost:8000/schedule/calendar/callback` must be authorised
+   redirect URIs.
 
 8. **learner_id vs user_id** — these are different things.
    `user_id` is the auth identity (users table).
    `learner_id` is the coaching profile (learners table).
-   They are linked by `users.learner_id` foreign key.
+   They are linked by `users.learner_id`.
    Users created before onboarding have `learner_id = null` —
    they must complete onboarding before using coaching features.
 
-9. **Chat Coach opens with no history** for users who haven't submitted
-   any essays. The welcome path (`has_history: False`) shows a generic
-   message directing them to Writing Coach. This is correct behavior.
+9. **Tutor opens with no history** for users who haven't practised yet.
+   The welcome path (`has_history: False`) directs them to a Coach first.
+   This is correct behaviour.
 
-11. **Identity always comes from the server.** Tool executors overwrite
-    `learner_id` with the authenticated learner — never trust a
-    `learner_id` from model tool arguments or the client. Tutor chat
-    prompt + transcript live in `tutor_session_transcripts`; the client
-    sends only `session_id` + `message`.
+10. **The dev compose file must bypass `docker-entrypoint.sh`.** That
+    script starts Nginx with the production TLS config, which fails
+    locally with a missing Let's Encrypt certificate. `docker-compose.yml`
+    sets `entrypoint: []` and runs `migrate.py` + uvicorn directly.
 
-13. **Bots link only by one-time code.** Never link a chat by email.
-    Webhooks fail closed: Telegram needs `TELEGRAM_WEBHOOK_SECRET` (pass it
-    as `secret_token` to setWebhook), WhatsApp needs `WHATSAPP_APP_SECRET`.
-    Both bots share `app/services/bot_conversation.py` — change behaviour
-    there, not in one route. Register the Telegram webhook with:
+11. **Chat coaches link only by one-time code.** Never link a chat by
+    email. Webhooks fail closed: Telegram needs `TELEGRAM_WEBHOOK_SECRET`
+    (pass it as `secret_token` to setWebhook), WhatsApp needs
+    `WHATSAPP_APP_SECRET`. Both channels share
+    `app/services/bot_conversation.py` — change behaviour there, not in one
+    route. Register the Telegram webhook with:
     `curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook?url=<public-url>/telegram/webhook&secret_token=$TELEGRAM_WEBHOOK_SECRET"`
-    (`<public-url>` is `/api`-prefixed behind Nginx). Locally, bots need a
-    tunnel (e.g. ngrok) to receive messages.
+    (`<public-url>` is `/api`-prefixed behind Nginx). Locally, the bots need
+    a tunnel (e.g. ngrok) to receive messages.
 
 12. **`/mcp-server` is admin-only.** Requests need
     `Authorization: Bearer $MCP_API_TOKEN`; if the env var is unset,
-    every request gets 401.
-
-10. **TTS model** — use `qwen3-tts-flash` (see §4 TTS model selection).
-    A 404 "Model not exist" means the configured snapshot was retired.
+    every request gets 401. Its tools accept any `learner_id`, so never
+    expose it without the token.
 
 ---
 
@@ -412,15 +435,16 @@ calls are blocked — mock with `FakeLLM` from `tests/conftest.py`).
 hand only.
 
 - [ ] `pytest` passes; new rules/permissions have a test in `tests/`
+- [ ] Schema changes have an Alembic revision
 - [ ] API route tested in `/docs` Swagger UI with real JWT
 - [ ] React page loads without console errors
 - [ ] Auth check present — route returns 400 if no learner_id
-- [ ] Attempt saves to `practice_attempts` (verified in DB Browser)
-- [ ] Memories extracted and saved with correct `section` value
+- [ ] Attempt saves to `practice_attempts`
+- [ ] Memories saved with the correct `section` value
 - [ ] Memory panel shows memories from previous attempt on second run
 - [ ] Progress Dashboard has a tab for this module
 - [ ] Memory Dashboard shows this module's memories automatically
-- [ ] Docker rebuild runs clean (`docker compose up --build`)
+- [ ] Docker rebuild runs clean (`docker compose up -d --build`)
 - [ ] README.md updated
 - [ ] CLAUDE.md §1 checklist updated
 
@@ -431,9 +455,11 @@ hand only.
 1. Read `README.md` — product scope and current features
 2. Read this file — conventions and gotchas
 3. Check §1 status checklist against actual file tree
-4. **Do not re-add Streamlit** — `app/pages/` and `app/main.py`
-   are intentionally deleted. The app is now React + FastAPI only.
-5. For new API routes: follow §4 auth pattern exactly
-6. For new React pages: follow §4 ProtectedShell pattern
-7. For JSX: pre-compute all complex conditions as variables (§6 gotcha 6)
-8. Update §1 and README when a phase completes
+4. Start the stack: `docker compose up -d`; seed a demo learner with
+   `docker exec ielts-api-dev python seed_demo.py` if the DB is empty
+5. **Do not re-add Streamlit** — `app/pages/` and `app/main.py`
+   are intentionally deleted. The app is React + FastAPI only.
+6. For new API routes: follow §4 auth + identity patterns exactly
+7. For new React pages: follow §4 ProtectedShell pattern
+8. For JSX: pre-compute all complex conditions as variables (§6 gotcha 6)
+9. Update §1 and README when a phase completes
