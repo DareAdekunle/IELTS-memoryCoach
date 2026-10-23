@@ -1,7 +1,7 @@
 """
 Tests for deterministic routing, exit criteria, practice conditions,
 fading rules, action tags, and the spine validator.
-Run from repo root:  python tests/test_pedagogy_planner.py
+Run from repo root:  pytest tests/test_legacy_checks.py  (or: python tests/scripts/pedagogy_planner_checks.py)
 """
 import sys
 sys.path.append('.')

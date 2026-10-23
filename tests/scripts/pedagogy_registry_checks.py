@@ -1,6 +1,6 @@
 """
 Tests for the pedagogical framework registry, stages, and descriptors.
-Run from repo root:  python tests/test_pedagogy_registry.py
+Run from repo root:  pytest tests/test_legacy_checks.py  (or: python tests/scripts/pedagogy_registry_checks.py)
 """
 import sys
 sys.path.append('.')

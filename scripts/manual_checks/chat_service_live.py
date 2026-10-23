@@ -1,3 +1,6 @@
+"""Manual check against the LIVE Qwen API (costs credit). Not run by pytest.
+Run from repo root: python scripts/manual_checks/chat_service_live.py
+"""
 import sys
 sys.path.append('.')
 
@@ -27,35 +30,18 @@ if not result["has_history"]:
     print("(Re-run with a learner_id that has essay history to test "
           "the full conversation flow.)")
 else:
-    system_prompt = result["system_prompt"]
-
-    # Build conversation history manually, simulating a back-and-forth
-    history = [
-        {"role": "assistant", "content": result["message"]}
-    ]
+    # The prompt and transcript are held server-side; only session_id travels.
+    session_id = result["session_id"]
 
     print("=" * 60)
     print("=== Learner responds: 'Yes I'm ready, let's work on it' ===\n")
-
-    turn2 = continue_chat_session(
-        system_prompt=system_prompt,
-        conversation_history=history,
-        learner_message="Yes I'm ready, let's work on it"
-    )
+    turn2 = continue_chat_session(session_id, LEARNER_ID, "Yes I'm ready, let's work on it")
     print(f"state: {turn2['state']}")
     print(f"\nCoach says:\n{turn2['message']}\n")
 
-    history.append({"role": "user", "content": "Yes I'm ready, let's work on it"})
-    history.append({"role": "assistant", "content": turn2["message"]})
-
     print("=" * 60)
     print("=== Learner asks an off-topic question ===\n")
-
-    turn3 = continue_chat_session(
-        system_prompt=system_prompt,
-        conversation_history=history,
-        learner_message="What's the weather like today?"
-    )
+    turn3 = continue_chat_session(session_id, LEARNER_ID, "What's the weather like today?")
     print(f"state: {turn3['state']}")
     print(f"\nCoach says:\n{turn3['message']}\n")
 

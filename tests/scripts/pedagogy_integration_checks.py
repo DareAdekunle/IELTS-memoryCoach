@@ -1,7 +1,7 @@
 """
 Integration test: session → plan → events → hint dependency →
 criterion state → Coach guardrail, against the real SQLite schema.
-Run from repo root:  python tests/test_pedagogy_integration.py
+Run from repo root:  pytest tests/test_legacy_checks.py
 """
 import sys
 sys.path.append('.')

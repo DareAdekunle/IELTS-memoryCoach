@@ -389,6 +389,12 @@ This is handled in `src/pages/ChatCoach.jsx` — don't remove it.
 
 ## 7. Definition of done for any new feature
 
+Tests: `docker exec ielts-api-dev pytest` (throwaway SQLite DB; live Qwen
+calls are blocked — mock with `FakeLLM` from `tests/conftest.py`).
+`scripts/manual_checks/` holds scripts that hit the LIVE Qwen API — run by
+hand only.
+
+- [ ] `pytest` passes; new rules/permissions have a test in `tests/`
 - [ ] API route tested in `/docs` Swagger UI with real JWT
 - [ ] React page loads without console errors
 - [ ] Auth check present — route returns 400 if no learner_id
