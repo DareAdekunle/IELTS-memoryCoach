@@ -3,14 +3,14 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
 
 from api.dependencies import get_current_user
 from api.auth.models import User
 from app.services.chat_coach_service import (
     start_chat_session,
-    continue_chat_session
+    continue_chat_session,
+    SessionNotFound,
 )
 from app.utils.logger import get_logger
 
@@ -20,11 +20,8 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 class ContinueChatRequest(BaseModel):
-    system_prompt: str
-    history: list
-    message: str
-    section: Optional[str] = "Writing"
-    session_id: Optional[str] = None
+    session_id: str = Field(min_length=1, max_length=64)
+    message: str = Field(min_length=1, max_length=8000)
 
 
 @router.get("/context")
@@ -106,7 +103,6 @@ async def start_chat(
             "state": result["state"],
             "has_history": result["has_history"],
             "section": result["section"],
-            "system_prompt": result.get("system_prompt", ""),
             "session_id": result.get("session_id"),
             "pedagogy": result.get("pedagogy")
         }
@@ -131,24 +127,30 @@ async def continue_chat(
     When the tutor reaches bridge_to_practice: micro-memories are
     extracted AND the Coach interprets the session's pedagogical
     evidence in the background (hint dependency, support fading).
+
+    The client sends only the session id and its next message; the
+    system prompt and prior turns are held server-side.
     """
+    if not current_user.learner_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Please create a learner profile first"
+        )
+
     try:
         result = continue_chat_session(
-            system_prompt=request.system_prompt,
-            conversation_history=request.history,
-            learner_message=request.message,
+            session_id=request.session_id,
             learner_id=current_user.learner_id,
-            section=request.section,
-            session_id=request.session_id
+            learner_message=request.message,
         )
 
         # Coach interprets the session evidence once tutoring concludes
-        if result.get("session_completed") and request.session_id:
+        if result.get("session_completed"):
             from app.services.coach_service import coach_tutor_session
             background_tasks.add_task(
                 coach_tutor_session,
                 current_user.learner_id,
-                request.section,
+                result["section"],
                 request.session_id
             )
 
@@ -159,6 +161,11 @@ async def continue_chat(
             "memories_extracted": result.get("memories_extracted", 0)
         }
 
+    except SessionNotFound:
+        raise HTTPException(
+            status_code=404,
+            detail="Tutor session not found. Please start a new session."
+        )
     except Exception as e:
         logger.error(f"Chat continue failed: {e}")
         raise HTTPException(

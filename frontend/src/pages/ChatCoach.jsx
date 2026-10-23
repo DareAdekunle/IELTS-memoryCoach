@@ -71,7 +71,6 @@ export default function ChatCoach() {
   const { user } = useAuth()
   const [selectedSection, setSelectedSection] = useState(null)
   const [messages, setMessages]               = useState([])
-  const [systemPrompt, setSystemPrompt]       = useState('')
   const [state, setState]                     = useState(null)
   const [hasHistory, setHasHistory]           = useState(null)
   const [tutorContext, setTutorContext]        = useState(null)
@@ -99,7 +98,6 @@ export default function ChatCoach() {
       try {
         const parsed = JSON.parse(cached)
         setMessages(parsed.messages)
-        setSystemPrompt(parsed.systemPrompt)
         setState(parsed.state)
         setHasHistory(parsed.hasHistory)
         setSessionId(parsed.sessionId || null)
@@ -111,7 +109,6 @@ export default function ChatCoach() {
     }
 
     setMessages([])
-    setSystemPrompt('')
     setState(null)
     setHasHistory(null)
     setSessionId(null)
@@ -136,13 +133,11 @@ export default function ChatCoach() {
       setMessages(newMessages)
       setState(data.state)
       setHasHistory(data.has_history)
-      setSystemPrompt(data.system_prompt || '')
       setSessionId(data.session_id || null)
       setPedagogy(data.pedagogy || null)
 
       sessionStorage.setItem(SESSION_CACHE_KEY(sectionId, user?.user_id), JSON.stringify({
         messages: newMessages,
-        systemPrompt: data.system_prompt || '',
         state: data.state,
         hasHistory: data.has_history,
         sessionId: data.session_id || null,
@@ -178,7 +173,6 @@ export default function ChatCoach() {
         setMessages(updatedMessages)
         sessionStorage.setItem(SESSION_CACHE_KEY(selectedSection, user?.user_id), JSON.stringify({
           messages: updatedMessages,
-          systemPrompt,
           state,
           hasHistory
         }))
@@ -186,13 +180,9 @@ export default function ChatCoach() {
         return
       }
 
-      const historyForCall = newMessages.slice(0, -1)
       const res = await continueChat({
-        system_prompt: systemPrompt,
-        history: historyForCall,
-        message: text,
-        section: selectedSection,
-        session_id: sessionId
+        session_id: sessionId,
+        message: text
       })
 
       const replyText = (res.data.message || '').trim() ||
@@ -205,7 +195,6 @@ export default function ChatCoach() {
 
       sessionStorage.setItem(SESSION_CACHE_KEY(selectedSection, user?.user_id), JSON.stringify({
         messages: updatedMessages,
-        systemPrompt,
         state: res.data.state,
         hasHistory,
         sessionId,
@@ -213,6 +202,10 @@ export default function ChatCoach() {
       }))
 
     } catch (err) {
+      // Session expired or no longer exists server-side — drop the stale cache
+      if (err.response?.status === 404) {
+        sessionStorage.removeItem(SESSION_CACHE_KEY(selectedSection, user?.user_id))
+      }
       const isTimeout = err.code === 'ECONNABORTED'
       setError(isTimeout
         ? 'The tutor took too long to respond. Please try sending your message again.'
@@ -239,7 +232,6 @@ export default function ChatCoach() {
     }
     setSelectedSection(null)
     setMessages([])
-    setSystemPrompt('')
     setState(null)
     setHasHistory(null)
     setTutorContext(null)

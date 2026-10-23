@@ -140,8 +140,8 @@ class TutorSession(Base):
     One row per Tutor chat session. Anchors the pedagogical session
     plan and all evidence events recorded during the session.
 
-    Conversation history stays client-side (unchanged) — this row is
-    the server-side identity of the session, not a transcript.
+    This row is the server-side identity of the session; the prompt and
+    transcript live in TutorSessionTranscript.
     """
     __tablename__ = "tutor_sessions"
 
@@ -151,6 +151,20 @@ class TutorSession(Base):
     state = Column(String, default="introduction")   # last known conversation state
     started_at = Column(DateTime, default=func.now())
     completed_at = Column(DateTime, nullable=True)   # set at bridge_to_practice
+
+
+class TutorSessionTranscript(Base):
+    """
+    Server-held system prompt and conversation for one Tutor session.
+    The client never supplies either — it only sends the next message.
+    """
+    __tablename__ = "tutor_session_transcripts"
+
+    session_id = Column(String, primary_key=True, index=True)
+    learner_id = Column(String, nullable=False, index=True)
+    system_prompt = Column(Text, nullable=False)
+    messages = Column(Text, nullable=False, default="[]")  # JSON: [{role, content}]
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
 class LearnerCriterionState(Base):

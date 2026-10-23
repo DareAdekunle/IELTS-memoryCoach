@@ -43,6 +43,9 @@ from app.services.agent_tools import (
 from app.services.pedagogical_event_service import (
     create_tutor_session,
     update_session_state,
+    save_transcript,
+    load_owned_session,
+    append_transcript,
     get_session_plan,
     record_event,
     record_hint,
@@ -182,8 +185,10 @@ def start_chat_session(
         state:         Current state
         has_history:   Whether this learner has practice data
         section:       Which section this session is for
-        system_prompt: Full system prompt for subsequent turns
         learner_id:    Passed through for agent loop turns
+
+    The system prompt and transcript are stored server-side, keyed by
+    session_id; they are never returned to the client.
     """
     if section not in TUTOR_PROMPTS:
         section = "Writing"
@@ -208,7 +213,6 @@ def start_chat_session(
             "state": state,
             "has_history": False,
             "section": section,
-            "system_prompt": "",
             "learner_id": learner_id,
             "session_id": None,
             "pedagogy": None
@@ -304,13 +308,16 @@ def start_chat_session(
     clean_text, actions = parse_action_tags(clean_text)
     _record_actions(actions, session_id, learner_id, section)
     update_session_state(session_id, state)
+    save_transcript(
+        session_id, learner_id, system_prompt,
+        [{"role": "assistant", "content": clean_text}],
+    )
 
     return {
         "message": clean_text,
         "state": state,
         "has_history": True,
         "section": section,
-        "system_prompt": system_prompt,
         "learner_id": learner_id,
         "context": context,
         "session_id": session_id,
@@ -318,16 +325,21 @@ def start_chat_session(
     }
 
 
+class SessionNotFound(Exception):
+    """The session does not exist or belongs to another learner."""
+
+
 def continue_chat_session(
-    system_prompt: str,
-    conversation_history: list,
+    session_id: str,
+    learner_id: str,
     learner_message: str,
-    learner_id: str = None,
-    section: str = "Writing",
-    session_id: str = None
 ) -> dict:
     """
     Continues an existing tutor session with a new learner message.
+
+    The system prompt, prior turns and section are loaded from the
+    server-held transcript; raises SessionNotFound unless the session
+    belongs to learner_id.
 
     The Tutor is now a tool-calling agent — it can query live learner
     data mid-conversation when it needs to reference specific evidence.
@@ -347,6 +359,14 @@ def continue_chat_session(
         tools_called:       Which tools the Tutor called this turn
         session_completed:  True when bridge_to_practice was reached
     """
+    session = load_owned_session(session_id, learner_id)
+    if session is None:
+        raise SessionNotFound(session_id)
+
+    system_prompt = session["system_prompt"]
+    conversation_history = session["messages"]
+    section = session["section"]
+
     messages = [
         {"role": "system", "content": system_prompt}
     ] + conversation_history + [
@@ -435,9 +455,12 @@ def continue_chat_session(
 
     # Parse and record pedagogical action tags
     clean_text, actions = parse_action_tags(clean_text)
-    if session_id:
-        _record_actions(actions, session_id, learner_id, section)
-        update_session_state(session_id, state)
+    _record_actions(actions, session_id, learner_id, section)
+    update_session_state(session_id, state)
+    append_transcript(session_id, [
+        {"role": "user", "content": learner_message},
+        {"role": "assistant", "content": clean_text},
+    ])
 
     # Extract memories when tutor concludes drilling
     memories_extracted = 0
@@ -478,7 +501,8 @@ def continue_chat_session(
         "memories_extracted": memories_extracted,
         "tools_called": tools_called,
         "session_completed": session_completed,
-        "session_id": session_id
+        "session_id": session_id,
+        "section": section
     }
 
 

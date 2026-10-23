@@ -14,6 +14,7 @@ from app.db.database import SessionLocal
 from app.db.models import (
     TutorSession,
     TutorSessionPlan,
+    TutorSessionTranscript,
     PedagogicalEvent,
     HintEvent,
 )
@@ -58,6 +59,73 @@ def update_session_state(session_id: str, state: str) -> None:
     except Exception as e:
         db.rollback()
         logger.warning(f"Failed to update session state: {e}")
+    finally:
+        db.close()
+
+
+# ─── Server-held transcript ───────────────────────────────────────────────────
+
+def save_transcript(
+    session_id: str, learner_id: str, system_prompt: str, messages: list
+) -> None:
+    db = SessionLocal()
+    try:
+        db.add(TutorSessionTranscript(
+            session_id=session_id,
+            learner_id=learner_id,
+            system_prompt=system_prompt,
+            messages=json.dumps(messages),
+        ))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+def load_owned_session(session_id: str, learner_id: str) -> dict | None:
+    """Returns the session only if it belongs to learner_id, else None."""
+    db = SessionLocal()
+    try:
+        row = (
+            db.query(TutorSession, TutorSessionTranscript)
+            .join(
+                TutorSessionTranscript,
+                TutorSessionTranscript.session_id == TutorSession.session_id,
+            )
+            .filter(
+                TutorSession.session_id == session_id,
+                TutorSession.learner_id == learner_id,
+                TutorSessionTranscript.learner_id == learner_id,
+            )
+            .first()
+        )
+        if not row:
+            return None
+        session, transcript = row
+        return {
+            "session_id": session.session_id,
+            "section": session.section,
+            "system_prompt": transcript.system_prompt,
+            "messages": json.loads(transcript.messages or "[]"),
+        }
+    finally:
+        db.close()
+
+
+def append_transcript(session_id: str, new_messages: list) -> None:
+    db = SessionLocal()
+    try:
+        row = db.query(TutorSessionTranscript).filter(
+            TutorSessionTranscript.session_id == session_id
+        ).first()
+        if row:
+            row.messages = json.dumps(json.loads(row.messages or "[]") + new_messages)
+            db.commit()
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 
