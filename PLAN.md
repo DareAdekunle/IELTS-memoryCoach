@@ -65,8 +65,8 @@ Ship nothing new; fix what's broken.
 - [x] Fixed: Speaking feedback audio (retired TTS model)
 - [x] Local Docker setup works without production TLS
 - [x] Hackathon material removed; README / CLAUDE.md / ARCHITECTURE updated
-- [ ] Remove dead code: `skill_classifier_service.py`, `agent_controller.py`,
-      unused classifier prompts (in progress)
+- [x] Removed dead code: `skill_classifier_service.py`, `agent_controller.py`,
+      unused classifier prompts
 
 ---
 
