@@ -8,6 +8,7 @@ import {
   Calendar, Clock, Trash2, Check, AlertCircle,
   ExternalLink, Unlink, RefreshCw,
 } from 'lucide-react'
+import ChatChannelsCard from '../components/ChatChannelsCard'
 
 const DAYS     = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const DURATIONS = [15, 30, 45, 60]
@@ -346,6 +347,8 @@ export default function StudyPlan() {
           </div>
         </div>
       )}
+
+      <ChatChannelsCard />
     </div>
   )
 }

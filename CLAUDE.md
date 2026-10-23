@@ -376,6 +376,15 @@ This is handled in `src/pages/ChatCoach.jsx` — don't remove it.
     prompt + transcript live in `tutor_session_transcripts`; the client
     sends only `session_id` + `message`.
 
+13. **Bots link only by one-time code.** Never link a chat by email.
+    Webhooks fail closed: Telegram needs `TELEGRAM_WEBHOOK_SECRET` (pass it
+    as `secret_token` to setWebhook), WhatsApp needs `WHATSAPP_APP_SECRET`.
+    Both bots share `app/services/bot_conversation.py` — change behaviour
+    there, not in one route. Register the Telegram webhook with:
+    `curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook?url=<public-url>/telegram/webhook&secret_token=$TELEGRAM_WEBHOOK_SECRET"`
+    (`<public-url>` is `/api`-prefixed behind Nginx). Locally, bots need a
+    tunnel (e.g. ngrok) to receive messages.
+
 12. **`/mcp-server` is admin-only.** Requests need
     `Authorization: Bearer $MCP_API_TOKEN`; if the env var is unset,
     every request gets 401.

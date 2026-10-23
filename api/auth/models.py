@@ -23,7 +23,22 @@ class User(Base):
     auth_provider = Column(String, default="local")  # "local" or "google"
     is_active = Column(Boolean, default=True)
     learner_id = Column(String, nullable=True)       # linked learner profile
-    whatsapp_number  = Column(String, nullable=True, index=True)
+    whatsapp_number  = Column(String, nullable=True, index=True)  # set only via a link code
     telegram_chat_id = Column(String, nullable=True, index=True)
     created_at = Column(DateTime, default=func.now())
     last_login = Column(DateTime, nullable=True)
+
+
+class ChannelLinkCode(Base):
+    """
+    One-time code that links a Telegram chat or WhatsApp number to a user.
+    The learner generates it in the web app (proving they own the account)
+    and sends it to the bot. Only a SHA-256 hash of the code is stored.
+    """
+    __tablename__ = "channel_link_codes"
+
+    code_hash = Column(String, primary_key=True)
+    user_id = Column(String, nullable=False, index=True)
+    channel = Column(String, nullable=False)          # "telegram" | "whatsapp"
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=func.now())

@@ -19,6 +19,7 @@ import httpx
 from openai import OpenAI
 from dotenv import load_dotenv
 
+from app.services.bot_guardrails import SCOPE_RULES
 from app.utils.tool_calls import assistant_tool_message, parse_tool_args
 
 load_dotenv()
@@ -184,12 +185,13 @@ def _execute_tool(tool_name: str, args: dict, learner_id: str | None) -> dict:
 
 # ─── Qwen agentic loop ────────────────────────────────────────────────────────
 
-SYSTEM_PROMPT = """You are BandUp, an AI IELTS study coach. You help learners track \
-their progress, understand their weaknesses, and manage their study schedule — \
-all via WhatsApp.
+SYSTEM_PROMPT = f"""You are BandUp, an AI IELTS study coach built on Qwen by Alibaba Cloud.
+You help learners track their IELTS progress, understand their weaknesses, and manage \
+their study schedule — via WhatsApp.
 
-Rules:
-- You are powered by Qwen, Alibaba Cloud's AI model.
+{SCOPE_RULES}
+
+## Coaching rules
 - Keep replies SHORT — this is WhatsApp, not an essay. Max 3-4 sentences unless listing data.
 - For any coaching question, call get_coaching_context before answering.
 - For schedule changes, confirm the change with the user before calling schedule tools.

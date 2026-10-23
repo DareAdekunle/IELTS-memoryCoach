@@ -25,6 +25,8 @@ from api.routes.chat import router as chat_router
 from api.routes.pedagogy import router as pedagogy_router
 from api.routes.schedule import router as schedule_router
 from api.routes.telegram import router as telegram_router
+from api.routes.whatsapp import router as whatsapp_router
+from api.routes.channels import router as channels_router
 from app.mcp.memory_server import mcp as memory_mcp
 from app.utils.logger import get_logger, set_request_id
 
@@ -168,6 +170,8 @@ app.include_router(chat_router)
 app.include_router(pedagogy_router)
 app.include_router(schedule_router)
 app.include_router(telegram_router)
+app.include_router(whatsapp_router)
+app.include_router(channels_router)
 
 
 @app.get("/")

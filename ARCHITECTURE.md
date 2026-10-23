@@ -404,12 +404,15 @@ graph LR
 ### Telegram / Qwen agent loop
 
 ```
-User messages @qieltsbot
-  → POST /telegram/webhook
-  → resolve learner from telegram_chat_id (users table)
-  → if unknown: ask for email → find_learner → store mapping
-  → Qwen (qwen-plus) agentic loop, up to 5 tool-call iterations
-  → reply sent via Telegram Bot API
+User messages @qieltsbot (or the WhatsApp number)
+  → POST /telegram/webhook   — X-Telegram-Bot-Api-Secret-Token must match
+    POST /whatsapp/webhook   — X-Hub-Signature-256 must match WHATSAPP_APP_SECRET
+  → 200 immediately; app/services/bot_conversation.respond() runs in background
+  → resolve learner from telegram_chat_id / whatsapp_number (users table)
+  → if unknown: only a one-time link code (created in the web app) links the chat
+  → Qwen (qwen-plus) agentic loop, up to 5 tool-call iterations;
+    every tool call runs as the linked learner, whatever learner_id the model sends
+  → reply sent via Telegram Bot API / WhatsApp Cloud API
 ```
 
 The Qwen agent has access to all coaching and scheduling tools. A message like
@@ -421,12 +424,12 @@ then Qwen synthesises both results into one reply.
 
 Two layers prevent the bot from being used outside IELTS coaching:
 
-1. **Keyword pre-filter** (`api/routes/telegram.py`) — checks for ~27 blocked
+1. **Keyword pre-filter** (`app/services/bot_guardrails.py`) — checks for ~27 blocked
    patterns (API keys, `.env`, code/script requests, jailbreak phrases) before
    any Qwen call is made. Matching messages receive a fixed refusal and the
    agent loop never starts.
 
-2. **System prompt boundary** (`app/services/telegram_service.py`) — the Qwen
+2. **System prompt boundary** (`SCOPE_RULES` in `app/services/bot_guardrails.py`, used by both bots) — the Qwen
    system prompt contains a non-negotiable scope section listing exactly what
    to refuse and providing a fixed one-sentence refusal template. The same
    scope guardrail appears in all five coach/tutor prompts (`app/prompts/`).

@@ -299,7 +299,7 @@ Speaking (9), Listening (8) sub-skills.
 
 ---
 
-## Telegram Coaching Bot
+## Telegram & WhatsApp Coaching Bots
 
 **[@qieltsbot](https://t.me/qieltsbot)** — Qwen-powered, available anywhere.
 
@@ -311,13 +311,16 @@ The Telegram bot brings BandUp's full coaching intelligence to any device withou
 - Reschedule study sessions: *"Move my Wednesday session to Friday at 9am"* — Qwen calls `schedule_study_sessions`, updates the DB, patches Google Calendar
 - Add one-off sessions: *"Add a 45-min session this Saturday at 10am"*
 
-**Architecture:**
+**Connecting an account:** in the web app, open **Study Plan → Chat with your coach**, tap *Connect Telegram* (or *Connect WhatsApp*) and send the one-time code to the bot. Codes expire after 10 minutes, are single-use and stored only as a hash — knowing someone's email is not enough to reach their data.
+
+**Architecture** (Telegram and WhatsApp share one conversation flow in `app/services/bot_conversation.py`):
 ```
-Telegram message → FastAPI /telegram/webhook
+Message → /telegram/webhook (secret-token header) or /whatsapp/webhook (Meta signature)
+  → 200 returned immediately; reply built in the background
+  → link-code check (unlinked chats get connect instructions, no LLM call)
   → keyword pre-filter (blocks off-topic / abuse without LLM call)
-  → Qwen agent (qwen-plus, tool-calling)
-  → same backend coaching functions as the web app
-  → reply sent via Telegram Bot API
+  → Qwen agent (qwen-plus, tool-calling) — tools always run as the linked learner
+  → reply sent via Telegram Bot API / WhatsApp Cloud API
 ```
 
 The Qwen agent loop runs up to 5 tool-call iterations per message — enough for chained queries like "What should I study, and when is my next scheduled session?" in a single reply.
@@ -378,9 +381,7 @@ Every coaching memory is embedded using DashScope `text-embedding-v3` at write t
 git clone https://github.com/DareAdekunle/IELTS-memoryCoach.git
 cd IELTS-memoryCoach
 cp .env.example .env
-# Fill in: DASHSCOPE_API_KEY, JWT_SECRET, GOOGLE_CLIENT_ID/SECRET,
-#          POSTGRES_PASSWORD, TELEGRAM_BOT_TOKEN,
-#          GOOGLE_CALENDAR_CLIENT_ID/SECRET, GOOGLE_CALENDAR_REDIRECT_URI
+# Fill in the values — every variable is described in .env.example
 docker compose -f docker-compose.prod.yml up --build
 ```
 
