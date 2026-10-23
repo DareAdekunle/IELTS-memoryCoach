@@ -113,26 +113,27 @@ async def receive_message(request: Request):
         _awaiting_email.discard(phone)
         email = text.strip()
 
-        # Run agent with the email so it calls find_learner
-        history = _history[phone]
-        reply = run_qwen_agent(
-            user_message=f"My Qonda email is: {email}",
-            learner_id=None,
-            conversation_history=history,
-        )
-        # Check if link succeeded
-        learner_id = _get_learner_id_by_phone(phone)
-        if not learner_id:
-            # Agent called find_learner; try to persist the mapping
-            db = SessionLocal()
-            try:
-                user = db.query(User).filter(User.email == email.lower()).first()
-                if user and user.learner_id:
-                    user.whatsapp_number = phone
-                    db.commit()
-                    learner_id = user.learner_id
-            finally:
-                db.close()
+        db = SessionLocal()
+        try:
+            user = db.query(User).filter(User.email == email.lower()).first()
+            if user and user.learner_id:
+                user.whatsapp_number = phone
+                db.commit()
+                learner_id = user.learner_id
+        finally:
+            db.close()
+
+        if learner_id:
+            reply = run_qwen_agent(
+                user_message=f"My Qonda email is: {email}",
+                learner_id=learner_id,
+                conversation_history=[],
+            )
+        else:
+            reply = (
+                "I couldn't find a Qonda account for that email. "
+                "Please check the address or register at ielts.qonda.xyz, then try again."
+            )
 
         _history[phone].append({"role": "assistant", "content": reply})
         send_whatsapp_message(phone, reply)

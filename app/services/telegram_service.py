@@ -41,23 +41,6 @@ TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "find_learner",
-            "description": (
-                "Look up a Qonda learner's ID using their email address. "
-                "Call this when the user provides their email to link their account."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "email": {"type": "string", "description": "The learner's Qonda email address"}
-                },
-                "required": ["email"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
             "name": "get_coaching_context",
             "description": (
                 "Get a complete coaching overview for a learner — weaknesses, strengths, "
@@ -166,17 +149,18 @@ TOOLS = [
 
 # ─── Tool execution (same functions as MCP server) ────────────────────────────
 
-def _execute_tool(tool_name: str, args: dict) -> dict:
+def _execute_tool(tool_name: str, args: dict, learner_id: str | None) -> dict:
+    """Runs a tool for the linked learner only; the model's learner_id is ignored."""
     from app.mcp.memory_server import (
-        find_learner,
         get_coaching_context,
         get_study_schedule,
         schedule_study_sessions,
         add_one_off_session,
         cancel_study_schedule,
     )
+    if not learner_id:
+        return {"error": "This Telegram chat is not linked to a Qonda account yet."}
     dispatch = {
-        "find_learner":            find_learner,
         "get_coaching_context":    get_coaching_context,
         "get_study_schedule":      get_study_schedule,
         "schedule_study_sessions": schedule_study_sessions,
@@ -187,7 +171,7 @@ def _execute_tool(tool_name: str, args: dict) -> dict:
     if not fn:
         return {"error": f"Unknown tool: {tool_name}"}
     try:
-        return fn(**args)
+        return fn(**{**args, "learner_id": learner_id})
     except Exception as e:
         return {"error": str(e)}
 
@@ -215,8 +199,6 @@ Never partially answer, suggest alternatives, or acknowledge the out-of-scope co
 
 ## Coaching rules
 - Keep replies SHORT and conversational. Max 3-4 sentences unless listing data.
-- If you don't know who the user is, ask for their Qonda email to link their account.
-- Once you have their email, call find_learner first to get their learner_id.
 - For any coaching question, call get_coaching_context before answering.
 - For schedule changes, confirm the intent before calling schedule tools.
 - Be warm, encouraging, and direct. Use their name when you know it.
@@ -263,7 +245,7 @@ def run_qwen_agent(user_message: str, learner_id: str | None, conversation_histo
         messages.append(choice.message)
         for tc in choice.message.tool_calls:
             args = json.loads(tc.function.arguments)
-            result = _execute_tool(tc.function.name, args)
+            result = _execute_tool(tc.function.name, args, learner_id)
             messages.append({
                 "role": "tool",
                 "tool_call_id": tc.id,

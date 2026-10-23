@@ -364,6 +364,16 @@ This is handled in `src/pages/ChatCoach.jsx` — don't remove it.
    any essays. The welcome path (`has_history: False`) shows a generic
    message directing them to Writing Coach. This is correct behavior.
 
+11. **Identity always comes from the server.** Tool executors overwrite
+    `learner_id` with the authenticated learner — never trust a
+    `learner_id` from model tool arguments or the client. Tutor chat
+    prompt + transcript live in `tutor_session_transcripts`; the client
+    sends only `session_id` + `message`.
+
+12. **`/mcp-server` is admin-only.** Requests need
+    `Authorization: Bearer $MCP_API_TOKEN`; if the env var is unset,
+    every request gets 401.
+
 10. **TTS quota** — `qwen3-tts-flash` is nearly exhausted.
     Use `qwen3-tts-flash-2025-11-27` instead. Change `TTS_MODEL`
     in `app/services/tts_service.py`.

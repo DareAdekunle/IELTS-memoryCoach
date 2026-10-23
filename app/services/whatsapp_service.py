@@ -8,7 +8,7 @@ layer powers both Claude Desktop (via MCP) and WhatsApp (via Qwen agent).
 Flow:
   Incoming WhatsApp message
     → resolve learner from whatsapp_number in DB
-    → if unknown, ask for email → find_learner → store mapping
+    → if unknown, ask for email → route links the number → agent runs as that learner
     → run Qwen agentic loop with tool-calling
     → send WhatsApp reply
 """
@@ -42,23 +42,6 @@ WA_API_URL  = f"https://graph.facebook.com/v19.0/{WA_PHONE_ID}/messages"
 # ─── Qwen tool definitions (mirror the MCP server tools) ─────────────────────
 
 TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "find_learner",
-            "description": (
-                "Look up a Qonda learner's ID using their email address. "
-                "Call this when the user provides their email to link their account."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "email": {"type": "string", "description": "The learner's Qonda email address"}
-                },
-                "required": ["email"]
-            }
-        }
-    },
     {
         "type": "function",
         "function": {
@@ -170,18 +153,18 @@ TOOLS = [
 
 # ─── Tool execution (same functions as MCP server) ────────────────────────────
 
-def _execute_tool(tool_name: str, args: dict) -> dict:
-    """Execute a tool call by calling the same Python functions as the MCP server."""
+def _execute_tool(tool_name: str, args: dict, learner_id: str | None) -> dict:
+    """Runs a tool for the linked learner only; the model's learner_id is ignored."""
     from app.mcp.memory_server import (
-        find_learner,
         get_coaching_context,
         get_study_schedule,
         schedule_study_sessions,
         add_one_off_session,
         cancel_study_schedule,
     )
+    if not learner_id:
+        return {"error": "This WhatsApp number is not linked to a Qonda account yet."}
     dispatch = {
-        "find_learner":           find_learner,
         "get_coaching_context":   get_coaching_context,
         "get_study_schedule":     get_study_schedule,
         "schedule_study_sessions": schedule_study_sessions,
@@ -192,7 +175,7 @@ def _execute_tool(tool_name: str, args: dict) -> dict:
     if not fn:
         return {"error": f"Unknown tool: {tool_name}"}
     try:
-        return fn(**args)
+        return fn(**{**args, "learner_id": learner_id})
     except Exception as e:
         return {"error": str(e)}
 
@@ -206,8 +189,6 @@ all via WhatsApp.
 Rules:
 - You are powered by Qwen, Alibaba Cloud's AI model.
 - Keep replies SHORT — this is WhatsApp, not an essay. Max 3-4 sentences unless listing data.
-- If you don't know who the user is, ask for their Qonda email to link their account.
-- Once you have their email, always call find_learner first to get their learner_id.
 - For any coaching question, call get_coaching_context before answering.
 - For schedule changes, confirm the change with the user before calling schedule tools.
 - Be warm, encouraging, and direct. Use their name when you know it.
@@ -258,7 +239,7 @@ def run_qwen_agent(user_message: str, learner_id: str | None, conversation_histo
         messages.append(choice.message)
         for tc in choice.message.tool_calls:
             args = json.loads(tc.function.arguments)
-            result = _execute_tool(tc.function.name, args)
+            result = _execute_tool(tc.function.name, args, learner_id)
             messages.append({
                 "role": "tool",
                 "tool_call_id": tc.id,

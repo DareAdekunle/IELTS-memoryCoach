@@ -414,9 +414,8 @@ def continue_chat_session(
             except json.JSONDecodeError:
                 args = {}
 
-            # Inject learner_id if not provided by model
-            if "learner_id" not in args and learner_id:
-                args["learner_id"] = learner_id
+            # The authenticated learner always wins over model-supplied ids
+            args["learner_id"] = learner_id
             if "section" not in args:
                 args["section"] = section
 
@@ -619,8 +618,7 @@ def _resolve_tool_calls(
         except json.JSONDecodeError:
             args = {}
 
-        if "learner_id" not in args and learner_id:
-            args["learner_id"] = learner_id
+        args["learner_id"] = learner_id
 
         tool_result = execute_tutor_tool(tool_call.function.name, args)
         messages.append({

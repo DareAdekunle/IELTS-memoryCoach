@@ -2,11 +2,13 @@ import sys
 import os
 import uuid
 import asyncio
+import hmac
 from contextlib import asynccontextmanager
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
@@ -137,8 +139,24 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# MCP server mounted at /mcp-server
-app.mount("/mcp-server", mcp_http_app)
+class _RequireBearerToken:
+    """Rejects every request unless it carries `Authorization: Bearer $MCP_API_TOKEN`.
+    MCP tools take a learner_id argument, so this endpoint is admin-only."""
+
+    def __init__(self, app, token: str | None):
+        self.app = app
+        self.expected = f"Bearer {token}".encode() if token else None
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http":
+            auth = dict(scope.get("headers") or []).get(b"authorization", b"")
+            if not self.expected or not hmac.compare_digest(auth, self.expected):
+                await JSONResponse({"detail": "Unauthorized"}, status_code=401)(scope, receive, send)
+                return
+        await self.app(scope, receive, send)
+
+
+app.mount("/mcp-server", _RequireBearerToken(mcp_http_app, os.getenv("MCP_API_TOKEN")))
 
 
 # ─── Request ID Middleware ────────────────────────────────────────────────────

@@ -208,7 +208,8 @@ def run_coach_agent(
             logger.info(f"Coach calling tool: {tool_name}")
             tools_called.append(tool_name)
 
-            # Execute the tool
+            # The authenticated learner always wins over model-supplied ids
+            args["learner_id"] = learner_id
             tool_result = execute_coach_tool(tool_name, args)
 
             # Track outcomes
@@ -531,6 +532,7 @@ def coach_tutor_session(
                 continue
 
             tools_called.append(tool_name)
+            args["learner_id"] = learner_id
             tool_result = execute_coach_tool(tool_name, args)
             messages.append({
                 "role": "tool",
