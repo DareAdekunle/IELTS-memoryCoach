@@ -1,4 +1,6 @@
 """Agent tools must act for the authenticated learner, never a learner_id the model supplies."""
+import json
+
 import pytest
 
 import app.mcp.memory_server as mcp_tools
@@ -36,6 +38,22 @@ def test_coach_tools_run_for_submitting_learner(monkeypatch):
     coach.run_coach_agent("alice", "Writing", {"prompt": "P", "essay": "E", "scores": {}, "feedback": ""})
 
     assert seen and all(args["learner_id"] == "alice" for args in seen)
+
+
+def test_malformed_tool_arguments_are_not_echoed_back(monkeypatch):
+    """Qwen 400s the next request if an echoed function.arguments isn't JSON."""
+    broken = tool_call("get_skill_rank", {})
+    broken.function.arguments = '{"section": "Writing", "skill_id": '
+    fake = FakeLLM(reply(tool_calls=[broken]), reply("Evaluation complete."))
+    monkeypatch.setattr(coach, "client", fake)
+    monkeypatch.setattr(coach, "execute_coach_tool", lambda name, args: "{}")
+
+    result = coach.run_coach_agent("alice", "Writing", {"prompt": "P", "essay": "E", "scores": {}, "feedback": ""})
+
+    assert result["success"]
+    echoed = [m for m in fake.calls[1]["messages"] if m.get("tool_calls")]
+    for call in echoed[0]["tool_calls"]:
+        json.loads(call["function"]["arguments"])
 
 
 @pytest.mark.parametrize("bot", [telegram, whatsapp], ids=["telegram", "whatsapp"])

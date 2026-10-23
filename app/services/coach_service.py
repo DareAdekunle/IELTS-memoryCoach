@@ -38,6 +38,7 @@ import json
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from app.utils.tool_calls import assistant_tool_message, parse_tool_args
 from app.services.qwen_service import client, QWEN_TURBO_MODEL, QWEN_MODEL
 from app.services.agent_tools import (
     COACH_TOOL_SCHEMAS,
@@ -170,21 +171,10 @@ def run_coach_agent(
         message = choice.message
 
         # Add assistant message to history
-        messages.append({
-            "role": "assistant",
-            "content": message.content or "",
-            "tool_calls": [
-                {
-                    "id": tc.id,
-                    "type": "function",
-                    "function": {
-                        "name": tc.function.name,
-                        "arguments": tc.function.arguments
-                    }
-                }
-                for tc in (message.tool_calls or [])
-            ] if message.tool_calls else []
-        })
+        messages.append(
+            assistant_tool_message(message) if message.tool_calls
+            else {"role": "assistant", "content": message.content or ""}
+        )
 
         # No more tool calls — agent is done
         if not message.tool_calls:
@@ -200,10 +190,7 @@ def run_coach_agent(
         # Execute each tool call
         for tool_call in message.tool_calls:
             tool_name = tool_call.function.name
-            try:
-                args = json.loads(tool_call.function.arguments)
-            except json.JSONDecodeError:
-                args = {}
+            args = parse_tool_args(tool_call.function.arguments)
 
             logger.info(f"Coach calling tool: {tool_name}")
             tools_called.append(tool_name)
@@ -492,21 +479,10 @@ def coach_tutor_session(
             return {"success": False, "error": str(e), "tools_called": tools_called}
 
         message = response.choices[0].message
-        messages.append({
-            "role": "assistant",
-            "content": message.content or "",
-            "tool_calls": [
-                {
-                    "id": tc.id,
-                    "type": "function",
-                    "function": {
-                        "name": tc.function.name,
-                        "arguments": tc.function.arguments
-                    }
-                }
-                for tc in (message.tool_calls or [])
-            ] if message.tool_calls else []
-        })
+        messages.append(
+            assistant_tool_message(message) if message.tool_calls
+            else {"role": "assistant", "content": message.content or ""}
+        )
 
         if not message.tool_calls:
             summary = message.content or ""
@@ -514,10 +490,7 @@ def coach_tutor_session(
 
         for tool_call in message.tool_calls:
             tool_name = tool_call.function.name
-            try:
-                args = json.loads(tool_call.function.arguments)
-            except json.JSONDecodeError:
-                args = {}
+            args = parse_tool_args(tool_call.function.arguments)
 
             # Guardrail: no skill classifications from tutoring evidence
             if tool_name == "submit_classification":

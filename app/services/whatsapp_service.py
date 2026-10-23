@@ -19,6 +19,8 @@ import httpx
 from openai import OpenAI
 from dotenv import load_dotenv
 
+from app.utils.tool_calls import assistant_tool_message, parse_tool_args
+
 load_dotenv()
 
 # ─── Qwen client (same config as qwen_service.py) ────────────────────────────
@@ -236,9 +238,9 @@ def run_qwen_agent(user_message: str, learner_id: str | None, conversation_histo
             return choice.message.content or "Sorry, I couldn't generate a response."
 
         # Execute each tool call and feed results back
-        messages.append(choice.message)
+        messages.append(assistant_tool_message(choice.message))
         for tc in choice.message.tool_calls:
-            args = json.loads(tc.function.arguments)
+            args = parse_tool_args(tc.function.arguments)
             result = _execute_tool(tc.function.name, args, learner_id)
             messages.append({
                 "role": "tool",

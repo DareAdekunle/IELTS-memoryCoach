@@ -31,6 +31,7 @@ import json
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+from app.utils.tool_calls import assistant_tool_message, parse_tool_args
 from app.services.qwen_service import client, QWEN_MODEL
 from app.services.memory_service import (
     build_chat_coach_context,
@@ -284,21 +285,7 @@ def start_chat_session(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": opening_instruction},
-                {
-                    "role": "assistant",
-                    "content": message.content or "",
-                    "tool_calls": [
-                        {
-                            "id": tc.id,
-                            "type": "function",
-                            "function": {
-                                "name": tc.function.name,
-                                "arguments": tc.function.arguments
-                            }
-                        }
-                        for tc in message.tool_calls
-                    ]
-                }
+                assistant_tool_message(message)
             ],
             tool_calls=message.tool_calls,
             learner_id=learner_id
@@ -391,28 +378,11 @@ def continue_chat_session(
         logger.info(f"Tutor calling tools: {tools_called}")
 
         # Add assistant message with tool calls to history
-        messages.append({
-            "role": "assistant",
-            "content": message.content or "",
-            "tool_calls": [
-                {
-                    "id": tc.id,
-                    "type": "function",
-                    "function": {
-                        "name": tc.function.name,
-                        "arguments": tc.function.arguments
-                    }
-                }
-                for tc in message.tool_calls
-            ]
-        })
+        messages.append(assistant_tool_message(message))
 
         # Execute tools and add results
         for tool_call in message.tool_calls:
-            try:
-                args = json.loads(tool_call.function.arguments)
-            except json.JSONDecodeError:
-                args = {}
+            args = parse_tool_args(tool_call.function.arguments)
 
             # The authenticated learner always wins over model-supplied ids
             args["learner_id"] = learner_id
@@ -613,10 +583,7 @@ def _resolve_tool_calls(
     Used when tool calls happen at session start.
     """
     for tool_call in tool_calls:
-        try:
-            args = json.loads(tool_call.function.arguments)
-        except json.JSONDecodeError:
-            args = {}
+        args = parse_tool_args(tool_call.function.arguments)
 
         args["learner_id"] = learner_id
 
