@@ -33,7 +33,7 @@ For the market, positioning and business model see
   research-backed lesson plan and the learner's own work.
 - **Adaptive content** — difficulty matched to the learner's band; seen items
   are not repeated until the pool is exhausted.
-- **Handwritten essays** — photograph an essay; `qwen-vl-plus` extracts the text.
+- **Handwritten essays** — photograph an essay; `qwen3-vl-plus` extracts the text.
 - **Study scheduler** — recurring study plan synced to Google Calendar.
 - **Telegram and WhatsApp coaches** — ask about progress or reschedule study
   sessions from a chat app.
@@ -69,7 +69,7 @@ For the market, positioning and business model see
 ```
 PERCEIVE   Essay submitted / audio recorded / passage answered
            → scored against IELTS criteria (qwen-plus); speech transcribed
-             (qwen3-asr-flash); handwriting extracted (qwen-vl-plus)
+             (qwen3-asr-flash); handwriting extracted (qwen3-vl-plus)
 
 REMEMBER   Coach agent gathers evidence with tool calls, then
            → classifies each sub-skill (strength / weakness / not applicable)
@@ -157,7 +157,7 @@ System design: [`ARCHITECTURE.md`](ARCHITECTURE.md)
 |---|---|
 | Frontend | React (Vite) + Tailwind CSS |
 | Backend API | FastAPI (Python 3.11) |
-| Text + vision AI | Alibaba Cloud Model Studio — `qwen-plus`, `qwen-vl-plus` (`qwen-turbo` for JSON repair) |
+| Text + vision AI | Alibaba Cloud Model Studio — `qwen-plus`, `qwen3-vl-plus` (`qwen-turbo` for JSON repair) |
 | Speech-to-text | `qwen3-asr-flash` |
 | Text-to-speech | `qwen3-tts-flash` (Cherry voice) |
 | Embeddings | `text-embedding-v3` (1024-d) |

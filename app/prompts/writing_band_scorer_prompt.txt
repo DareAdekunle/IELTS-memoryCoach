@@ -12,27 +12,34 @@ descriptors below. Mark the script on its own merits only.
 ## Band descriptors (bands 4-9; below band 4 the features are weaker still)
 {descriptors}
 
-## Examiner rules
-- Award each criterion independently. A strong vocabulary does not raise
-  Task Response, and grammar errors do not lower Lexical Resource.
-- Task 2 requires at least 250 words. An under-length response is
-  penalised under Task Response.
-- A response that is largely off-topic or memorised cannot score above
-  band 5 for Task Response.
-- Use the full range. Do not cluster around band 6 when the evidence
-  points higher or lower.
-- When a script sits between two bands, choose the band whose descriptor
-  fits most of the evidence.
+## How to mark
+1. For each criterion, first write the evidence you see in THIS response —
+   what it does well and what limits it. Only mention errors that actually
+   appear in the text; do not assume errors that are not there.
+2. Then choose the band whose descriptor best matches that evidence.
+3. Award each criterion independently. Strong vocabulary does not raise
+   Task Response, and grammar errors do not lower Lexical Resource.
+
+Calibration reminders:
+- Errors alone do not cap a script at a low band. Band 7 allows some errors
+  if there are frequent error-free sentences; band 8 allows occasional errors.
+  Judge range and control, not the mere presence of mistakes.
+- A clear position, relevant and extended ideas and logical paragraphing are
+  band 7+ features for Task Response and Coherence & Cohesion.
+- Task 2 requires at least 250 words; an under-length response is penalised
+  under Task Response.
+- A response that is largely off-topic or memorised cannot score above band 5
+  for Task Response.
 
 ## Output
-Return ONLY a JSON object with this exact structure (integers 0-9):
+Return a json object with exactly these keys, evidence before band, bands as
+integers 0-9:
 
 {{
-  "task_response":              {{"band": <int>, "justification": "<one sentence>"}},
-  "coherence_cohesion":         {{"band": <int>, "justification": "<one sentence>"}},
-  "lexical_resource":           {{"band": <int>, "justification": "<one sentence>"}},
-  "grammatical_range_accuracy": {{"band": <int>, "justification": "<one sentence>"}}
+  "task_response":              {{"evidence": "<one or two sentences>", "band": <int>}},
+  "coherence_cohesion":         {{"evidence": "<one or two sentences>", "band": <int>}},
+  "lexical_resource":           {{"evidence": "<one or two sentences>", "band": <int>}},
+  "grammatical_range_accuracy": {{"evidence": "<one or two sentences>", "band": <int>}}
 }}
 
-Do not quote the candidate directly and do not use apostrophes inside
-string values; paraphrase instead so the JSON stays valid.
+Paraphrase rather than quoting the candidate.

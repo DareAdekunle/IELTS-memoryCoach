@@ -14,6 +14,24 @@ in [`PLAN.md`](../../PLAN.md).
 | `examples/` | Three **synthetic** essays with illustrative ratings, for trying the harness. Not evidence of anything. |
 | `data/` | Your real essays, ratings and results. **Git-ignored** — it contains people's writing. |
 
+## Free reference data (no recruiting)
+
+Two sources can be built locally. Neither is a full substitute for blind,
+calibrated raters, but together they give a usable signal:
+
+| Set | Build | Reference | Caveats |
+|---|---|---|---|
+| **Official examiner scripts** (10 Task 2 scripts, bands 4–8.5) | Download the two `*-writing-sample-tasks-2023.pdf` files from ielts.org into `data/official/download/`, then `docker exec ielts-api-dev python scripts/build_official_samples.py evaluation/writing/data/official` | Published examiner band (overall only) | Handwritten → transcribed with the app's own vision model, which occasionally corrects a spelling; likely in the model's training data; too few for a pass/fail verdict |
+| **writing9 corpus sample** (154 essays, 22 per band 5.0–8.0, dev/test split) | Download `data/test.jsonl` from huggingface.co/datasets/ndtran0101/writing9-ielts-essays into `data/writing9/download/`, then `python3 scripts/build_writing9_sample.py evaluation/writing/data/writing9/download/test.jsonl evaluation/writing/data/writing9` | writing9.com site/crowd scores (overall + criteria) | Not examiner marks; noisy at the extremes (most trustworthy around 5.5–6.0); licence unknown — internal research only, credit writing9.com |
+
+Run the harness on each with `--data evaluation/writing/data/official` or
+`.../writing9`. The scorer model can be switched with `BAND_SCORER_MODEL`
+(e.g. `docker exec -e BAND_SCORER_MODEL=qwen-max ielts-api-dev python scripts/eval_writing.py ...`);
+cached scores are kept per model and prompt version.
+
+When budget allows, one qualified rater scoring 30–40 of the writing9 essays
+with `RATER_GUIDE.md` turns this into a real measurement — no new writers needed.
+
 ## Running a pilot (20 essays, 2 raters)
 
 1. **Collect essays.** Recruit ~10 writers to write 2 Task 2 essays each on

@@ -169,7 +169,7 @@ async def submit_essay_image(
     """
     Handwritten essay submission via image upload.
 
-    Step 1: qwen-vl-plus extracts the handwritten text from the image
+    Step 1: qwen3-vl-plus extracts the handwritten text from the image
     Step 2: Extracted text is evaluated using the standard Writing pipeline
 
     Supports JPEG, PNG and WebP images.

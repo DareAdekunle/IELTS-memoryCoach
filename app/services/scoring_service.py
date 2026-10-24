@@ -13,6 +13,8 @@ OSS_ACCESS_KEY_ID     = os.getenv("OSS_ACCESS_KEY_ID")
 OSS_ACCESS_KEY_SECRET = os.getenv("OSS_ACCESS_KEY_SECRET")
 OSS_BUCKET            = os.getenv("OSS_BUCKET", "ielts-memorycoach-audio")
 OSS_ENDPOINT          = os.getenv("OSS_ENDPOINT", "oss-ap-southeast-1.aliyuncs.com")
+# Dated / legacy VL names get retired (qwen-vl-plus now returns "Model not exist").
+VL_MODEL = os.getenv("VL_MODEL", "qwen3-vl-plus")
 
 
 def _upload_image_to_oss(image_bytes: bytes, media_type: str) -> tuple[str, str]:
@@ -115,7 +117,7 @@ def evaluate_writing(prompt: str, essay: str, memories: list = None) -> dict:
 
 def extract_text_from_image(image_bytes: bytes, media_type: str = "image/jpeg") -> dict:
     """
-    Uses qwen-vl-plus to extract handwritten essay text from an image.
+    Uses the vision model (VL_MODEL) to extract handwritten essay text from an image.
 
     Accepts raw image bytes and returns the extracted text along with
     a confidence indicator. This is the first step in the image
@@ -142,7 +144,7 @@ def extract_text_from_image(image_bytes: bytes, media_type: str = "image/jpeg") 
         image_url, oss_key = _upload_image_to_oss(image_bytes, media_type)
 
         response = client.chat.completions.create(
-            model="qwen-vl-plus",
+            model=VL_MODEL,
             messages=[
                 {
                     "role": "user",
@@ -228,7 +230,7 @@ def evaluate_writing_from_image(
     """
     Full pipeline for handwritten essay submission via image.
 
-    Step 1: qwen-vl-plus extracts the essay text from the image
+    Step 1: the vision model extracts the essay text from the image
     Step 2: Extracted text flows through standard evaluate_writing()
 
     Returns the standard evaluation result dict plus:

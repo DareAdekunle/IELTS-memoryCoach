@@ -27,7 +27,7 @@ os.environ["DATABASE_URL"] = f"sqlite:///{_db.name}"
 PRICES = {
     "qwen-plus":         {"in": 0.40, "out": 1.20},
     "qwen-turbo":        {"in": 0.05, "out": 0.20},   # official list price is CNY 0.367 / 1.468
-    "qwen-vl-plus":      {"in": 0.21, "out": 0.63},   # third-party figure, unverified
+    "qwen3-vl-plus":     {"in": 0.20, "out": 1.60},
     "text-embedding-v3": {"in": 0.07, "out": 0.0},
 }
 ASR_PER_SECOND = 0.000035      # qwen3-asr-flash

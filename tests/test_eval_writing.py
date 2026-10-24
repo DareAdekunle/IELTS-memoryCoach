@@ -142,7 +142,7 @@ def test_no_consent_essays_and_their_ratings_are_skipped(data_dir):
 
 def test_bad_rating_is_a_data_error(data_dir):
     with open(data_dir / "ratings.csv", "a", newline="") as f:
-        csv.writer(f).writerow(["SYN-MID", "R3", 6.5, 6, 6, 6, "half band"])
+        csv.writer(f).writerow(["SYN-MID", "R3", 6.25, 6, 6, 6, "not a half-band step"])
     essays = eval_writing.load_essays(str(data_dir / "essays.csv"))
     with pytest.raises(eval_writing.DataError):
         eval_writing.load_ratings(str(data_dir / "ratings.csv"), essays)
@@ -153,3 +153,40 @@ def test_blank_rating_row_is_skipped(data_dir):
         csv.writer(f).writerow(["SYN-MID", "R3", "", "", "", "", "unreadable"])
     essays = eval_writing.load_essays(str(data_dir / "essays.csv"))
     assert "R3" not in eval_writing.load_ratings(str(data_dir / "ratings.csv"), essays)["SYN-MID"]
+
+
+def test_half_bands_and_source_overall_are_accepted(data_dir):
+    rows = list(csv.reader(open(data_dir / "ratings.csv")))
+    rows[0].insert(6, "overall")
+    for r in rows[1:]:
+        r.insert(6, "")
+    rows.append(["SYN-MID", "W9", 6.5, 6, 6.5, 6, 7.0, "site score"])
+    csv.writer(open(data_dir / "ratings.csv", "w", newline="")).writerows(rows)
+    essays = eval_writing.load_essays(str(data_dir / "essays.csv"))
+    ratings = eval_writing.load_ratings(str(data_dir / "ratings.csv"), essays)
+    assert ratings["SYN-MID"]["W9"]["task_response"] == 6.5
+    assert eval_writing.reference_scores({"SYN-MID": {"W9": ratings["SYN-MID"]["W9"]}})["SYN-MID"]["overall"] == 7.0
+
+
+def test_overall_only_ratings_compare_overall_and_skip_criteria(data_dir, monkeypatch):
+    with open(data_dir / "ratings.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["essay_id", "rater_id", "task_response", "coherence_cohesion",
+                    "lexical_resource", "grammatical_range_accuracy", "overall", "justification"])
+        for essay_id, band in (("SYN-WEAK", 4.5), ("SYN-MID", 6.5), ("SYN-STRONG", 8.0)):
+            w.writerow([essay_id, "EXAMINER", "", "", "", "", band, "published examiner band"])
+    monkeypatch.setattr(scorer, "client", FakeLLM(band_reply(6, 6, 6, 6)))
+
+    out = eval_writing.main(["--data", str(data_dir), "--split", "all"])
+    report = open(os.path.join(out, "report.md")).read()
+
+    assert "| Task Response | – |" in report.split("BandUp vs rater average")[1]
+    assert "| Overall (task band) | 3 |" in report.split("BandUp vs rater average")[1]
+
+
+def test_partial_criteria_is_a_data_error(data_dir):
+    with open(data_dir / "ratings.csv", "a", newline="") as f:
+        csv.writer(f).writerow(["SYN-MID", "R3", 6, "", 6, 6, "missing one"])
+    essays = eval_writing.load_essays(str(data_dir / "essays.csv"))
+    with pytest.raises(eval_writing.DataError):
+        eval_writing.load_ratings(str(data_dir / "ratings.csv"), essays)

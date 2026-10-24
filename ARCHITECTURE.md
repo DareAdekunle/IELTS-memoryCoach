@@ -79,7 +79,7 @@ graph TD
     Telegram["Telegram\n@qieltsbot"] -->|webhook POST\nsecret token| FastAPI
     WhatsApp["WhatsApp\nCloud API"] -->|webhook POST\nHMAC signature| FastAPI
     FastAPI -->|Qwen tool-calling agent| Services
-    Services -->|text + vision generation| ModelStudio["Alibaba Cloud\nModel Studio\nqwen-plus + qwen-turbo + qwen-vl-plus\nSingapore workspace"]
+    Services -->|text + vision generation| ModelStudio["Alibaba Cloud\nModel Studio\nqwen-plus + qwen-turbo + qwen3-vl-plus\nSingapore workspace"]
     Services -->|text embeddings| EMB["DashScope Embeddings\ntext-embedding-v3\n1024 dimensions"]
     Services -->|speech-to-text| ASR["DashScope ASR\nqwen3-asr-flash"]
     Services -->|text-to-speech| TTS["DashScope TTS\nqwen3-tts-flash\nCherry voice"]
@@ -209,7 +209,7 @@ before making classification and memory decisions.
 sequenceDiagram
     participant R as React
     participant F as FastAPI
-    participant VL as qwen-vl-plus
+    participant VL as qwen3-vl-plus
     participant Q1 as qwen-plus
     participant CA as Coach Agent
     participant DB as PostgreSQL
@@ -665,7 +665,7 @@ request fail.
 qwen-plus     → evaluation, Coach agent (classification + memories),
                  Tutor agent, chat coaches
 qwen-turbo    → JSON repair (fix_broken_json) — faster, cheaper
-qwen-vl-plus  → vision (handwritten essay image extraction)
+qwen3-vl-plus → vision (handwritten essay image extraction)
 ```
 
 ### 5. OSS for audio
@@ -719,7 +719,7 @@ ranking, so existing integrations are unaffected.
 DashScope's VL endpoint only accepts `https://` URLs — base64 data URIs are
 rejected with a 400. Handwritten essay images are uploaded to a private OSS
 object, a 5-minute pre-signed GET URL is generated (`bucket.sign_url`), and
-that URL is passed to `qwen-vl-plus`. The temporary object is deleted in a
+that URL is passed to `qwen3-vl-plus`. The temporary object is deleted in a
 `finally` block regardless of success or failure. No public-read ACL is
 required; the pre-signed URL gives Qwen time-limited access only.
 

@@ -63,8 +63,24 @@ def load_essays(path: str) -> dict:
     return essays
 
 
+def _parse_band(raw, field: str, line: int) -> float:
+    raw = (raw or "").strip()
+    try:
+        band = float(raw)
+    except ValueError:
+        raise DataError(f"ratings.csv line {line}: {field} = {raw!r} is not a number") from None
+    if not (0 <= band <= 9 and (band * 2).is_integer()):
+        raise DataError(f"ratings.csv line {line}: {field} must be a band 0-9 in half steps, got {raw}")
+    return band
+
+
+def _rater_overall(bands: dict) -> float:
+    from app.services.band_scoring_service import overall_band
+    return bands["overall"] if "overall" in bands else overall_band(bands)
+
+
 def load_ratings(path: str, essays: dict) -> dict:
-    """Returns {essay_id: {rater_id: {criterion: int band}}}."""
+    """Returns {essay_id: {rater_id: {criterion: band (optional), "overall": band (optional)}}}."""
     ratings = defaultdict(dict)
     with open(path, newline="", encoding="utf-8") as f:
         for line, row in enumerate(csv.DictReader(f), start=2):
@@ -74,18 +90,17 @@ def load_ratings(path: str, essays: dict) -> dict:
                 continue
             if essay_id not in essays:
                 continue  # unknown or no-consent essay
-            if not any((row.get(c) or "").strip() for c in CRITERIA):
+            filled = [c for c in CRITERIA if (row.get(c) or "").strip()]
+            has_overall = bool((row.get("overall") or "").strip())
+            if not filled and not has_overall:
                 continue  # rater declined to score (unreadable / not a genuine attempt)
-            bands = {}
-            for c in CRITERIA:
-                raw = (row.get(c) or "").strip()
-                try:
-                    band = float(raw)
-                except ValueError:
-                    raise DataError(f"ratings.csv line {line}: {c} = {raw!r} is not a number") from None
-                if not band.is_integer() or not 0 <= band <= 9:
-                    raise DataError(f"ratings.csv line {line}: {c} must be a whole band 0-9, got {raw}")
-                bands[c] = int(band)
+            if filled and len(filled) < len(CRITERIA):
+                raise DataError(f"ratings.csv line {line}: score all four criteria or none")
+            bands = {c: _parse_band(row.get(c), c, line) for c in filled}
+            # Optional overall band from the source (e.g. examiner samples that publish
+            # only an overall band, or writing9's site score) instead of deriving it
+            if has_overall:
+                bands["overall"] = _parse_band(row["overall"], "overall", line)
             if rater in ratings[essay_id]:
                 raise DataError(f"ratings.csv line {line}: {rater} rated {essay_id} twice")
             ratings[essay_id][rater] = bands
@@ -116,7 +131,7 @@ def score_essays(essays: list, cache_path: str, rescore: bool = False) -> tuple[
     cache = {} if rescore else load_cache(cache_path)
     scores, failures = {}, []
     for i, essay in enumerate(essays, 1):
-        key = _cache_key(essay["essay_id"], scorer.QWEN_MODEL, version)
+        key = _cache_key(essay["essay_id"], scorer.SCORER_MODEL, version)
         if key in cache:
             scores[essay["essay_id"]] = cache[key]
             continue
@@ -136,24 +151,31 @@ def score_essays(essays: list, cache_path: str, rescore: bool = False) -> tuple[
 # ─── Analysis ─────────────────────────────────────────────────────────────────
 
 def reference_scores(ratings: dict) -> dict:
-    """Mean of raters per criterion, plus the mean of each rater's task band."""
-    from app.services.band_scoring_service import overall_band
+    """
+    Mean of raters per criterion (None when no rater gave criterion bands),
+    plus the mean of each rater's task band.
+    """
     ref = {}
     for essay_id, by_rater in ratings.items():
-        ref[essay_id] = {c: mean(r[c] for r in by_rater.values()) for c in CRITERIA}
-        ref[essay_id]["overall"] = mean(overall_band(r) for r in by_rater.values())
+        ref[essay_id] = {}
+        for c in CRITERIA:
+            given = [r[c] for r in by_rater.values() if c in r]
+            ref[essay_id][c] = mean(given) if given else None
+        ref[essay_id]["overall"] = mean(_rater_overall(r) for r in by_rater.values())
         ref[essay_id]["raters"] = len(by_rater)
     return ref
 
 
 def rater_agreement(ratings: dict) -> dict:
-    from app.services.band_scoring_service import overall_band
     out = {}
     for field in CRITERIA + ["overall"]:
         by_rater = defaultdict(dict)
         for essay_id, raters in ratings.items():
             for rater, bands in raters.items():
-                by_rater[rater][essay_id] = overall_band(bands) if field == "overall" else bands[field]
+                if field == "overall":
+                    by_rater[rater][essay_id] = _rater_overall(bands)
+                elif field in bands:
+                    by_rater[rater][essay_id] = bands[field]
         out[field] = inter_rater(by_rater)
     return out
 
@@ -164,8 +186,12 @@ def model_agreement(model_scores: dict, ref: dict) -> dict:
         return {}
     out = {}
     for field in CRITERIA + ["overall"]:
-        predicted = [model_scores[i]["overall"] if field == "overall" else model_scores[i]["criteria"][field] for i in ids]
-        out[field] = summarise(predicted, [ref[i][field] for i in ids])
+        rated = [i for i in ids if ref[i][field] is not None]
+        if not rated:
+            out[field] = None  # e.g. sources that publish only an overall band
+            continue
+        predicted = [model_scores[i]["overall"] if field == "overall" else model_scores[i]["criteria"][field] for i in rated]
+        out[field] = summarise(predicted, [ref[i][field] for i in rated])
     out["buckets"] = {}
     for label, test in BUCKETS:
         bucket = [i for i in ids if test(ref[i]["overall"])]
@@ -254,7 +280,7 @@ def write_per_essay(path, essays, ref, model_scores):
                 e["essay_id"], e["split"], r["raters"] if r else 0,
                 f"{r['overall']:.2f}" if r else "", m["overall"] if m else "",
                 f"{diff:+.2f}" if diff is not None else "",
-                *[f"{r[c]:.2f}" if r else "" for c in CRITERIA],
+                *[f"{r[c]:.2f}" if r and r[c] is not None else "" for c in CRITERIA],
                 *[m["criteria"][c] if m else "" for c in CRITERIA],
             ]))
         for _, row in sorted(rows, key=lambda x: -x[0]):  # biggest disagreements first
@@ -284,7 +310,7 @@ def main(argv=None) -> str:
     model, failures, model_scores, version, model_name = None, [], {}, "", ""
     if not args.raters_only:
         from app.services import band_scoring_service as scorer
-        version, model_name = scorer.prompt_version(), scorer.QWEN_MODEL
+        version, model_name = scorer.prompt_version(), scorer.SCORER_MODEL
         to_score = [e for e in essays if e["essay_id"] in ref][: args.limit]
         print(f"Scoring {len(to_score)} rated essays ({args.split}) with {model_name}, prompt {version}")
         model_scores, failures = score_essays(to_score, os.path.join(args.data, "model_scores.jsonl"), args.rescore)

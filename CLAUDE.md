@@ -217,7 +217,8 @@ Never bypass `get_current_user` for protected routes.
 Text generation    → OpenAI SDK, compatible-mode endpoint
                      base_url: dashscope-intl.aliyuncs.com/compatible-mode/v1
                      models: qwen-plus (main), qwen-turbo (JSON repair),
-                             qwen-vl-plus (handwriting; https URLs only)
+                             qwen3-vl-plus (handwriting; https URLs only;
+                             override with VL_MODEL env)
 
 ASR (speech→text)  → asr_service.py → HTTP POST to the workspace
                      multimodal-generation endpoint, base64 audio data URI

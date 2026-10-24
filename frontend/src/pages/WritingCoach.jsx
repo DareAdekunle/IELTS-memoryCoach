@@ -275,7 +275,7 @@ export default function WritingCoach() {
           {inputMode === 'image' && (
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
               <p className="text-gray-500 text-sm mb-4">
-                Photograph your handwritten essay and upload it. qwen-vl will extract the text
+                Photograph your handwritten essay and upload it. BandUp will extract the text
                 and evaluate it using the same AI pipeline as typed essays.
               </p>
 

@@ -14,6 +14,8 @@ from app.pedagogy.descriptors import get_band_descriptors, get_criterion_ids, ge
 from app.services.qwen_service import QWEN_MODEL, client
 from app.utils.json_utils import safe_parse_json
 
+SCORER_MODEL = os.getenv("BAND_SCORER_MODEL", QWEN_MODEL)
+
 CRITERIA = ["task_response", "coherence_cohesion", "lexical_resource", "grammatical_range_accuracy"]
 
 _PROMPT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts", "writing_band_scorer_prompt.txt")
@@ -67,7 +69,7 @@ def parse_band_reply(raw: str) -> dict:
         if not isinstance(band, int) or isinstance(band, bool) or not 0 <= band <= 9:
             raise InvalidBandScore(f"{cid}: expected an integer band 0-9, got {band!r}")
         criteria[cid] = band
-        justifications[cid] = str(entry.get("justification", ""))
+        justifications[cid] = str(entry.get("evidence") or entry.get("justification") or "")
     return {"criteria": criteria, "justifications": justifications}
 
 
@@ -87,12 +89,13 @@ def score_writing_bands(prompt: str, essay: str) -> dict:
         descriptors=_descriptor_block(),
     )
     response = client.chat.completions.create(
-        model=QWEN_MODEL,
+        model=SCORER_MODEL,
         messages=[{"role": "user", "content": full_prompt}],
         temperature=0,
+        response_format={"type": "json_object"},  # guarantees parseable JSON
     )
     result = parse_band_reply(response.choices[0].message.content or "")
     result["overall"] = overall_band(result["criteria"])
-    result["model"] = QWEN_MODEL
+    result["model"] = SCORER_MODEL
     result["prompt_version"] = prompt_version()
     return result
