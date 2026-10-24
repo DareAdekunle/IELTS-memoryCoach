@@ -89,8 +89,19 @@ The most important work: scores must be defensible before anything is built on t
 - [ ] Unify the two Writing scoring paths (typed essays use the streaming
       route's prompt; handwritten essays use `evaluate_writing()` with a
       different rubric)
-- [ ] Watch for the "halo" pattern seen in a first synthetic run (identical
-      bands across all four criteria; generous at the top)
+- [x] Free reference data: 10 official examiner scripts (ielts.org samples)
+      + 154 writing9 essays (crowd/site labels, dev/test) — no recruiting
+- [x] Scorer experiments on dev (Oct 2026): `qwen3.5-plus` beat `qwen-plus`
+      (within ±0.5: 35% → 52%); anchor essays and isotonic calibration gave
+      no measurable gain and were not adopted
+- [x] **Result on unseen data** (`qwen3.5-plus`, plain prompt `cab6bb5a07`):
+      writing9 test 44% within ±0.5 / 69% within ±1.0; examiner scripts 50% /
+      60%. Mid bands good (5.5–6.5: 69% / 87%); scores pulled toward 6 —
+      band 7+ scripts ~1–2 bands low, ≤5 ~1 band high. **Below target**
+- [ ] **Decide:** keep precise bands out of the app for now, or show a range
+      (e.g. "Band 6–7")
+- [ ] Trustworthy reference for the high bands: one qualified rater scores
+      30–40 writing9 essays with `RATER_GUIDE.md` (~$100)
 - [ ] Separate Task 1 (Academic / General) and Task 2 scoring logic
 - [ ] Fix the weakest criteria first (typically Task Response, Coherence)
 - [ ] Speaking: separate transcript-based criteria from pronunciation; test

@@ -18,13 +18,17 @@ import csv
 import json
 import os
 import sys
+import threading
+import time
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from statistics import mean
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
+from evaluation.calibration import apply as apply_calibration, fit_isotonic  # noqa: E402
 from evaluation.metrics import inter_rater, summarise  # noqa: E402
 
 CRITERIA = ["task_response", "coherence_cohesion", "lexical_resource", "grammatical_range_accuracy"]
@@ -124,28 +128,77 @@ def load_cache(path: str) -> dict:
     return cache
 
 
-def score_essays(essays: list, cache_path: str, rescore: bool = False) -> tuple[dict, list]:
+def _score_with_retry(scorer, essay: dict, attempts: int = 3) -> dict:
+    """Retries transient errors (connection drops); a bad reply is not retried."""
+    for attempt in range(1, attempts + 1):
+        try:
+            return scorer.score_writing_bands(essay["prompt"], essay["essay"])
+        except scorer.InvalidBandScore:
+            raise
+        except Exception:
+            if attempt == attempts:
+                raise
+            time.sleep(5 * attempt)
+
+
+def score_essays(essays: list, cache_path: str, rescore: bool = False, workers: int = 1) -> tuple[dict, list]:
     from app.services import band_scoring_service as scorer
 
     version = scorer.prompt_version()
     cache = {} if rescore else load_cache(cache_path)
-    scores, failures = {}, []
-    for i, essay in enumerate(essays, 1):
+    scores, failures, lock = {}, [], threading.Lock()
+    todo = []
+    for essay in essays:
         key = _cache_key(essay["essay_id"], scorer.SCORER_MODEL, version)
         if key in cache:
             scores[essay["essay_id"]] = cache[key]
-            continue
-        print(f"  scoring {i}/{len(essays)}: {essay['essay_id']}", flush=True)
+        else:
+            todo.append(essay)
+
+    def run(essay):
         try:
-            result = scorer.score_writing_bands(essay["prompt"], essay["essay"])
+            result = _score_with_retry(scorer, essay)
         except Exception as e:  # recorded and reported, never silently scored
-            failures.append({"essay_id": essay["essay_id"], "error": str(e)[:200]})
-            continue
+            with lock:
+                failures.append({"essay_id": essay["essay_id"], "error": str(e)[:200]})
+            return
         entry = {"essay_id": essay["essay_id"], **result}
-        with open(cache_path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry) + "\n")
-        scores[essay["essay_id"]] = entry
+        with lock:
+            with open(cache_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry) + "\n")
+            scores[essay["essay_id"]] = entry
+            print(f"  scored {len(scores)}/{len(essays)}: {essay['essay_id']}", flush=True)
+
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
+        list(pool.map(run, todo))
     return scores, failures
+
+
+def calibrate_scores(model_scores: dict, calibration: dict) -> dict:
+    """Applies a fitted calibration table to raw model scores (criteria and overall)."""
+    from app.services.band_scoring_service import ielts_round
+    out = {}
+    for essay_id, entry in model_scores.items():
+        criteria = dict(entry["criteria"])
+        for c in CRITERIA:
+            if c in calibration["fields"]:
+                criteria[c] = min(9, max(0, round(apply_calibration(calibration["fields"][c], criteria[c]))))
+        overall = entry["overall"]
+        if "overall" in calibration["fields"]:
+            overall = ielts_round(apply_calibration(calibration["fields"]["overall"], overall))
+        out[essay_id] = {**entry, "criteria": criteria, "overall": overall, "raw_overall": entry["overall"]}
+    return out
+
+
+def fit_calibration(model_scores: dict, ref: dict, split: str, model_name: str, version: str) -> dict:
+    ids = sorted(set(model_scores) & set(ref))
+    fields = {}
+    for field in CRITERIA + ["overall"]:
+        rated = [i for i in ids if ref[i][field] is not None]
+        if len(rated) >= 10:
+            raw = [model_scores[i]["overall"] if field == "overall" else model_scores[i]["criteria"][field] for i in rated]
+            fields[field] = fit_isotonic(raw, [ref[i][field] for i in rated])
+    return {"model": model_name, "prompt_version": version, "fitted_on": split, "n": len(ids), "fields": fields}
 
 
 # ─── Analysis ─────────────────────────────────────────────────────────────────
@@ -296,6 +349,10 @@ def main(argv=None) -> str:
     parser.add_argument("--raters-only", action="store_true", help="report rater agreement only; no API calls")
     parser.add_argument("--rescore", action="store_true", help="ignore cached model scores")
     parser.add_argument("--limit", type=int, help="score at most N essays (cost control)")
+    parser.add_argument("--workers", type=int, default=4, help="parallel scoring requests")
+    parser.add_argument("--fit-calibration", metavar="PATH",
+                        help="fit a calibration table on this split and save it (use on dev only)")
+    parser.add_argument("--calibration", metavar="PATH", help="apply a saved calibration table to model scores")
     args = parser.parse_args(argv)
 
     all_essays = load_essays(os.path.join(args.data, "essays.csv"))
@@ -313,7 +370,21 @@ def main(argv=None) -> str:
         version, model_name = scorer.prompt_version(), scorer.SCORER_MODEL
         to_score = [e for e in essays if e["essay_id"] in ref][: args.limit]
         print(f"Scoring {len(to_score)} rated essays ({args.split}) with {model_name}, prompt {version}")
-        model_scores, failures = score_essays(to_score, os.path.join(args.data, "model_scores.jsonl"), args.rescore)
+        model_scores, failures = score_essays(
+            to_score, os.path.join(args.data, "model_scores.jsonl"), args.rescore, args.workers)
+        if args.fit_calibration:
+            table = fit_calibration(model_scores, ref, args.split, model_name, version)
+            with open(args.fit_calibration, "w", encoding="utf-8") as f:
+                json.dump(table, f, indent=2)
+            print(f"Saved calibration ({len(table['fields'])} fields, n={table['n']}) to {args.fit_calibration}")
+        if args.calibration:
+            with open(args.calibration, encoding="utf-8") as f:
+                table = json.load(f)
+            if (table["model"], table["prompt_version"]) != (model_name, version):
+                raise DataError(f"calibration was fitted for {table['model']} / prompt {table['prompt_version']}, "
+                                f"not {model_name} / prompt {version}")
+            model_scores = calibrate_scores(model_scores, table)
+            model_name = f"{model_name} + calibration fitted on {table['fitted_on']} (n={table['n']})"
         model = model_agreement(model_scores, ref)
 
     report = build_report(args.split, essay_ids, split_ratings, raters, model, failures, model_scores, version, model_name)

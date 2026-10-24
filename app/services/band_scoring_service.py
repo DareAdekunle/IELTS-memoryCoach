@@ -7,6 +7,7 @@ custom 1-5 skills); switching production over is a separate decision once
 calibration numbers exist.
 """
 import hashlib
+import json
 import math
 import os
 
@@ -15,8 +16,15 @@ from app.services.qwen_service import QWEN_MODEL, client
 from app.utils.json_utils import safe_parse_json
 
 SCORER_MODEL = os.getenv("BAND_SCORER_MODEL", QWEN_MODEL)
+# Optional JSON file of reference essays with known bands, shown to the model
+# before it marks (examiner-style standardisation). See scripts/build_writing9_anchors.py.
+ANCHORS_PATH = os.getenv("BAND_SCORER_ANCHORS")
 
 CRITERIA = ["task_response", "coherence_cohesion", "lexical_resource", "grammatical_range_accuracy"]
+CRITERION_LABELS = {
+    "task_response": "TR", "coherence_cohesion": "CC",
+    "lexical_resource": "LR", "grammatical_range_accuracy": "GRA",
+}
 
 _PROMPT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts", "writing_band_scorer_prompt.txt")
 
@@ -31,8 +39,27 @@ def _template() -> str:
 
 
 def prompt_version() -> str:
-    """Changes whenever the prompt or descriptors change, so results are never mixed across versions."""
-    return hashlib.sha256((_template() + _descriptor_block()).encode()).hexdigest()[:10]
+    """Changes whenever the prompt, descriptors or anchors change, so results are never mixed."""
+    return hashlib.sha256((_template() + _descriptor_block() + _anchor_block()).encode()).hexdigest()[:10]
+
+
+def _anchor_block() -> str:
+    """Reference essays with known bands, or "" when no anchors are configured."""
+    if not ANCHORS_PATH:
+        return ""
+    with open(ANCHORS_PATH, encoding="utf-8") as f:
+        anchors = json.load(f)
+    lines = [
+        "",
+        "## Reference scripts",
+        "These scripts were marked by experienced raters. Use them to calibrate",
+        "your scale; do not mark the candidate by similarity of topic.",
+    ]
+    for i, a in enumerate(anchors, 1):
+        bands = ", ".join(f"{CRITERION_LABELS[c]} {a['criteria'][c]:g}" for c in CRITERIA)
+        lines += ["", f"### Reference {i} — overall band {a['overall']:g} ({bands})",
+                  f"Task: {a['prompt']}", "", a["essay"]]
+    return "\n".join(lines) + "\n"
 
 
 def _descriptor_block() -> str:
@@ -87,6 +114,7 @@ def score_writing_bands(prompt: str, essay: str) -> dict:
         essay=essay,
         word_count=len(essay.split()),
         descriptors=_descriptor_block(),
+        anchors=_anchor_block(),
     )
     response = client.chat.completions.create(
         model=SCORER_MODEL,

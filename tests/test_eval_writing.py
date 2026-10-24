@@ -190,3 +190,85 @@ def test_partial_criteria_is_a_data_error(data_dir):
     essays = eval_writing.load_essays(str(data_dir / "essays.csv"))
     with pytest.raises(eval_writing.DataError):
         eval_writing.load_ratings(str(data_dir / "ratings.csv"), essays)
+
+
+# ─── Calibration ──────────────────────────────────────────────────────────────
+
+from evaluation.calibration import apply as apply_calibration, fit_isotonic  # noqa: E402
+
+
+def test_isotonic_fit_is_monotonic_and_averages_groups():
+    table = fit_isotonic([5, 5, 6, 6, 7], [6.0, 7.0, 6.0, 6.0, 8.5])
+    assert table == [[5, 6.25], [6, 6.25], [7, 8.5]]  # 6.5 > 6.0 violated order -> pooled
+    values = [y for _, y in table]
+    assert values == sorted(values)
+
+
+def test_calibration_interpolates_and_clamps():
+    table = [[4.0, 4.0], [6.0, 7.5]]
+    assert apply_calibration(table, 5.0) == pytest.approx(5.75)
+    assert apply_calibration(table, 3.0) == 4.0 and apply_calibration(table, 9.0) == 7.5
+
+
+def _many_essays(data_dir, n=12):
+    """Copies the synthetic examples into n essays with spread reference bands."""
+    rows = list(csv.DictReader(open(data_dir / "essays.csv")))
+    with open(data_dir / "essays.csv", "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w.writeheader()
+        for i in range(n):
+            w.writerow({**rows[i % 3], "essay_id": f"E{i:02d}", "split": "dev"})
+    with open(data_dir / "ratings.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["essay_id", "rater_id", "task_response", "coherence_cohesion",
+                    "lexical_resource", "grammatical_range_accuracy", "overall", "justification"])
+        for i in range(n):
+            w.writerow([f"E{i:02d}", "REF", "", "", "", "", [5.0, 6.5, 8.0][i % 3], "ref"])
+
+
+def test_harness_fits_then_applies_calibration(data_dir, monkeypatch):
+    _many_essays(data_dir)
+    # A compressed scorer: real 5.0/6.5/8.0 come back as 5/5.5/6 across all criteria
+    by_essay = {"SYN-WEAK": 5, "SYN-MID": 5.5, "SYN-STRONG": 6}
+    example_ids = {r["essay"]: r["essay_id"] for r in csv.DictReader(open(os.path.join(EXAMPLES, "essays.csv")))}
+
+    def fake_score(prompt, essay):
+        band = by_essay[example_ids[essay]]
+        return {"criteria": {c: int(band) for c in scorer.CRITERIA}, "overall": band, "justifications": {},
+                "model": scorer.SCORER_MODEL, "prompt_version": scorer.prompt_version()}
+
+    monkeypatch.setattr(scorer, "score_writing_bands", fake_score)
+    table_path = str(data_dir / "cal.json")
+
+    eval_writing.main(["--data", str(data_dir), "--split", "dev", "--fit-calibration", table_path])
+    out = eval_writing.main(["--data", str(data_dir), "--split", "dev", "--calibration", table_path])
+
+    report = open(os.path.join(out, "report.md")).read()
+    assert "calibration fitted on dev" in report
+    assert "| Overall (task band) | 12 | 0.00 |" in report
+
+
+def test_calibration_for_another_prompt_is_refused(data_dir, monkeypatch):
+    monkeypatch.setattr(scorer, "client", FakeLLM(band_reply()))
+    table_path = data_dir / "cal.json"
+    table_path.write_text(json.dumps({"model": "other-model", "prompt_version": "x", "fitted_on": "dev",
+                                      "n": 10, "fields": {}}))
+    with pytest.raises(eval_writing.DataError):
+        eval_writing.main(["--data", str(data_dir), "--split", "all", "--calibration", str(table_path)])
+
+
+def test_anchors_are_shown_and_change_the_prompt_version(tmp_path, monkeypatch):
+    plain_version = scorer.prompt_version()
+    anchors = tmp_path / "anchors.json"
+    anchors.write_text(json.dumps([{"prompt": "Q", "essay": "ANCHOR ESSAY TEXT", "overall": 7.5,
+                                    "criteria": {c: 7 for c in scorer.CRITERIA}}]))
+    monkeypatch.setattr(scorer, "ANCHORS_PATH", str(anchors))
+    fake = FakeLLM(band_reply())
+    monkeypatch.setattr(scorer, "client", fake)
+
+    scorer.score_writing_bands("Prompt", "word " * 260)
+
+    sent = fake.calls[0]["messages"][0]["content"]
+    assert "ANCHOR ESSAY TEXT" in sent and "overall band 7.5" in sent
+    assert sent.index("ANCHOR ESSAY TEXT") < sent.index("Candidate response to mark")
+    assert scorer.prompt_version() != plain_version
