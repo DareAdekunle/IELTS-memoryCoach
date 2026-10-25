@@ -83,26 +83,43 @@
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "According to the passage, what did Andrew Carnegie believe libraries could do for poor people?",
-        "answer": "Carnegie believed libraries gave poor people the opportunity to educate themselves and improve their lives.",
-        "explanation": "This is stated directly in the third paragraph. A good answer should mention self-education and life improvement.",
-        "skill": "detail_retrieval"
+        "question": "Complete the sentence: Carnegie believed libraries gave poor people the opportunity to educate themselves and improve ______.",
+        "answer": "their lives",
+        "explanation": "Paragraph 3: Carnegie believed libraries gave poor people the opportunity to educate themselves and improve their lives.",
+        "skill": "detail_retrieval",
+        "acceptable_answers": [
+          "lives"
+        ],
+        "word_limit": 2
       },
       {
         "question_id": "q9",
         "question_type": "short_answer",
-        "question": "Name TWO services that modern public libraries offer besides lending books.",
-        "answer": "Any two of: access to computers and the internet, community events, language classes, support services for job seekers.",
-        "explanation": "The final paragraph lists four additional services. The learner needs to correctly identify any two of them.",
-        "skill": "detail_retrieval"
+        "question": "Name ONE service, other than lending books, that many modern public libraries provide.",
+        "answer": "community events",
+        "explanation": "Paragraph 4 lists access to computers and the internet, community events, language classes and support services for job seekers.",
+        "skill": "detail_retrieval",
+        "acceptable_answers": [
+          "access to computers",
+          "computers",
+          "the internet",
+          "internet",
+          "language classes",
+          "support services"
+        ],
+        "word_limit": 3
       },
       {
         "question_id": "q10",
         "question_type": "short_answer",
-        "question": "In your own words, explain why the development of free public libraries in the nineteenth century was important for society.",
-        "answer": "Free public libraries gave ordinary and working-class people access to books and education for the first time, reducing the gap between the wealthy and the poor in terms of access to knowledge.",
-        "explanation": "A strong answer should explain that access to knowledge and education was previously limited to wealthy people, and free libraries changed this by making information available to everyone.",
-        "skill": "inference"
+        "question": "Before free public libraries, which group of people mainly had access to books and educational materials?",
+        "answer": "the wealthy",
+        "explanation": "Paragraph 2: free libraries meant ordinary working-class people, 'not just the wealthy', could access books \u2014 implying that before, mainly the wealthy could.",
+        "skill": "inference",
+        "acceptable_answers": [
+          "wealthy"
+        ],
+        "word_limit": 2
       }
     ]
   },
@@ -190,26 +207,36 @@
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "What does the passage say happens to the body during non-REM deep sleep?",
-        "answer": "During non-REM deep sleep the body releases growth hormones, repairs muscle tissue and consolidates memories.",
-        "explanation": "This information is clearly stated in the second paragraph. A complete answer should mention at least two of the three processes.",
-        "skill": "detail_retrieval"
+        "question": "Complete the sentence: During deep non-REM sleep the body releases growth hormones, repairs muscle tissue and consolidates ______.",
+        "answer": "memories",
+        "explanation": "Paragraph 2 lists releasing growth hormones, repairing muscle tissue and consolidating memories.",
+        "skill": "detail_retrieval",
+        "acceptable_answers": [],
+        "word_limit": 1
       },
       {
         "question_id": "q9",
         "question_type": "short_answer",
-        "question": "According to the passage, name THREE health problems linked to regularly sleeping fewer than six hours.",
-        "answer": "Any three of: obesity, diabetes, cardiovascular disease, weakened immune function.",
-        "explanation": "The third paragraph lists four health risks associated with sleep deprivation. The learner should correctly identify three of them.",
-        "skill": "detail_retrieval"
+        "question": "Name ONE health problem the passage links to widespread sleep deprivation.",
+        "answer": "obesity",
+        "explanation": "Paragraph 3 links sleep deprivation to obesity, diabetes, cardiovascular disease and weakened immune function.",
+        "skill": "detail_retrieval",
+        "acceptable_answers": [
+          "diabetes",
+          "cardiovascular disease",
+          "weakened immune function"
+        ],
+        "word_limit": 3
       },
       {
         "question_id": "q10",
         "question_type": "short_answer",
-        "question": "What does the writer mean by describing sleep deprivation as a badge of honour? Use evidence from the passage to support your answer.",
-        "answer": "The writer means that in many societies people are proud of sleeping very little because it is seen as a sign of hard work and productivity. This is supported by the passage stating that societies treat sleep deprivation as a sign of hard work.",
-        "explanation": "A strong answer should explain the phrase in the context of cultural attitudes and reference the passage's mention of hard work and productivity as the reason people treat sleep deprivation positively.",
-        "skill": "vocabulary_in_context"
+        "question": "Complete the sentence: Treating sleep deprivation as a 'badge of honour' means seeing it as a sign of hard work and ______.",
+        "answer": "productivity",
+        "explanation": "The final paragraph explains the 'badge of honour' as 'a sign of hard work and productivity'.",
+        "skill": "vocabulary_in_context",
+        "acceptable_answers": [],
+        "word_limit": 1
       }
     ]
   },
@@ -297,26 +324,32 @@
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "According to supporters of AI adoption, why should we not be too worried about job displacement caused by AI?",
-        "answer": "Supporters argue that as with previous technological revolutions, new industries and job categories will be created to replace those that are displaced, as happened with the mechanisation of agriculture.",
-        "explanation": "A strong answer should reference the historical precedent argument made by proponents in the second paragraph.",
-        "skill": "detail_retrieval"
+        "question": "Complete the sentence: Supporters of AI argue that displaced workers will be offset by the creation of new industries and new ______.",
+        "answer": "job categories",
+        "explanation": "Paragraph 2: displacement 'will be offset by the creation of new industries and job categories that do not yet exist'.",
+        "skill": "detail_retrieval",
+        "acceptable_answers": [],
+        "word_limit": 2
       },
       {
         "question_id": "q9",
         "question_type": "short_answer",
-        "question": "Explain in your own words what the writer means by AI compressing labour market transitions into years rather than decades.",
-        "answer": "The writer means that while past technological changes happened slowly enough for workers and institutions to adapt over many years or generations, AI is changing so quickly that people and organisations may not have enough time to adjust.",
-        "explanation": "A strong answer should capture both elements: the historical slowness of past transitions and the potentially dangerous speed of AI-driven change.",
-        "skill": "vocabulary_in_context"
+        "question": "Complete the sentence: Historical labour market transitions typically unfolded over ______, giving people time to adapt.",
+        "answer": "generations",
+        "explanation": "Paragraph 4 contrasts past transitions that 'unfolded over generations' with AI compressing them into years.",
+        "skill": "vocabulary_in_context",
+        "acceptable_answers": [],
+        "word_limit": 1
       },
       {
         "question_id": "q10",
         "question_type": "short_answer",
-        "question": "The passage presents two contrasting views of AI's economic future. Summarise both views in your own words.",
-        "answer": "One view is optimistic: AI will generate so much productivity that living standards will rise and the benefits will be widely shared. The other view is pessimistic: the economic gains from AI will mostly go to the owners of the technology rather than ordinary workers, leading to greater inequality.",
-        "explanation": "A complete answer must accurately summarise both the optimistic view of radical abundance and shared gains, and the pessimistic view of inequality and concentrated ownership of AI benefits.",
-        "skill": "inference"
+        "question": "According to the pessimistic view in the final paragraph, AI could lead to increasing what?",
+        "answer": "inequality",
+        "explanation": "The final paragraph: 'Others warn of increasing inequality, in which the economic gains from AI accrue primarily to those who own the technology'.",
+        "skill": "inference",
+        "acceptable_answers": [],
+        "word_limit": 1
       }
     ]
   },
@@ -404,43 +437,38 @@
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "According to the passage, why are people who live near parks more likely to exercise regularly?",
-        "answer": "Because they have convenient, free outdoor spaces available to them",
-        "acceptable_answers": [
-          "convenient free outdoor spaces",
-          "they have free outdoor spaces nearby",
-          "convenient and free spaces for exercise"
-        ],
-        "explanation": "The passage states that people near parks exercise more because they have convenient, free outdoor spaces available to them.",
-        "skill": "detail_retrieval"
+        "question": "Complete the sentence: People who live near parks exercise more because they have convenient, free ______ available to them.",
+        "answer": "outdoor spaces",
+        "acceptable_answers": [],
+        "explanation": "Paragraph 3: 'they have convenient, free outdoor spaces available to them'.",
+        "skill": "detail_retrieval",
+        "word_limit": 2
       },
       {
         "question_id": "q9",
         "question_type": "short_answer",
-        "question": "What threat do urban green spaces face according to the final paragraph?",
-        "answer": "Urban development and conversion to building land",
+        "question": "According to the final paragraph, what are green spaces in many cities under threat from?",
+        "answer": "urban development",
         "acceptable_answers": [
-          "urban development",
-          "conversion to building land",
-          "housing development",
-          "being converted for housing"
+          "development"
         ],
-        "explanation": "The passage states that parks and gardens are sometimes converted into building land as cities grow and demand for housing increases.",
-        "skill": "main_idea"
+        "explanation": "The final paragraph: 'green spaces in many cities are under threat from urban development'.",
+        "skill": "main_idea",
+        "word_limit": 2
       },
       {
         "question_id": "q10",
         "question_type": "short_answer",
-        "question": "Name two environmental services provided by urban green spaces.",
-        "answer": "Absorbing carbon dioxide and cleaning the air / reducing urban heat island effect / absorbing rainwater to prevent flooding",
+        "question": "Name ONE environmental service that urban green spaces provide.",
+        "answer": "absorb carbon dioxide",
         "acceptable_answers": [
-          "absorb carbon dioxide and clean the air",
-          "reduce urban heat island effect",
-          "absorb rainwater / prevent flooding",
-          "clean the air and absorb rainwater"
+          "clean the air",
+          "absorb rainwater",
+          "prevent flooding"
         ],
-        "explanation": "The passage lists several environmental services: absorbing CO2, cleaning the air, reducing the heat island effect, and absorbing rainwater to prevent flooding.",
-        "skill": "detail_retrieval"
+        "explanation": "Paragraph 4: plants absorb carbon dioxide, clean the air, reduce the urban heat island effect and absorb rainwater, which helps to prevent flooding.",
+        "skill": "detail_retrieval",
+        "word_limit": 3
       }
     ]
   },
@@ -528,41 +556,37 @@
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "Why does social media use particularly affect teenagers' sleep?",
-        "answer": "It has been linked to delayed sleep times and poorer sleep quality",
-        "acceptable_answers": [
-          "linked to delayed sleep times",
-          "causes delayed sleep and poorer quality sleep",
-          "delays sleep time and reduces sleep quality"
-        ],
-        "explanation": "The passage states that social media use in particular has been linked to delayed sleep times and poorer sleep quality among teenagers.",
-        "skill": "detail_retrieval"
+        "question": "Complete the sentence: Social media use has been linked to delayed sleep times and poorer ______ among teenagers.",
+        "answer": "sleep quality",
+        "acceptable_answers": [],
+        "explanation": "Paragraph 3: social media use 'has been linked to delayed sleep times and poorer sleep quality among teenagers'.",
+        "skill": "detail_retrieval",
+        "word_limit": 2
       },
       {
         "question_id": "q9",
         "question_type": "short_answer",
-        "question": "Give two reasons why changing school start times is described as a complex issue.",
-        "answer": "It affects transport schedules and working parents / after-school activities",
+        "question": "Name ONE thing that changing school start times affects, according to paragraph 4.",
+        "answer": "transport schedules",
         "acceptable_answers": [
-          "transport schedules and working parents",
-          "after-school activities",
-          "affects transport and parents' work schedules"
+          "working parents",
+          "after-school activities"
         ],
-        "explanation": "The passage mentions that changing school start times affects transport schedules, working parents and after-school activities.",
-        "skill": "main_idea"
+        "explanation": "Paragraph 4: changing start times 'affects transport schedules, working parents and after-school activities'.",
+        "skill": "main_idea",
+        "word_limit": 2
       },
       {
         "question_id": "q10",
         "question_type": "short_answer",
-        "question": "According to the experts quoted in the passage, what should students do for at least one hour before bed?",
-        "answer": "Avoid screens",
+        "question": "For how long before bed do experts recommend that students avoid screens? Give the minimum time.",
+        "answer": "one hour",
         "acceptable_answers": [
-          "avoid screens",
-          "stay away from screens",
-          "not use screens or devices"
+          "1 hour"
         ],
-        "explanation": "Experts recommend students avoid screens for at least one hour before bed to improve sleep quality.",
-        "skill": "detail_retrieval"
+        "explanation": "The final paragraph: experts recommend students 'avoid screens for at least one hour before bed'.",
+        "skill": "detail_retrieval",
+        "word_limit": 2
       }
     ]
   },
@@ -650,40 +674,37 @@
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "What psychological difficulties have been associated with extended remote work according to the passage?",
-        "answer": "Feelings of isolation, blurred boundaries between professional and personal life, and difficulties establishing collegial relationships",
+        "question": "Name ONE psychological difficulty that has been associated with extended remote work.",
+        "answer": "feelings of isolation",
         "acceptable_answers": [
-          "isolation and blurred work-life boundaries",
-          "feelings of isolation",
-          "difficulty building relationships with colleagues"
+          "isolation",
+          "blurred boundaries"
         ],
-        "explanation": "The passage lists isolation, blurred professional/personal boundaries, and difficulties establishing collegial relationships as psychological difficulties of extended remote work.",
-        "skill": "detail_retrieval"
+        "explanation": "Paragraph 4 lists feelings of isolation, blurred boundaries between professional and personal life, and difficulties establishing collegial relationships.",
+        "skill": "detail_retrieval",
+        "word_limit": 3
       },
       {
         "question_id": "q9",
         "question_type": "short_answer",
-        "question": "What two challenges do hybrid models introduce according to the final paragraphs?",
-        "answer": "The need for investment in office redesign and the challenge of coordinating schedules across distributed teams",
-        "acceptable_answers": [
-          "office redesign costs and schedule coordination",
-          "redesigning offices and coordinating team schedules"
-        ],
-        "explanation": "The passage mentions 'significant investment in office redesign' and 'the challenge of coordinating schedules across distributed teams' as complications of hybrid models.",
-        "skill": "main_idea"
+        "question": "Complete the sentence: Hybrid models require significant investment in office ______.",
+        "answer": "redesign",
+        "acceptable_answers": [],
+        "explanation": "Paragraph 5: hybrid models introduce 'the need for significant investment in office redesign'.",
+        "skill": "main_idea",
+        "word_limit": 1
       },
       {
         "question_id": "q10",
         "question_type": "short_answer",
-        "question": "In your own words, explain what the writer means by remote work becoming a 'permanent feature of the modern employment landscape'.",
-        "answer": "Remote work is no longer a temporary emergency measure but has become an established and lasting part of how people work",
+        "question": "What did remote work begin as for many organisations?",
+        "answer": "an emergency measure",
         "acceptable_answers": [
-          "it is now a lasting part of working life",
-          "remote work is here to stay permanently",
-          "it is established as a long-term way of working"
+          "emergency measure"
         ],
-        "explanation": "The writer contrasts the initial emergency adoption with its evolution into something lasting and established, suggesting remote work is now a standard part of employment.",
-        "skill": "inference"
+        "explanation": "Paragraph 1: 'What began as an emergency measure for many organisations has evolved into a permanent feature'.",
+        "skill": "inference",
+        "word_limit": 3
       }
     ]
   },
@@ -771,42 +792,32 @@
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "What effect does red have on the human body according to paragraph 2?",
-        "answer": "It activates the sympathetic nervous system, elevating heart rate and creating a sense of urgency",
-        "acceptable_answers": [
-          "elevates heart rate and creates urgency",
-          "activates sympathetic nervous system",
-          "increases heart rate and urgency"
-        ],
-        "explanation": "The passage states red 'universally activates the sympathetic nervous system, elevating heart rate and creating a sense of urgency'.",
-        "skill": "detail_retrieval"
+        "question": "Complete the sentence: Red activates the sympathetic nervous system, elevating heart rate and creating a sense of ______.",
+        "answer": "urgency",
+        "acceptable_answers": [],
+        "explanation": "Paragraph 2: red 'universally activates the sympathetic nervous system, elevating heart rate and creating a sense of urgency'.",
+        "skill": "detail_retrieval",
+        "word_limit": 1
       },
       {
         "question_id": "q9",
         "question_type": "short_answer",
-        "question": "How did orange-coloured packaging affect consumer perception of beverages in the study described?",
-        "answer": "It increased perceived sweetness",
-        "acceptable_answers": [
-          "made drinks seem sweeter",
-          "consumers rated them as sweeter",
-          "increased the perception of sweetness"
-        ],
-        "explanation": "The passage states that 'orange-coloured packaging increased perceived sweetness' in identical beverages.",
-        "skill": "detail_retrieval"
+        "question": "Complete the sentence: In the study described, orange-coloured packaging increased perceived ______.",
+        "answer": "sweetness",
+        "acceptable_answers": [],
+        "explanation": "Paragraph 4: 'Orange-coloured packaging increased perceived sweetness'.",
+        "skill": "detail_retrieval",
+        "word_limit": 1
       },
       {
         "question_id": "q10",
         "question_type": "short_answer",
-        "question": "In the context of this passage, what does 'subliminal' mean?",
-        "answer": "Below conscious awareness / occurring without the person being aware of it",
-        "acceptable_answers": [
-          "below conscious awareness",
-          "without the person realising",
-          "unconscious influence",
-          "happening without awareness"
-        ],
-        "explanation": "The passage uses subliminal to mean that colour influences consumers in ways they are not consciously aware of, as reinforced by the later discussion of awareness diminishing effectiveness.",
-        "skill": "inference"
+        "question": "Which colour does the passage say consistently suggests trust, competence and calm across cultures?",
+        "answer": "blue",
+        "acceptable_answers": [],
+        "explanation": "Paragraph 2: blue 'consistently triggers associations with trust, competence and calm across diverse cultural contexts'.",
+        "skill": "inference",
+        "word_limit": 1
       }
     ]
   },
@@ -894,40 +905,38 @@
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "Why are recovery timescales for disturbed abyssal habitats particularly alarming according to the passage?",
-        "answer": "Because recovery is measured in centuries rather than years, if recovery occurs at all",
-        "acceptable_answers": [
-          "recovery takes centuries not years",
-          "measured in centuries and may not occur at all",
-          "very slow recovery \u2014 centuries \u2014 if it happens"
-        ],
-        "explanation": "The passage states 'recovery timescales for disturbed abyssal habitats are measured not in years but in centuries \u2014 if recovery occurs at all', making disturbance potentially permanent on a human timescale.",
-        "skill": "inference"
+        "question": "Complete the sentence: Recovery timescales for disturbed abyssal habitats are measured not in years but in ______.",
+        "answer": "centuries",
+        "acceptable_answers": [],
+        "explanation": "Paragraph 3: recovery timescales 'are measured not in years but in centuries \u2014 if recovery occurs at all'.",
+        "skill": "inference",
+        "word_limit": 1
       },
       {
         "question_id": "q9",
         "question_type": "short_answer",
-        "question": "According to the passage, what two alternatives to deep sea mining might render it unnecessary?",
-        "answer": "Recycling technology and material substitution",
+        "question": "Name ONE development that might make deep sea mining unnecessary, according to the final paragraph.",
+        "answer": "recycling technology",
         "acceptable_answers": [
-          "recycling technology and material substitution",
-          "better recycling and finding substitute materials"
+          "recycling",
+          "material substitution"
         ],
         "explanation": "The final paragraph asks 'whether recycling technology and material substitution can render deep sea mining unnecessary'.",
-        "skill": "detail_retrieval"
+        "skill": "detail_retrieval",
+        "word_limit": 2
       },
       {
         "question_id": "q10",
         "question_type": "short_answer",
-        "question": "How does the passage characterise the relationship between the clean energy transition and mineral extraction?",
-        "answer": "As a fundamental tension \u2014 clean energy technologies require minerals whose extraction causes environmental damage, creating a paradox at the heart of decarbonisation",
+        "question": "Which body holds jurisdiction over seabed extraction in international waters?",
+        "answer": "International Seabed Authority",
         "acceptable_answers": [
-          "a fundamental tension between green technology and mining",
-          "clean energy requires environmentally damaging mining",
-          "the green transition depends on resource extraction that harms the environment"
+          "ISA",
+          "the ISA"
         ],
-        "explanation": "The passage describes this as 'a fundamental tension in the green transition: the environmental cost of producing the technologies required to combat climate change'.",
-        "skill": "inference"
+        "explanation": "Paragraph 4: 'The International Seabed Authority (ISA) ... holds jurisdiction over extraction in international waters'.",
+        "skill": "detail_retrieval",
+        "word_limit": 3
       }
     ]
   },
@@ -1015,41 +1024,38 @@
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "What role does the amygdala play in decision making under uncertainty according to paragraph 3?",
-        "answer": "It contributes to risk aversion by amplifying the emotional salience of potential losses",
-        "acceptable_answers": [
-          "amplifies emotional salience of losses",
-          "contributes to risk aversion",
-          "makes potential losses feel more significant"
-        ],
-        "explanation": "The passage states the amygdala 'contributes to risk aversion by amplifying the emotional salience of potential losses'.",
-        "skill": "detail_retrieval"
+        "question": "Complete the sentence: The amygdala contributes to risk aversion by amplifying the emotional salience of potential ______.",
+        "answer": "losses",
+        "acceptable_answers": [],
+        "explanation": "Paragraph 3: the amygdala 'contributes to risk aversion by amplifying the emotional salience of potential losses'.",
+        "skill": "detail_retrieval",
+        "word_limit": 1
       },
       {
         "question_id": "q9",
         "question_type": "short_answer",
-        "question": "Give two examples of population behaviours that have been modified through nudge interventions.",
-        "answer": "Organ donation rates and retirement savings / energy consumption / health screening uptake",
+        "question": "Name ONE behaviour that has been successfully modified through nudge interventions.",
+        "answer": "organ donation",
         "acceptable_answers": [
-          "organ donation and retirement savings",
-          "energy consumption and health screening",
-          "any two of: organ donation, retirement savings, energy consumption, health screening"
+          "organ donation rates",
+          "retirement savings",
+          "energy consumption",
+          "health screening",
+          "health screening uptake"
         ],
-        "explanation": "The passage lists organ donation rates, retirement savings, energy consumption and health screening uptake as examples modified through nudge interventions.",
-        "skill": "detail_retrieval"
+        "explanation": "Paragraph 5 lists organ donation rates, retirement savings, energy consumption and health screening uptake.",
+        "skill": "detail_retrieval",
+        "word_limit": 3
       },
       {
         "question_id": "q10",
         "question_type": "short_answer",
-        "question": "In your own words, explain the main criticism of nudge interventions presented in the final paragraph.",
-        "answer": "Critics argue nudges are paternalistic because they exploit cognitive vulnerabilities people cannot consciously override, effectively removing genuine agency even while appearing to preserve choice",
-        "acceptable_answers": [
-          "they exploit cognitive weaknesses people cannot resist",
-          "paternalistic \u2014 removes real agency by manipulating decisions",
-          "exploits cognitive vulnerabilities without people being able to resist"
-        ],
-        "explanation": "The passage states critics argue nudge interventions are 'paternalistic, removing genuine agency by exploiting cognitive vulnerabilities that individuals are powerless to override'.",
-        "skill": "inference"
+        "question": "What one word do critics use to describe nudge interventions in the final paragraph?",
+        "answer": "paternalistic",
+        "acceptable_answers": [],
+        "explanation": "The final paragraph: 'Critics argue that nudge interventions are paternalistic, removing genuine agency'.",
+        "skill": "inference",
+        "word_limit": 1
       }
     ]
   }

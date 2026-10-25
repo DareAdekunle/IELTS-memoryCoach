@@ -5,11 +5,9 @@ import random
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from app.services.qwen_service import call_qwen_for_json
-from app.utils.json_utils import safe_parse_json, extract_json_from_text
+from app.services.answer_matching import check_answer, limit_feedback, public_questions
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
-PROMPTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts")
 
 
 def load_reading_passages() -> list:
@@ -76,38 +74,6 @@ def check_true_false_ng(learner_answer: str, correct_answer: str) -> bool:
     return learner == correct
 
 
-def evaluate_short_answer(question: str, model_answer: str,
-                          learner_answer: str, explanation: str) -> dict:
-    path = os.path.join(PROMPTS_DIR, "reading_evaluator_prompt.txt")
-    with open(path, "r") as f:
-        template = f.read()
-
-    full_prompt = template.format(
-        question=question,
-        model_answer=model_answer,
-        learner_answer=learner_answer,
-        explanation=explanation
-    )
-
-    raw_response = call_qwen_for_json(full_prompt)
-
-    try:
-        result = safe_parse_json(raw_response)
-    except ValueError:
-        try:
-            result = extract_json_from_text(raw_response)
-        except ValueError:
-            return {
-                "is_correct": False,
-                "partial_credit": False,
-                "score": 0,
-                "feedback": "Could not evaluate this answer automatically.",
-                "skill_demonstrated": "unknown"
-            }
-
-    return result
-
-
 def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
     questions = passage["questions"]
     results = []
@@ -159,42 +125,31 @@ def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
             })
 
         elif qtype == "short_answer":
-            max_score += 2
+            max_score += 1
+            accepted = [correct_answer, *question.get("acceptable_answers", [])]
+            check = check_answer(learner_answer, accepted, question.get("word_limit"))
+            score = 1 if check["is_correct"] else 0
+            total_score += score
             if not learner_answer:
-                results.append({
-                    "question_id": qid,
-                    "question_type": qtype,
-                    "question": question["question"],
-                    "learner_answer": "",
-                    "correct_answer": correct_answer,
-                    "is_correct": False,
-                    "score": 0,
-                    "max_score": 2,
-                    "feedback": "No answer provided.",
-                    "skill": skill
-                })
+                feedback = "No answer provided."
+            elif check["is_correct"]:
+                feedback = "Correct!"
+            elif check["over_limit"]:
+                feedback = limit_feedback(question.get("word_limit"))
             else:
-                eval_result = evaluate_short_answer(
-                    question=question["question"],
-                    model_answer=correct_answer,
-                    learner_answer=learner_answer,
-                    explanation=question["explanation"]
-                )
-                score = eval_result.get("score", 0)
-                total_score += score
-                results.append({
-                    "question_id": qid,
-                    "question_type": qtype,
-                    "question": question["question"],
-                    "learner_answer": learner_answer,
-                    "correct_answer": correct_answer,
-                    "is_correct": eval_result.get("is_correct", False),
-                    "partial_credit": eval_result.get("partial_credit", False),
-                    "score": score,
-                    "max_score": 2,
-                    "feedback": eval_result.get("feedback", ""),
-                    "skill": skill
-                })
+                feedback = question["explanation"]
+            results.append({
+                "question_id": qid,
+                "question_type": qtype,
+                "question": question["question"],
+                "learner_answer": learner_answer,
+                "correct_answer": correct_answer,
+                "is_correct": check["is_correct"],
+                "score": score,
+                "max_score": 1,
+                "feedback": feedback,
+                "skill": skill
+            })
 
         if skill not in skill_scores:
             skill_scores[skill] = {"earned": 0, "possible": 0}
@@ -221,3 +176,10 @@ def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
         "skill_accuracy": skill_accuracy,
         "question_results": results
     }
+
+
+def public_passage(passage: dict | None) -> dict | None:
+    """Passage as sent to the browser before submission: no answer key."""
+    if passage is None:
+        return None
+    return {**passage, "questions": public_questions(passage["questions"])}

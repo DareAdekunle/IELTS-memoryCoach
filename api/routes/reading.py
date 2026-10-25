@@ -13,6 +13,7 @@ from app.services.reading_service import (
     get_adaptive_passage,
     get_all_passages_summary,
     get_passage_by_id,
+    public_passage,
     evaluate_reading_attempt
 )
 from app.services.memory_service import (
@@ -64,7 +65,7 @@ async def get_random_reading_passage(
             passage = get_adaptive_passage(current_user.learner_id)
         else:
             passage = get_random_passage()
-        return {"passage": passage}
+        return {"passage": public_passage(passage)}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -78,7 +79,7 @@ async def get_passage(
     passage = get_passage_by_id(passage_id)
     if not passage:
         raise HTTPException(status_code=404, detail="Passage not found")
-    return {"passage": passage}
+    return {"passage": public_passage(passage)}
 
 
 @router.get("/memories")

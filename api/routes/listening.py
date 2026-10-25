@@ -13,6 +13,7 @@ from api.auth.models import User
 from app.services.listening_service import (
     get_all_tracks_summary,
     get_track_by_id,
+    public_track,
     get_random_track,
     evaluate_listening_attempt
 )
@@ -60,7 +61,7 @@ async def get_random_listening_track(
             track = get_adaptive_track(current_user.learner_id)
         else:
             track = get_random_track()
-        return {"track": track}
+        return {"track": public_track(track)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -73,7 +74,7 @@ async def get_track(
     track = get_track_by_id(track_id)
     if not track:
         raise HTTPException(status_code=404, detail="Track not found")
-    return {"track": track}
+    return {"track": public_track(track)}
 
 
 

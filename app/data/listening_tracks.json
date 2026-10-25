@@ -25,7 +25,8 @@
           "M T Carter"
         ],
         "explanation": "The patient clearly states his full name as Michael Thomas Carter when asked by the receptionist.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q2",
@@ -37,10 +38,11 @@
           "14 March 1988",
           "14/03/1988",
           "March 14 1988",
-          "fourteenth of march nineteen eighty eight"
+          "14th of March 1988"
         ],
         "explanation": "The patient gives his date of birth as the fourteenth of March, nineteen eighty-eight.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q3",
@@ -53,7 +55,8 @@
           "42 birchwood ave"
         ],
         "explanation": "The patient gives his address as forty-two Birchwood Avenue and even spells out Birchwood.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q4",
@@ -66,7 +69,8 @@
           "SW64PN"
         ],
         "explanation": "The patient states the postcode is SW6 4PN immediately after giving his street address.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q5",
@@ -79,7 +83,8 @@
           "Patel"
         ],
         "explanation": "When offered a choice between Doctor Singh and Doctor Patel, the patient chooses Doctor Patel.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q6",
@@ -91,7 +96,8 @@
           "Penicillin"
         ],
         "explanation": "The patient states he is allergic to penicillin when asked about known allergies.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q7",
@@ -105,7 +111,8 @@
           "wednesday twenty-second"
         ],
         "explanation": "The receptionist confirms the first appointment is on Wednesday the twenty-second.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q8",
@@ -120,7 +127,8 @@
           "half past ten"
         ],
         "explanation": "The receptionist states the appointment is at ten thirty in the morning.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       }
     ]
   },
@@ -291,37 +299,37 @@
           "the fourteenth",
           "14th",
           "on the 14th",
-          "three days before the presentation"
+          "fourteenth",
+          "the 14th"
         ],
         "explanation": "Priya states the written report is due on the fourteenth, which is three days before the presentation on the seventeenth.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q5",
         "question_type": "short_answer",
         "question": "Where will James and Priya meet on Friday?",
-        "answer": "The library study room",
+        "answer": "library study room",
         "acceptable_answers": [
-          "the library study room",
-          "library study room",
-          "study room in the library",
-          "library"
+          "study room",
+          "the study room"
         ],
         "explanation": "James and Priya agree to meet at two o'clock in the library study room on Friday.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q6",
         "question_type": "short_answer",
-        "question": "What requirement must all academic sources meet?",
-        "answer": "They must be from peer-reviewed journals published in the last ten years.",
+        "question": "All sources must come from ______ journals published in the last ten years.",
+        "answer": "peer-reviewed",
         "acceptable_answers": [
-          "peer reviewed journals in the last ten years",
-          "peer-reviewed and published in last 10 years",
-          "from peer reviewed journals last ten years"
+          "peer reviewed"
         ],
-        "explanation": "Priya specifies that sources need to be from peer-reviewed journals published in the last ten years.",
-        "skill": "detail_accuracy"
+        "explanation": "Priya says the sources 'need to be from peer-reviewed journals published in the last ten years'.",
+        "skill": "detail_accuracy",
+        "word_limit": 3
       }
     ]
   },
@@ -343,17 +351,19 @@
       {
         "question_id": "q1",
         "question_type": "short_answer",
-        "question": "Name TWO types of urban green spaces mentioned by the lecturer.",
-        "answer": "Any two of: parks, gardens, tree-lined streets, community allotments, green rooftops.",
+        "question": "Name ONE type of urban green space mentioned by the lecturer.",
+        "answer": "parks",
         "acceptable_answers": [
-          "parks and gardens",
-          "parks and tree-lined streets",
-          "parks and allotments",
-          "gardens and rooftops",
-          "allotments and parks"
+          "gardens",
+          "tree-lined streets",
+          "community allotments",
+          "allotments",
+          "green rooftops",
+          "rooftops"
         ],
-        "explanation": "The lecturer lists parks, gardens, tree-lined streets, community allotments and green rooftops as examples of urban green spaces.",
-        "skill": "detail_accuracy"
+        "explanation": "The lecturer lists parks, gardens, tree-lined streets, community allotments and green rooftops.",
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q2",
@@ -365,7 +375,8 @@
           "5 years"
         ],
         "explanation": "The lecturer states the Copenhagen study tracked over three thousand residents for a period of five years.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q3",
@@ -378,7 +389,8 @@
           "twenty-three percent"
         ],
         "explanation": "The study found people living within three hundred metres of a green space had a twenty-three percent lower risk of stress-related conditions.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q4",
@@ -390,7 +402,8 @@
           "evapotranspiration process"
         ],
         "explanation": "The lecturer explains that trees release moisture through a process called evapotranspiration.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q5",
@@ -402,7 +415,8 @@
           "4"
         ],
         "explanation": "The lecturer states cities with high levels of green coverage can be up to four degrees cooler on average.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q6",
@@ -414,34 +428,33 @@
           "green gentrification phenomenon"
         ],
         "explanation": "The lecturer introduces the term green gentrification to describe the phenomenon where improving green spaces drives up property values and pushes out lower income residents.",
-        "skill": "main_idea"
+        "skill": "main_idea",
+        "word_limit": 3
       },
       {
         "question_id": "q7",
         "question_type": "short_answer",
         "question": "Name ONE city where green gentrification has been documented.",
-        "answer": "Any one of: New York, Barcelona, Seoul.",
+        "answer": "New York",
         "acceptable_answers": [
-          "new york",
-          "barcelona",
-          "seoul"
+          "Barcelona",
+          "Seoul"
         ],
         "explanation": "The lecturer mentions New York, Barcelona and Seoul as cities where green gentrification has been documented.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q8",
         "question_type": "short_answer",
-        "question": "According to the lecturer, what is needed to prevent displacement of residents?",
-        "answer": "Careful policy design, community consultation and rent control measures.",
+        "question": "Besides careful policy design and community consultation, what measures may be needed to prevent displacement?",
+        "answer": "rent control",
         "acceptable_answers": [
-          "policy design and community consultation",
-          "rent control",
-          "careful policy design",
-          "community consultation and rent control"
+          "rent control measures"
         ],
-        "explanation": "The lecturer states that preventing displacement requires careful policy design, community consultation and in some cases rent control measures.",
-        "skill": "main_idea"
+        "explanation": "The lecturer says this requires 'careful policy design, community consultation and in some cases rent control measures to prevent displacement'.",
+        "skill": "main_idea",
+        "word_limit": 3
       }
     ]
   },
@@ -472,7 +485,8 @@
           "eight items"
         ],
         "explanation": "The librarian clearly states that standard members can borrow up to eight items at a time.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q2",
@@ -486,7 +500,8 @@
           "7 days"
         ],
         "explanation": "The librarian specifies that DVDs have a loan period of one week only, shorter than the standard three weeks.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q3",
@@ -500,7 +515,8 @@
           "2 pounds 50"
         ],
         "explanation": "The librarian states there is a replacement fee of two pounds fifty for a lost card.",
-        "skill": "number_recognition"
+        "skill": "number_recognition",
+        "word_limit": 3
       },
       {
         "question_id": "q4",
@@ -513,7 +529,8 @@
           "2hrs"
         ],
         "explanation": "The librarian states that group study rooms can be booked for up to two hours at a time.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q5",
@@ -523,11 +540,12 @@
         "acceptable_answers": [
           "24 hours",
           "twenty-four hours",
-          "a day in advance",
-          "one day"
+          "one day",
+          "a day"
         ],
         "explanation": "Bookings must be made at least twenty-four hours in advance.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q6",
@@ -541,20 +559,23 @@
           "30,000+"
         ],
         "explanation": "The librarian mentions access to over thirty thousand ebooks and audiobooks through the BorrowBox app.",
-        "skill": "number_recognition"
+        "skill": "number_recognition",
+        "word_limit": 3
       },
       {
         "question_id": "q7",
         "question_type": "form_completion",
         "question": "Book club meeting day and time:",
-        "answer": "First Thursday of the month at 7pm",
+        "answer": "first Thursday, 7pm",
         "acceptable_answers": [
-          "first Thursday, 7pm",
-          "first Thursday at 7 in the evening",
-          "Thursday 7pm"
+          "first Thursday 7pm",
+          "first Thursday at 7pm",
+          "first Thursday 7 pm",
+          "first Thursday at 7"
         ],
         "explanation": "The librarian states the book club meets on the first Thursday of each month at seven in the evening.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q8",
@@ -563,12 +584,15 @@
         "answer": "10:30am",
         "acceptable_answers": [
           "10:30",
-          "half past ten",
+          "10.30",
+          "10:30am",
           "10.30am",
-          "half past ten in the morning"
+          "10:30 am",
+          "half past ten"
         ],
         "explanation": "The children's storytelling session is held at half past ten in the morning on the last Saturday of each month.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       }
     ]
   },
@@ -655,20 +679,18 @@
           "ten slides"
         ],
         "explanation": "James suggests eight slides but Maya counters with ten, and James agrees with 'fair enough'. Ten is the final agreed number.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q6",
         "question_type": "form_completion",
-        "question": "Source James will use for transport funding data:",
-        "answer": "Government transport statistics report",
-        "acceptable_answers": [
-          "government transport statistics report",
-          "government statistics report",
-          "government transport statistics"
-        ],
-        "explanation": "James says he will pull data 'from the government transport statistics report \u2014 it's the most reliable source'.",
-        "skill": "detail_accuracy"
+        "question": "Source of data for the transport funding graphs: the government transport ______ report",
+        "answer": "statistics",
+        "acceptable_answers": [],
+        "explanation": "James will 'pull the data from the government transport statistics report'.",
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q7",
@@ -682,20 +704,18 @@
           "2.30pm"
         ],
         "explanation": "Maya suggests two o'clock but James says 'let's say two thirty to give us time to grab lunch first', and Maya agrees.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q8",
         "question_type": "form_completion",
-        "question": "Reason James says a practice run is essential for him personally:",
-        "answer": "He always goes over time in presentations",
-        "acceptable_answers": [
-          "he goes over time",
-          "always runs over time",
-          "he tends to go over the time limit"
-        ],
-        "explanation": "James says 'I always go over time in presentations, so a practice run is essential for me'.",
-        "skill": "main_idea"
+        "question": "James says a practice run is essential because he always goes over ______ in presentations.",
+        "answer": "time",
+        "acceptable_answers": [],
+        "explanation": "James: 'I always go over time in presentations, so a practice run is essential for me.'",
+        "skill": "main_idea",
+        "word_limit": 3
       }
     ]
   },
@@ -724,7 +744,8 @@
           "myelinisation"
         ],
         "explanation": "The lecturer defines myelination as the process by which repeated behaviours cause neural pathways to become more efficient.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q2",
@@ -736,7 +757,8 @@
           "the basal ganglia"
         ],
         "explanation": "The lecturer explains that the basal ganglia is the key structure in habit formation, taking over control from the prefrontal cortex as behaviours become automatic.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q3",
@@ -748,7 +770,8 @@
           "Duhigg"
         ],
         "explanation": "The lecturer directly names Charles Duhigg as the author of The Power of Habit, published in 2012.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q4",
@@ -762,7 +785,8 @@
           "sixty-six days"
         ],
         "explanation": "The lecturer states that the Lally study found it took on average sixty-six days for a new behaviour to become automatic.",
-        "skill": "number_recognition"
+        "skill": "number_recognition",
+        "word_limit": 3
       },
       {
         "question_id": "q5",
@@ -771,11 +795,12 @@
         "answer": "18 to 254 days",
         "acceptable_answers": [
           "18 to 254 days",
-          "eighteen to two hundred and fifty-four days",
-          "18-254 days"
+          "18-254 days",
+          "18 to 254"
         ],
         "explanation": "The lecturer states that habit formation timescales ranged from eighteen to two hundred and fifty-four days in the Lally study.",
-        "skill": "number_recognition"
+        "skill": "number_recognition",
+        "word_limit": 3
       },
       {
         "question_id": "q6",
@@ -848,7 +873,8 @@
           "one quarter"
         ],
         "explanation": "The lecturer states that 'the oceans absorb approximately a quarter of all carbon dioxide emitted by human activities'.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q2",
@@ -860,7 +886,8 @@
           "pH 8.2"
         ],
         "explanation": "The lecturer states the pH has fallen 'from 8.2 to 8.1' since industrialisation began.",
-        "skill": "number_recognition"
+        "skill": "number_recognition",
+        "word_limit": 3
       },
       {
         "question_id": "q3",
@@ -873,7 +900,8 @@
           "26"
         ],
         "explanation": "The lecturer explains that a pH fall from 8.2 to 8.1 'represents a 26 percent increase in acidity on the logarithmic pH scale'.",
-        "skill": "number_recognition"
+        "skill": "number_recognition",
+        "word_limit": 3
       },
       {
         "question_id": "q4",
@@ -885,21 +913,23 @@
           "sea butterfly"
         ],
         "explanation": "The lecturer describes pteropods as 'small planktonic molluscs sometimes called sea butterflies'.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q5",
         "question_type": "form_completion",
         "question": "Decline in coral calcification rates on the Great Barrier Reef since 1976:",
-        "answer": "More than 40 percent",
+        "answer": "more than 40 percent",
         "acceptable_answers": [
           "more than 40%",
           "over 40 percent",
-          "40%+",
+          "over 40%",
           "more than 40"
         ],
         "explanation": "The lecturer cites research finding that 'coral calcification rates on the Great Barrier Reef have declined by more than 40 percent since 1976'.",
-        "skill": "number_recognition"
+        "skill": "number_recognition",
+        "word_limit": 3
       },
       {
         "question_id": "q6",
@@ -971,7 +1001,8 @@
           "Priya"
         ],
         "explanation": "The student gives her name as Priya Mehta and even spells both names for the receptionist.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q2",
@@ -985,7 +1016,8 @@
           "RLC4729"
         ],
         "explanation": "The student gives her membership number as RLC dash four seven two nine.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q3",
@@ -999,7 +1031,8 @@
           "two"
         ],
         "explanation": "The receptionist says court one is taken and offers court two, which the student accepts.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q4",
@@ -1012,7 +1045,8 @@
           "two players"
         ],
         "explanation": "The student says 'just two of us' when asked how many players.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q5",
@@ -1026,7 +1060,8 @@
           "\u00a39.00"
         ],
         "explanation": "The receptionist states the rate is 'nine pounds per hour' for members on weekends.",
-        "skill": "number_recognition"
+        "skill": "number_recognition",
+        "word_limit": 3
       },
       {
         "question_id": "q6",
@@ -1040,7 +1075,8 @@
           "August twenty-seven"
         ],
         "explanation": "The student gives the card expiry date as August 2027.",
-        "skill": "number_recognition"
+        "skill": "number_recognition",
+        "word_limit": 3
       },
       {
         "question_id": "q7",
@@ -1053,7 +1089,8 @@
           "at least 10 minutes"
         ],
         "explanation": "The receptionist asks players to arrive 'at least ten minutes before their booking' to collect the key card.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       },
       {
         "question_id": "q8",
@@ -1062,11 +1099,11 @@
         "answer": "Behind the building",
         "acceptable_answers": [
           "behind the building",
-          "directly behind the building",
-          "main car park behind the building"
+          "behind building"
         ],
         "explanation": "The receptionist says parking is 'in our main car park directly behind the building'.",
-        "skill": "detail_accuracy"
+        "skill": "detail_accuracy",
+        "word_limit": 3
       }
     ]
   }

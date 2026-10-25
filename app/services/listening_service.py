@@ -9,6 +9,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 import dashscope
 from dotenv import load_dotenv
 
+from app.services.answer_matching import check_answer, limit_feedback, public_questions
+
 load_dotenv()
 
 dashscope.api_key = os.getenv("DASHSCOPE_API_KEY")
@@ -202,106 +204,6 @@ def _format_script_for_tts(script: str, speakers: list) -> str:
 
 # ─── CHECK ANSWERS ────────────────────────────────────────────────────────────
 
-def check_answer(
-    learner_answer: str,
-    correct_answer: str,
-    acceptable_answers: list = None,
-    question_type: str = "short_answer"
-) -> dict:
-    """
-    Checks a learner's answer against the correct answer.
-
-    Uses fuzzy matching to handle common variations like:
-    - Different capitalisation
-    - Numbers written as words vs digits
-    - Extra spaces or punctuation
-    - Partial matches for acceptable answers list
-
-    Returns a dict with:
-    - is_correct (bool)
-    - matched_answer (str) — which acceptable answer was matched
-    """
-    if not learner_answer or not learner_answer.strip():
-        return {
-            "is_correct": False,
-            "matched_answer": ""
-        }
-
-    learner_clean = _normalise_answer(learner_answer)
-    correct_clean = _normalise_answer(correct_answer)
-
-    # Direct match
-    if learner_clean == correct_clean:
-        return {"is_correct": True, "matched_answer": correct_answer}
-
-    # Check against acceptable answers list
-    if acceptable_answers:
-        for acceptable in acceptable_answers:
-            acceptable_clean = _normalise_answer(acceptable)
-            if learner_clean == acceptable_clean:
-                return {
-                    "is_correct": True,
-                    "matched_answer": acceptable
-                }
-
-            # Partial match — learner answer contains the key information
-            if (acceptable_clean in learner_clean or
-                    learner_clean in acceptable_clean):
-                # Only accept partial if it is more than 3 characters
-                # to avoid false positives on short strings
-                if len(acceptable_clean) > 3 and len(learner_clean) > 3:
-                    return {
-                        "is_correct": True,
-                        "matched_answer": acceptable
-                    }
-
-    # Multiple choice — just compare the letter
-    if question_type == "multiple_choice":
-        if learner_clean.upper() == correct_clean.upper():
-            return {"is_correct": True, "matched_answer": correct_answer}
-
-    return {"is_correct": False, "matched_answer": ""}
-
-
-def _normalise_answer(text: str) -> str:
-    """
-    Normalises an answer string for comparison.
-
-    - Lowercase
-    - Strip whitespace and punctuation
-    - Convert common number words to digits
-    - Remove articles (a, an, the)
-    """
-    import re
-
-    text = text.lower().strip()
-
-    # Remove punctuation except hyphens
-    text = re.sub(r'[^\w\s\-]', '', text)
-
-    # Normalise whitespace
-    text = re.sub(r'\s+', ' ', text).strip()
-
-    # Convert number words to digits for common numbers
-    number_words = {
-        'zero': '0', 'one': '1', 'two': '2', 'three': '3',
-        'four': '4', 'five': '5', 'six': '6', 'seven': '7',
-        'eight': '8', 'nine': '9', 'ten': '10', 'eleven': '11',
-        'twelve': '12', 'thirteen': '13', 'fourteen': '14',
-        'fifteen': '15', 'sixteen': '16', 'seventeen': '17',
-        'eighteen': '18', 'nineteen': '19', 'twenty': '20',
-        'thirty': '30', 'forty': '40', 'fifty': '50'
-    }
-    for word, digit in number_words.items():
-        text = re.sub(r'\b' + word + r'\b', digit, text)
-
-    # Remove common articles
-    text = re.sub(r'\b(the|a|an)\b', '', text)
-    text = re.sub(r'\s+', ' ', text).strip()
-
-    return text
-
-
 def evaluate_listening_attempt(
     track: dict,
     learner_answers: dict
@@ -330,12 +232,13 @@ def evaluate_listening_attempt(
 
         max_score += 1
 
-        check_result = check_answer(
-            learner_answer=learner_answer,
-            correct_answer=correct_answer,
-            acceptable_answers=acceptable,
-            question_type=qtype
-        )
+        if qtype == "multiple_choice":
+            check_result = {
+                "is_correct": learner_answer.strip().upper() == correct_answer.strip().upper(),
+                "over_limit": False,
+            }
+        else:
+            check_result = check_answer(learner_answer, [correct_answer, *acceptable], question.get("word_limit"))
 
         is_correct = check_result["is_correct"]
         score = 1 if is_correct else 0
@@ -360,8 +263,9 @@ def evaluate_listening_attempt(
             "score": score,
             "max_score": 1,
             "feedback": (
-                question["explanation"] if not is_correct
-                else "Correct!"
+                "Correct!" if is_correct
+                else limit_feedback(question.get("word_limit")) if check_result["over_limit"]
+                else question["explanation"]
             ),
             "skill": skill
         })
@@ -414,3 +318,12 @@ def get_adaptive_track(learner_id: str) -> dict:
     if not filtered:
         filtered = tracks
     return _get_unseen_or_cycle(filtered, learner_id, "Listening", "track_id")
+
+
+def public_track(track: dict | None) -> dict | None:
+    """Track as sent to the browser before submission: no answer key, no transcript."""
+    if track is None:
+        return None
+    out = {k: v for k, v in track.items() if k != "script"}
+    out["questions"] = public_questions(track["questions"])
+    return out

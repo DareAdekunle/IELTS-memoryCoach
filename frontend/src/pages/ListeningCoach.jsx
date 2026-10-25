@@ -6,6 +6,7 @@ import {
   submitListening,
 } from '../api/listening'
 import { Headphones, ChevronRight, Loader2, Brain, RefreshCw } from 'lucide-react'
+import WordLimitHint from '../components/WordLimitHint'
 
 const TYPE_LABELS = {
   multiple_choice: 'Multiple Choice',
@@ -301,6 +302,9 @@ export default function ListeningCoach() {
                       placeholder={q.question_type === 'form_completion' ? 'Fill in the missing information...' : 'Your answer...'}
                       className="w-full bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-brand-500 transition-colors"
                     />
+                  )}
+                  {(q.question_type === 'form_completion' || q.question_type === 'short_answer') && (
+                    <WordLimitHint limit={q.word_limit} value={answers[q.question_id]} />
                   )}
                 </div>
               ))}
