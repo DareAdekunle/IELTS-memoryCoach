@@ -6,6 +6,7 @@ import {
   PenLine, RefreshCw, Brain, ChevronRight,
   Loader2, Upload, Camera, X, CheckCircle
 } from 'lucide-react'
+import EstimateNote from '../components/EstimateNote'
 
 const SKILL_LABELS = {
   thesis_clarity:   'Thesis Clarity',
@@ -388,7 +389,10 @@ export default function WritingCoach() {
 
           {/* Scores */}
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Skill Scores</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">Skill scores</h2>
+            <EstimateNote className="mb-4">
+              AI estimate of five writing skills on a 1–5 scale, for practice — not an IELTS band score.
+            </EstimateNote>
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               {Object.entries(feedback.scores || {}).map(([key, score]) => (
                 <div key={key} className="text-center">

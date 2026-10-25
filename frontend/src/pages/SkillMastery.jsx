@@ -3,6 +3,7 @@ import { getSkillRanks } from '../api/progress'
 import { getCriterionStages } from '../api/pedagogy'
 import { Trophy, Loader2, Zap, ChevronRight, TrendingUp, GraduationCap } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import EstimateNote from '../components/EstimateNote'
 
 const STAGE_META = {
   foundations:         { label: 'Foundations',         color: 'text-red-600',    bg: 'bg-red-50',    bar: 'bg-red-400',    pct: 25 },
@@ -250,6 +251,9 @@ export default function SkillMastery() {
           <p className="text-gray-500 mt-1">
             Your IELTS band estimates across all skills
           </p>
+          <EstimateNote className="mt-2">
+            Estimates from your practice so far — a guide to where you are, not an official IELTS score.
+          </EstimateNote>
         </div>
         <Link
           to={sectionConfig.practiceLink}
@@ -266,7 +270,7 @@ export default function SkillMastery() {
       {/* Overall stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Overall band', value: overallBandDisplay },
+          { label: 'Estimated overall band', value: overallBandDisplay },
           { label: 'Skills assessed', value: `${totalAssessed}/${totalSkills}` },
           { label: 'Band 8.0+ skills', value: totalAdvanced },
           { label: 'Active section', value: activeSection },

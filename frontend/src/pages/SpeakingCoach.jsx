@@ -10,6 +10,7 @@ import {
   Mic, MicOff, Upload, CheckCircle,
   Loader2, ChevronRight, Volume2, Brain, RefreshCw,
 } from 'lucide-react'
+import EstimateNote from '../components/EstimateNote'
 
 export default function SpeakingCoach() {
   const [phase, setPhase]               = useState('loading')  // loading | session | results
@@ -382,7 +383,8 @@ export default function SpeakingCoach() {
 
           {results.scores && (
             <div className="bg-white border border-gray-200 rounded-2xl p-5">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Band Scores</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-1">Estimated band scores</h3>
+              <EstimateNote className="mb-4" />
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 {[
                   { key: 'fluency_coherence',   label: 'Fluency & Coherence' },
@@ -403,7 +405,7 @@ export default function SpeakingCoach() {
               </div>
               {results.scores.overall_band && (
                 <div className="text-center py-3 bg-brand-500/10 border border-brand-500/30 rounded-xl">
-                  <p className="text-gray-500 text-sm">Overall Band</p>
+                  <p className="text-gray-500 text-sm">Estimated overall band</p>
                   <p className="text-brand-600 text-4xl font-bold">{results.scores.overall_band}</p>
                 </div>
               )}

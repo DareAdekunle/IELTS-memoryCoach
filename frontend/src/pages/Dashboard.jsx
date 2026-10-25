@@ -7,6 +7,7 @@ import {
   ChevronRight, Mic, Headphones, AlertTriangle, ArrowUpRight,
   Sparkles, Clock,
 } from 'lucide-react'
+import EstimateNote from '../components/EstimateNote'
 
 const SECTION_CONFIG = {
   Writing:   { icon: PenLine,    color: 'text-violet-600', bg: 'bg-violet-50',  border: 'border-violet-100' },
@@ -101,7 +102,7 @@ export default function Dashboard() {
         {overallBand && (
           <div className="mt-3 inline-flex items-center gap-2 bg-brand-50 border border-brand-100 rounded-xl px-4 py-2">
             <Trophy className="w-4 h-4 text-brand-600" />
-            <span className="text-brand-700 font-semibold text-sm">Overall Band {overallBand}</span>
+            <span className="text-brand-700 font-semibold text-sm">Estimated {overallBand}</span>
           </div>
         )}
       </div>
@@ -128,6 +129,9 @@ export default function Dashboard() {
           {['Writing', 'Reading', 'Speaking', 'Listening'].map(s => (
             <SectionBandCard key={s} section={s} band={insights.section_bands[s]} />
           ))}
+          <EstimateNote className="col-span-2 lg:col-span-4 -mt-1">
+            Band estimates come from your practice so far — a guide to where you are, not an official IELTS score.
+          </EstimateNote>
         </div>
       )}
 
