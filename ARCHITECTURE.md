@@ -469,7 +469,14 @@ learners
 practice_attempts
   attempt_id, learner_id, section, task_type
   prompt, learner_response, score_json
-  feedback, created_at
+  feedback, assessment_version_id, created_at
+
+assessment_versions           ← How a score was produced (one row per scoring setup)
+  version_id, section, method (llm / answer_key), model
+  components_json             ← digests of prompt, rubric, answer key, matcher
+  created_at
+  ← A changed prompt, model or answer key yields a new version; attempts
+    scored before versioning have assessment_version_id = NULL
 
 learner_memories              ← The Coach Agent's core evidence store
   memory_id, learner_id, section, skill

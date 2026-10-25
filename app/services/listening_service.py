@@ -10,6 +10,7 @@ import dashscope
 from dotenv import load_dotenv
 
 from app.services.answer_matching import check_answer, limit_feedback, public_questions
+from app.services.assessment_versions import answer_key_version
 
 load_dotenv()
 
@@ -292,6 +293,7 @@ def evaluate_listening_attempt(
     return {
         "track_id": track["track_id"],
         "track_title": track["title"],
+        "assessment_version": answer_key_version("Listening", "listening_tracks.json"),
         "part": track["part"],
         "difficulty": track["difficulty"],
         "total_score": total_score,

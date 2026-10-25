@@ -106,10 +106,12 @@ The most important work: scores must be defensible before anything is built on t
 - [ ] Fix the weakest criteria first (typically Task Response, Coherence)
 - [ ] Speaking: separate transcript-based criteria from pronunciation; test
       across accents and recording quality
-- [ ] Reading/Listening: explicit answer keys with accepted variants and word
-      limits; AI explains, never decides correctness
-- [ ] `assessment_versions` table — record model, prompt and rubric version per score
-- [ ] Label all scores as estimates in the UI
+- [x] Reading/Listening: answer-key marking with word limits, no AI; 27
+      open Reading questions rewritten IELTS-style; answer keys and the
+      listening transcript no longer sent to the browser
+- [x] `assessment_versions` — every attempt records the method, model and
+      prompt/answer-key digests that scored it
+- [x] Label AI scores and band estimates as estimates in the UI
 
 **Exit:** Writing within ±0.5 band on ≥80% of the held-out set; scores
 labelled as estimates.

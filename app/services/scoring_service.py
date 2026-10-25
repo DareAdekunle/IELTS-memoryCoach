@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from app.services.qwen_service import call_qwen_for_json, client, QWEN_MODEL
 from app.services.practice_service import get_rubric_summary
+from app.services.assessment_versions import digest, llm_version
 from app.utils.json_utils import safe_parse_json, extract_json_from_text
 
 OSS_ACCESS_KEY_ID     = os.getenv("OSS_ACCESS_KEY_ID")
@@ -112,6 +113,8 @@ def evaluate_writing(prompt: str, essay: str, memories: list = None) -> dict:
         if field not in result:
             raise Exception(f"Qwen response missing required field: '{field}'")
 
+    result["assessment_version"] = llm_version(
+        "Writing", QWEN_MODEL, "writing_evaluator_prompt.txt", rubric=digest(rubric))
     return result
 
 
@@ -267,6 +270,9 @@ def evaluate_writing_from_image(
     result["extraction_confidence"] = extraction["confidence"]
     result["extraction_notes"] = extraction["notes"]
     result["word_count"] = extraction["word_count"]
+    result["assessment_version"] = llm_version(
+        "Writing", QWEN_MODEL, "writing_evaluator_prompt.txt",
+        rubric=digest(get_rubric_summary("Writing")), vision_model=VL_MODEL)
 
     return result
 

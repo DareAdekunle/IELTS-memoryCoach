@@ -6,6 +6,7 @@ import random
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from app.services.answer_matching import check_answer, limit_feedback, public_questions
+from app.services.assessment_versions import answer_key_version
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 
@@ -169,6 +170,7 @@ def evaluate_reading_attempt(passage: dict, learner_answers: dict) -> dict:
     return {
         "passage_id": passage["passage_id"],
         "passage_title": passage["title"],
+        "assessment_version": answer_key_version("Reading", "reading_passages.json"),
         "difficulty": passage["difficulty"],
         "total_score": total_score,
         "max_score": max_score,

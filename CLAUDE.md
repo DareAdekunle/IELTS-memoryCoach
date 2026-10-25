@@ -28,7 +28,7 @@ ARCHITECTURE
 
 IELTS MODULES
   ✅ Writing Coach            — streamed evaluation, Coach agent, image upload
-  ✅ Reading Coach            — passages, questions, short-answer eval
+  ✅ Reading Coach            — passages, questions, answer-key marking
   ✅ Speaking Coach           — 3-part session, ASR, Cherry TTS feedback
   ✅ Listening Coach          — question preview, cached TTS audio, answers
   ✅ IELTS Tutor              — 4 specialist tutors with pedagogy plans
@@ -210,6 +210,21 @@ Login/Register → FastAPI returns access_token
 
 Never store sensitive data in localStorage beyond the JWT token.
 Never bypass `get_current_user` for protected routes.
+
+### Marking rules
+
+- **Reading/Listening are marked by answer key only** (`app/services/answer_matching.py`):
+  exact match after normalisation, IELTS word limits, no partial matching, no
+  model. Gap questions need `word_limit` and answers that fit it; Reading
+  answers must appear in the passage — `tests/test_answer_keys.py` enforces this.
+- **Never send answer keys to the browser.** GET passage/track routes return
+  `public_passage()` / `public_track()` (no `answer`, `acceptable_answers`,
+  `explanation`, or listening `script`).
+- **Every scorer stamps `assessment_version`** on its result
+  (`app/services/assessment_versions.py`); save functions store it on
+  `practice_attempts`. A new scorer must do the same.
+- Writing and Speaking scores are AI estimates — label them as such in the UI
+  (`EstimateNote`).
 
 ### Qwen calls — which client for which job
 

@@ -10,6 +10,7 @@ from typing import Optional
 
 from api.dependencies import get_current_user, get_db
 from api.auth.models import User
+from app.services.assessment_versions import digest, llm_version
 from app.services.practice_service import (
     get_adaptive_writing_prompt,
     get_random_writing_prompt
@@ -254,6 +255,9 @@ async def submit_essay_image(
     }
 
 
+STREAM_RUBRIC = "Task Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy"
+
+
 @router.post("/submit/stream")
 async def submit_essay_stream(
     request: SubmitEssayRequest,
@@ -279,7 +283,7 @@ async def submit_essay_stream(
         prompt=request.prompt,
         essay=request.essay,
         memories=memory_context,
-        rubric="Task Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy"
+        rubric=STREAM_RUBRIC
     )
 
     from app.services.qwen_service import client, QWEN_MODEL
@@ -317,6 +321,8 @@ async def submit_essay_stream(
                         "recommended_next_step": ""
                     }
 
+            result["assessment_version"] = llm_version(
+                "Writing", QWEN_MODEL, "writing_evaluator_prompt.txt", rubric=digest(STREAM_RUBRIC))
             try:
                 save_attempt(
                     learner_id=learner_id,

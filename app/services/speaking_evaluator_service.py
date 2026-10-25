@@ -4,7 +4,8 @@ import re
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from app.services.qwen_service import call_qwen
+from app.services.qwen_service import call_qwen, QWEN_MODEL
+from app.services.assessment_versions import llm_version
 from app.services.tts_service import examiner_speak
 from app.utils.json_utils import safe_parse_json, extract_json_from_text
 
@@ -186,6 +187,7 @@ def evaluate_speaking_attempt(
             "part3_responses": part3_responses,
             "topic": prompt_set["topic"],
             "difficulty": prompt_set["difficulty"],
+            "assessment_version": llm_version("Speaking", QWEN_MODEL, "speaking_evaluator_prompt.txt"),
             "error": ""
         }
 

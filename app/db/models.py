@@ -33,6 +33,7 @@ class PracticeAttempt(Base):
     learner_response = Column(Text, nullable=False)  # what the learner wrote
     score_json = Column(Text, nullable=True)         # Qwen's scores as JSON string
     feedback = Column(Text, nullable=True)           # Qwen's feedback text
+    assessment_version_id = Column(String, nullable=True, index=True)  # how it was scored (assessment_versions)
     created_at = Column(DateTime, default=func.now())
 
 
@@ -275,3 +276,19 @@ class LearnerSeenContent(Base):
     section = Column(String, nullable=False)      # Writing / Reading / Speaking / Listening
     content_id = Column(String, nullable=False)   # passage_id / prompt_id / track_id
     seen_at = Column(DateTime, default=func.now())
+
+
+class AssessmentVersion(Base):
+    """
+    One row per distinct scoring setup (method, model, prompt/rubric/answer-key
+    digests). practice_attempts.assessment_version_id points here, so scores
+    produced by different methods can be told apart.
+    """
+    __tablename__ = "assessment_versions"
+
+    version_id = Column(String, primary_key=True)
+    section = Column(String, nullable=False)
+    method = Column(String, nullable=False)        # "llm" | "answer_key"
+    model = Column(String, nullable=True)
+    components_json = Column(Text, nullable=False)  # JSON: {"prompt": digest, ...}
+    created_at = Column(DateTime, default=func.now())

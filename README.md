@@ -21,9 +21,10 @@ For the market, positioning and business model see
 - **All four IELTS skills** — Writing, Reading, Speaking and Listening, with
   real practice content (7 writing prompts, 9 reading passages, 15 speaking
   prompt sets, 9 listening tracks).
-- **Scoring against official rubrics** — Writing and Speaking are scored per
-  IELTS criterion; Reading and Listening answers are checked deterministically
-  (short answers and spelling variants via Qwen / fuzzy matching).
+- **Scoring** — Writing and Speaking are scored by an AI evaluator and shown
+  as practice estimates; Reading and Listening are marked like the real test —
+  exact match against an answer key with IELTS word limits, no AI involved.
+  Every attempt records which scoring method produced it.
 - **Persistent learner memory** — coaching observations are strengthened,
   weakened and archived over time, with semantic + spaced-repetition retrieval.
 - **Skill mastery** — 40 sub-skills (Writing 13, Reading 10, Speaking 9,

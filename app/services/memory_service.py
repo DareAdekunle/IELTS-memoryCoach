@@ -34,6 +34,7 @@ def save_attempt(learner_id: str, section: str, task_type: str,
 
         attempt = PracticeAttempt(
             attempt_id=attempt_id,
+            assessment_version_id=score_json.get("assessment_version") if isinstance(score_json, dict) else None,
             learner_id=learner_id,
             section=section,
             task_type=task_type,
@@ -690,6 +691,7 @@ def save_reading_attempt(learner_id: str, attempt_result: dict) -> str:
 
         attempt = PracticeAttempt(
             attempt_id=attempt_id,
+            assessment_version_id=attempt_result.get("assessment_version"),
             learner_id=learner_id,
             section="Reading",
             task_type=attempt_result.get("difficulty", "").title(),
@@ -828,6 +830,7 @@ def save_speaking_attempt(learner_id: str, attempt_result: dict) -> str:
 
         attempt = PracticeAttempt(
             attempt_id=attempt_id,
+            assessment_version_id=attempt_result.get("assessment_version"),
             learner_id=learner_id,
             section="Speaking",
             task_type=attempt_result.get("difficulty", "").title(),
@@ -1071,6 +1074,7 @@ def save_listening_attempt(learner_id: str, attempt_result: dict) -> str:
 
         attempt = PracticeAttempt(
             attempt_id=attempt_id,
+            assessment_version_id=attempt_result.get("assessment_version"),
             learner_id=learner_id,
             section="Listening",
             task_type=f"Part {attempt_result.get('part', '?')}",
